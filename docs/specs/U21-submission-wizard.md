@@ -40,7 +40,7 @@ gets the Login page.
 | Action | Who may — and when |
 |--------|--------------------|
 | **Open the Make a Submission start screen** | • any signed-in user, whatever their roles. The screen itself then decides whether they may proceed (Rule 3) <sup>c</sup> |
-| **Start a submission** (press "Begin Submission") | • Author; Journal Manager: with their existing role<br>• an Editor who is also an Author: under the role they pick in "Submit As" (Rule 4a). On a preprint server a Preprint Server Manager who is also an Author picks the same way [OPS1](#ops1)<br>• a Section Editor who is also an Author: only as Author. "Submit As" also offers "Section editor", but "Begin Submission" refuses it ⚠ [A14](#a14). On a preprint server a Moderator who is also an Author is not offered the Moderator role and submits as Author<br>• Section Editor with no other role: admitted, but silently enrolled as an Author, and their submission is made under that new role instead of their editorial one ⚠ [A9](#a9). A pure Site Administrator likely gets the same treatment; this is unverified, because no scenario exercises it, and is recorded as an open question ([A9](#a9))<br>• any other signed-in user: admitted while an author-role group allows self-registration (Rule 3), and enrolled on "Begin Submission" in one of the journal's author-role groups, which is not always "Author" (Rule 3a) [A23](#a23). On a preprint server the enrolment happens earlier, on merely opening the start screen ⚠ [OPS2](#ops2). With no self-registering author-role group they get the "Not Allowed" page <sup>c</sup> |
+| **Start a submission** (press "Begin Submission") | • Author: with their existing role<br>• Journal Manager: with their existing role. On a journal or press only while an author-role group allows self-registration (Rule 3) [A25](#a25); a Preprint Server Manager either way<br>• an Editor who is also an Author: under the role they pick in "Submit As" (Rule 4a). On a preprint server a Preprint Server Manager who is also an Author picks the same way [OPS1](#ops1)<br>• a Section Editor who is also an Author: only as Author. "Submit As" also offers "Section editor", but "Begin Submission" refuses it ⚠ [A14](#a14). On a preprint server a Moderator who is also an Author is not offered the Moderator role and submits as Author<br>• Section Editor with no other role: admitted, but silently enrolled in an author-role group, as in Rule 3a, and their submission is made under that new role instead of their editorial one ⚠ [A9](#a9). A pure Site Administrator likely gets the same treatment; this is unverified, and recorded as an open question ([A9](#a9)). On a preprint server a Moderator with no other role is enrolled on merely opening the start screen [OPS2](#ops2).<br>• any other signed-in user: admitted while an author-role group allows self-registration (Rule 3), and enrolled on "Begin Submission" in an author-role group, not always "Author" (Rule 3a) [A23](#a23). Otherwise they get the "Not Allowed" page. On a preprint server the enrolment happens on merely opening the start screen, so that page shows only on their first visit ⚠ [OPS2](#ops2) <sup>c</sup> |
 | **Open a draft's wizard** (fill, autosave, change settings, save for later, submit) | • the submitting author: their own draft. On a press, a submission made in the "Chapter Author" role opens, but none of its saves goes through (Rule 9b) [OMP4](#omp4)<br>• Journal Manager; Site Administrator: any draft in the journal<br>• assigned Section Editor: drafts a Journal Manager has assigned them to as a participant, through the Participants panel on the draft's workflow screen (see *Stage participants*) <sup>f</sup> |
 | **Cancel a draft** (the footer "Cancel" control, Rule 16) | • the submitting author; Journal Manager; Site Administrator. Only they are shown the control. Behind the scenes the deletion is refused for anyone else; that is a safeguard, not a testable step, because no other role has a control to press. On a preprint server the author's own cancel is refused too ⚠ [OPS3](#ops3) <sup>o</sup> |
 | **See the Saved for Later / Submission complete / Submission cancelled screens** | • whoever may open the underlying submission. The cancelled screen names no submission and shows for anyone signed in <sup>n</sup> |
@@ -84,21 +84,32 @@ itself enforces before submission is Rule 13.
    refused. An already-started draft, however, can still be opened, filled
    and submitted ⚠ [A1](#a1). <sup>b</sup>
 3. **Start-screen gates.** The start screen turns a user away with a
-   "Not Allowed" page in two cases. First, they hold no role that may submit
-   and no author-role user group of the journal permits self-registration
-   ("You are not allowed to submit to this journal because authors must be
-   registered by the editorial staff…"). Second, on a journal or preprint
-   server, every section is closed to them ("…submissions to all sections
-   of this journal have been deactivated or restricted…"). On a preprint
-   server either explanation renders as a raw locale code under the heading
-   ⚠ [OPS7](#ops7). The gate weighs the author-role groups (Rule 3a) as a
-   set. Of them, a press ships two that allow self-registration, "Author"
-   and "Chapter Author", so switching it off on the Author group alone
-   still leaves the way in open there; the page appears only once it is
-   off on both {OMP}. On a journal or preprint server only "Author" does.
-   A section is closed to an author when it has been deactivated, or when it
-   is restricted to editorial roles and the user is not a Site
-   Administrator, Journal Manager or Section Editor. <sup>c</sup>
+   "Not Allowed" page in two cases:
+   - *No role that may submit.* None of their roles works in the
+     Submission stage (a tick in that column of Settings › Users & Roles
+     › "Roles", as an Editor's and a Section Editor's role has), and no
+     author-role group of the journal permits self-registration:
+     "You are not allowed to submit to this journal because authors must
+     be registered by the editorial staff…". A preprint server asks
+     instead whether they hold a manager or author role there, and shows
+     the page only on a first visit, which enrols them anyway (Rule 3a).
+     On a journal or press this catches a Journal Manager with no other
+     role (their stock role works in no stage), although a submission
+     they start goes through, made in the manager role ⚠ [A25](#a25).
+   - *Every section closed* {OJS OPS}. Every section is closed to them:
+     "…submissions to all sections of this journal have been deactivated
+     or restricted…". A section is closed when it has been deactivated,
+     or when it is restricted to editorial roles and the user is not a
+     Site Administrator, Journal Manager, Editor, Production Editor,
+     Section Editor or Guest Editor.
+
+   On a preprint server either explanation renders as a raw locale code
+   under the heading ⚠ [OPS7](#ops7). The gate weighs the author-role
+   groups (Rule 3a) as a set: a press ships two that allow
+   self-registration, "Author" and "Chapter Author", so switching it off
+   on "Author" alone leaves the way in open; the page appears only once
+   it is off on both {OMP}. On a journal or preprint server only "Author"
+   does. <sup>c</sup>
 3a. **The role a user without one is given.** A user with no submitting
     role who passes the gates (Rule 3) gets no "Submit As". Pressing
     "Begin Submission" enrolls them in one of the journal's author-role
@@ -110,12 +121,16 @@ itself enforces before submission is Rule 13.
     - Once a Journal Manager has saved a change to the Author role
       (Settings › Users & Roles › "Roles", "Edit", "OK"), even one saved
       back in a second "Edit", it is "Translator" on a journal and
-      "Chapter Author" on a press ("Translator" once "Chapter Author" has
-      been edited too) ⚠ [A23](#a23). A submission made as "Chapter
-      Author" cannot be saved (Rule 9b) [OMP4](#omp4).
+      "Chapter Author" on a press. Once "Chapter Author" has been edited
+      too, it can be any of the press's author roles: "Translator",
+      "Volume editor" and "Author" have been seen ⚠ [A23](#a23). A
+      submission made as "Chapter Author" cannot be saved (Rule 9b)
+      [OMP4](#omp4).
 
-    A preprint server has one author-role group, "Author", and enrolls
-    the user on merely opening the start screen ⚠ [OPS2](#ops2).
+    A preprint server has one author-role group, "Author". Merely
+    opening the start screen enrolls in it every user who holds no
+    manager or author role there and is not a Site Administrator, a
+    Moderator included, self-registration or not ⚠ [OPS2](#ops2).
     <sup>c</sup>
 4. **The start form.** The screen is headed "Make a Submission" and carries
    the start form (fields above), ending in the primary button
@@ -149,7 +164,9 @@ itself enforces before submission is Rule 13.
 5. **Begin Submission creates the draft.** Pressing "Begin Submission"
    creates the submission immediately, with the entered title, the chosen
    language, section or type, and the chosen submitting role. It then opens
-   the wizard at its first step. When submitting under an Author role, the
+   the wizard at its first step. The draft already carries a submission
+   date, the moment it was created, until "Submit" replaces it (Rule 14)
+   ⚠ [A26](#a26). When submitting in an author-role group, the
    author is also placed on the submission's Contributors list, as its
    primary contact, whether or not the author's profile carries an
    affiliation (an empty affiliation is a legitimate profile state).
@@ -405,17 +422,18 @@ itself enforces before submission is Rule 13.
 14. **Submitting.** On the Review step the primary button reads "Submit".
     It stays disabled until the check passes, every confirmation box is
     ticked, and no failed save has left the wizard "Reconnecting" or hung
-    on "Saving" (Rules 9a, 9c). Pressing it asks for confirmation. On a journal
-    the message reads: "The submission, {title}, will be submitted to
-    {journal} for editorial review. Are you sure you want to complete this
-    submission?" A preprint server's message says instead what happens
-    next: a moderator will review it, or, for submitters who may post their
-    own preprints, that they will be able to post it [OPS1](#ops1).
-    Confirming submits. The draft becomes a submitted submission on the
-    editorial Submission stage (a preprint server's single production stage
-    [OPS1](#ops1)), the side effects fire (see *Side effects*), and if the
-    copyright box was ticked the agreement is recorded in the submission's
-    activity log. <sup>m</sup>
+    on "Saving" (Rules 9a, 9c). Pressing it asks for confirmation. On a
+    journal: "The submission, {title}, will be submitted to {journal} for
+    editorial review. Are you sure you want to complete this submission?"
+    On a preprint server it ends "…a moderator will review the preprint
+    before posting it online.", or, for whoever submitted as "Preprint
+    Server manager" or an author a screening plugin lets post
+    [OPS1](#ops1), "…you will be able to review your submission and post
+    it online." Once confirmed, the draft is submitted to the Submission
+    stage (a preprint server's single stage), its submission date becomes
+    the moment of submitting [A26](#a26), the side effects fire
+    (*Side effects*), and a ticked copyright agreement is recorded in the
+    submission's activity log. <sup>m</sup>
 15. **Submission complete.** After submitting, the author lands on
     "Submission complete". The screen says the journal has been notified
     and a confirmation email sent. It says so even when no email went out:
@@ -1106,6 +1124,7 @@ Left out of the scenarios above, by reason:
   - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names) [report 2026-10-01]
   - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names) [report 2026-10-01]
   - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names) [report 2026-10-01]
+  - with self-registration off on every author-role group, an Editor, a Section Editor with no other role and an Author still getting the start form (Rule 3; scenario 9's "Self-registration off") [incidental 2026-11-23]
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold
@@ -1136,8 +1155,11 @@ Left out of the scenarios above, by reason:
   - A22 (the start screen's "Title" box at phone width)
   - A23 (a user with no submitting role starting a submission after the Author role was edited, and "OK" with nothing changed leaving "Author" in place)
   - A24 (a reload, or a bookmark taken from the address bar, opening a saved draft on "Upload Files", and "Save for Later" pressed there)
+  - A25 (a Journal Manager with no other role opening "Make a Submission" with self-registration off on every author-role group, and a start form they loaded earlier)
+  - A26 (a draft's submission date, read in the statistics reports before and after "Submit")
   - OMP2 (a second copy address on a press)
   - OMP4 (a submission made as "Chapter Author" on a press, its refused saves and the hang)
+  - OPS2 (a Moderator with no other role opening the start screen on a preprint server)
   - OPS4 (a manager reading another author's completion screen)
   - OPS8 (a further galley on a draft that already listed one when the wizard was opened)
   - OPS9 (the Review step's "Files" panel after a reload)
@@ -1172,7 +1194,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-25; additions
-2026-08-26, 2026-09-07, 2026-09-28, 2026-09-30, 2026-10-01, 2026-10-05, 2026-10-19, 2026-10-21 and 2026-11-13), unreviewed unless an entry notes otherwise; the team settles
+2026-08-26, 2026-09-07, 2026-09-28, 2026-09-30, 2026-10-01, 2026-10-05, 2026-10-19, 2026-10-21, 2026-11-13 and 2026-11-23), unreviewed unless an entry notes otherwise; the team settles
 them on spec review. The summary is sorted 🐞 → ❓ → ✅ and the entries below
 are the source; badges, Impact and Basis:
 [Reading a spec](GLOSSARY.md#reading-a-spec).
@@ -1194,6 +1216,7 @@ are the source; badges, Impact and Basis:
 | [A22](#a22) | On a phone, "Make a Submission" squeezes the "Title" box to nothing, so no submission can be started | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A23](#a23) | Once a manager edits the Author role, a user with no role who starts a submission is made "Translator" on a journal, "Chapter Author" on a press | 🐞 | minor | — |
 | [A24](#a24) | Submission wizard: a reload opens a draft on its first step with the later steps locked, and "Save for Later" there forgets the step reached | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
+| [A25](#a25) | On a journal or press with self-registration off on every author role, a Journal Manager is turned away from "Make a Submission" as if they were an unregistered author | 🐞 | minor | — |
 | [OMP2](#omp2) | A press refuses the comma-separated "Notify Anyone" list its own help text asks for | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP4](#omp4) | On a press, a submission made as "Chapter Author" cannot be saved: the title is lost, every save is refused and the wizard hangs | 🐞 | user-visible · crash: script | — |
 | [OPS3](#ops3) | A preprint author cannot delete their own draft: the wizard's "Cancel" does nothing and My Submissions refuses it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -1208,7 +1231,8 @@ are the source; badges, Impact and Basis:
 | [A9](#a9) | Pressing "Begin Submission" silently enrolls a pure Section Editor as Author, and probably a pure Site Administrator too | ❓ | latent | — |
 | [A15](#a15) | Leaving the wizard within a minute of the last save drops the change without a question | ❓ | minor | — |
 | [A17](#a17) | "Needs an editor" goes out for a submission that already has an editor on it | ❓ | minor | — |
-| [OPS2](#ops2) | A preprint server enrolls a roleless visitor as Author on merely opening the start screen | ❓ | latent | — |
+| [A26](#a26) | A draft carries a submission date from the moment it was started, and the statistics reports list it under "Date submitted" | ❓ | minor | — |
+| [OPS2](#ops2) | A preprint server enrolls a visitor with no role, or a Moderator, as Author on merely opening the start screen | ❓ | latent | — |
 | [OPS4](#ops4) | The preprint completion screen thanks the viewer, not the submitter | ❓ | latent | — |
 | [OPS6](#ops6) | The "needs an editor" email keeps its journal wording on a preprint server | ❓ | minor | — |
 | [OPS10](#ops10) | A Moderator already on a preprint is not emailed when it is submitted | ❓ | minor | — |
@@ -1328,10 +1352,10 @@ Basis: probe, 2026-10-01. <sup>[q](#fn-q)</sup>
 **A9 — Starting a submission quietly turns a Section Editor into an Author** · ❓ · latent.
 The start screen admits a user whose only role is Section Editor on the
 strength of that editorial role. But pressing "Begin Submission" enrolls
-them in the journal's Author role, without asking, and without the
+them in an author-role group (Rule 3a), without asking, and without the
 self-registration check the ordinary sign-up path applies. The submission
 is made under that new role, with the section editor auto-listed as its
-contributor and primary contact (Rule 5). A pure Site Administrator most
+contributor and primary contact (Rule 5). A pure Site Administrator
 likely gets the same treatment. That half is unverified: confirming it
 would permanently change the roles of the one seeded administrator account
 the whole test install depends on, so it awaits a check with a disposable
@@ -1566,8 +1590,9 @@ Journal Manager has saved a change to the Author role, even ticking
 "Consider role in masthead list", "OK", then unticking it, "OK", the
 same press of "Begin Submission" makes them "Translator" on a journal,
 a role the journal does not open to self-registration, and "Chapter
-Author" on a press; once "Chapter Author" has been edited as well,
-"Translator" there too. Pressing "OK" in the role's "Edit" window
+Author" on a press. Once "Chapter Author" has been edited as well, a
+press gives any of its author roles: "Translator", "Volume editor" and
+"Author" have all been seen. Pressing "OK" in the role's "Edit" window
 without changing anything does not do it. Nothing
 on screen tells the user; the new role shows in the user's row on
 Settings › Users & Roles › "Users".
@@ -1577,7 +1602,7 @@ As with [A21](#a21), no app decides the order: the user gets whichever
 author-role group the database returns first; on PostgreSQL, the only
 database tried, a role saved again moves to the end of its table. A
 preprint server has a single author-role group, so it is not affected.
-Basis: probe, 2026-10-19. <sup>[fn-a23](#fn-a23)</sup>
+Basis: probe, 2026-10-19 and 2026-11-23. <sup>[fn-a23](#fn-a23)</sup>
 Report: paused — written 2026-10-21, held until a related item is settled before it is published (2026-10-21)
 
 <a id="a24"></a>
@@ -1596,6 +1621,41 @@ back, and a "Save for Later" from there records it again.
 "Complete submission" opens the wizard without a step in its address,
 so it reopens at the recorded step.
 Basis: probe, 2026-11-16. <sup>[fn-a24](#fn-a24)</sup>
+
+<a id="a25"></a>
+**A25 — A Journal Manager is told "authors must be registered by the editorial staff" and turned away from "Make a Submission"** · 🐞 · minor.
+On a journal or press where "Allow user self-registration" is off on
+every author-role group ("Author"; on a press "Author" and "Chapter
+Author"), a Journal Manager with no other role who opens "Make a
+Submission" gets the "Not Allowed" page: "You are not allowed to submit
+to this journal because authors must be registered by the editorial
+staff. If you believe this is an error, please contact {contact}."
+("press" on a press). The dashboard sidebar still offers "Start A New
+Submission", and it leads to the same page. Yet the manager may submit:
+a start form they opened before the change still creates the
+submission, made in the manager role, with no author role added.
+An Editor, a Section Editor and an Author still get the start form, and
+a Preprint Server Manager is not affected.
+Basis: probe, 2026-11-23. <sup>[fn-a25](#fn-a25)</sup>
+
+<a id="a26"></a>
+**A26 — A draft reads as submitted from the moment it was started** · ❓ · minor.
+From "Begin Submission" on, a draft carries a submission date, the
+moment it was created (Rule 5). The wizard, My Submissions and the
+workflow screen show no date. On a journal the "Articles Report" and on
+a press the "Monograph Report" (Statistics › "Reports") list the draft
+under "Date submitted" with that date and time to the second, and
+"Submission" under "Status" (see
+[Editorial statistics](U65-editorial-statistics.md)), and the
+dashboard's "Needs editor" view lists the draft as "Incomplete" (see
+[Submissions dashboard](U23-submissions-dashboard.md)). "Submit"
+replaces the date with the moment of submitting (Rule 14). A preprint
+server's "Reports" offers no such report.
+Question: should a draft carry a submission date? Lean: no. The step
+that creates a submission means to leave a draft undated, and "Needs
+editor" leaves out undated submissions, so an undated draft would not be
+listed there.
+Basis: probe + code inspection, 2026-11-23. <sup>[fn-a26](#fn-a26)</sup>
 
 ### OMP
 
@@ -1671,10 +1731,13 @@ inspection + probe; a deliberate single-stage design. <sup>[fn-ops1](#fn-ops1)</
 <a id="ops2"></a>
 **OPS2 — Enrolment as Author happens on opening the start screen** · ❓ · latent.
 On a journal or press, a roleless signed-in user is enrolled in an
-author-role group (Rule 3a) only when their submission is actually created. On a preprint server
-the enrolment happens as soon as they open the "Make a Submission" screen,
-before they have typed anything. So backing out still leaves the Author
-role on their account.
+author-role group (Rule 3a) only when their submission is created, and
+opening the start screen changes nobody's roles. On a preprint server a
+user who holds no manager or author role there and is not a Site
+Administrator (a user with no role, or a Moderator) is enrolled as
+Author on opening the "Make a Submission" screen, self-registration or
+not, even when that visit shows "Not Allowed" (Rule 3). Backing out
+leaves the Author role on their account.
 Question: should merely viewing the start screen change a user's roles?
 Lean: no. Enrol at creation, as the other apps do. Basis: probe.
 <sup>[c](#fn-c)</sup>
@@ -1892,7 +1955,10 @@ admits — note fn-a9). OPS overrides
 `getSubmitUserGroups()` and calls `Repo::userGroup()->assignUserToGroup()`
 directly while rendering the start page (basis of OPS2). Editor-restricted
 sections admit `PKPSection::getEditorRestrictedRoles()` = Site Admin,
-Manager, Sub-editor. Section closure roster:
+Manager, Sub-editor, matched by role (`isEditor()`), so every group
+with the manager role (OJS registry: Journal manager, Journal editor,
+Production editor) or the sub-editor role (Section editor, Guest
+editor) passes; Rule 3 names them. Section closure roster:
 `Repo::section()` collector `excludeInactive()` +
 `getEditorRestricted()` in `getSubmitSections()`. Live-probed 2026-08-25:
 a signed-in user with no role in the journal reaches the start form; on
@@ -1918,6 +1984,31 @@ OMP defines the one (`notAllowed.description`) its handler uses
 same day: the author's radio offered only the open sections; a Journal
 Manager was additionally offered the editor-restricted one; the deactivated
 section was offered to no one.
+The page's roster is the account's groups with a Submission-stage row
+(`withStageIds([WORKFLOW_STAGE_ID_SUBMISSION])` in
+`getSubmitUserGroups()`), which the stock manager group lacks, while
+`PKPSubmissionController::add()` accepts any of the user's manager or
+author groups (its stage filter is commented out pending
+pkp/pkp-lib#10929), so for a manager the page and the request disagree
+(Rule 3, A25, note fn-a25). Live-probed 2026-11-23 (Rules 3, 3a; OPS2),
+two runs per app on OJS, OMP and OPS `main`, scratch contexts with
+throwaway users, kept script `shared/playwright/checks/U21/I21/i21.js`:
+with every author-role group as installed, merely opening the start
+page added "Author" to a roleless Reader ("Author, Reader") and to a
+Moderator with no other role ("Author, Moderator") on OPS, while on OJS
+and OMP the same visits left a Reader and a Section (Series) editor
+with their roles unchanged. OPS's `getSubmitUserGroups()` override
+lists only the user's manager, site-admin and author groups, so by the
+code any other role is enrolled the same way. With "Allow user
+self-registration" off on every author-role group, a Journal (Press)
+editor and a Section (Series) editor with no other role, and an Author,
+still got the start form on OJS and OMP, and a roleless Reader got the
+"Not Allowed" page (OPS: OPS7's raw key). On OPS, with "Author"'s
+self-registration off, that first visit already enrolled the roleless
+Reader and a Moderator with no other role ("Author, Reader", "Author,
+Moderator"), and their second visit got the start form, in both runs:
+the override assigns the author group before it looks for a
+self-registering one, and returns none (Rules 3, 3a; OPS2).
 OPS7 issue report: [pkp-e2e#332](https://github.com/jardakotesovec/pkp-e2e/issues/332) ([docs/issues/U21-OPS7-preprint-not-allowed-page-raw-key.md](../issues/U21-OPS7-preprint-not-allowed-page-raw-key.md)).
 
 <a id="fn-d"></a>
@@ -1978,8 +2069,13 @@ submission payload (AFFW-073), POSTs to the submissions API, then saves
 groups; picks the Author-role group by default when none was chosen; creates
 submission + first publication; `Repo::stageAssignment()->build()` assigns
 the submitter (metadata-edit allowed while a draft); when submitting under
-an Author group, creates the contributor from the user's profile and makes
-it the publication's primary contact.
+an Author group (`roleId === ROLE_ID_AUTHOR`, so any author-role group,
+"Translator" included), creates the contributor from the user's profile
+and makes it the publication's primary contact.
+`Repo::submission()->add()` stamps
+`dateSubmitted` unless the object carries a `submissionProgress`, and
+`PKPSubmissionController::add()` builds it without one, so every draft
+has a submitted date from its creation (Rule 5, A26, note fn-a26).
 Live-probed 2026-09-28 (Rule 5's editorial-role sentence): a user who
 chose "Journal editor", "Press editor" or "Preprint Server manager"
 submitted with the Participants list, read by the submitter and by a
@@ -2324,7 +2420,7 @@ inactive or editor-restricted section
 `Repo::publication()->canCurrentUserPublish()` (AFFW-104;
 `SubmissionHandler::getConfirmSubmitMessage()` OPS override). On success:
 `Repo::submission()->submit()` clears `submissionProgress`, stamps
-`dateSubmitted`, fires the `SubmissionSubmitted` event, opens the
+`dateSubmitted` again, replacing the draft's creation time (A26), fires the `SubmissionSubmitted` event, opens the
 comments-for-editors discussion, auto-creates stage task templates;
 `confirmCopyright` adds the `SUBMISSION_LOG_COPYRIGHT_AGREED` event-log
 entry with the notice text. Submit dialog live-probed 2026-08-25, verbatim
@@ -2333,7 +2429,12 @@ per app — OJS/OMP: "The submission, {title}, will be submitted to
 submission?"; OPS plain author: "Are you sure you want to submit {title}
 to {server}? Once you submit, a moderator will review the preprint before
 posting it online."; OPS can-post submitter: "…Once you submit, you will
-be able to review your submission and post it online."
+be able to review your submission and post it online." OPS's
+`canCurrentUserPublish()` answers no for a user with an Author stage
+assignment on the submission unless a `Publication::canAuthorPublish`
+hook (a screening plugin) says yes, and yes for anyone else, so the
+can-post text goes to a submitter who submitted in the manager role
+(scenario 15's control).
 Validation live-probed 2026-08-25: against a 50-word section cap, the
 Details counter read "Word Count: 60/50" and the Review complaint was
 verbatim identical on OJS and OPS — "The abstract is too long. It should
@@ -2582,8 +2683,10 @@ are never eligible, and the submission-stage filter is commented out
 pending pkp/pkp-lib#10929 — so a pure Section Editor hits the empty-roster
 fallback, which enrols into the first author-role group the database
 returns without re-checking `permitSelfRegistration` (note c; which
-group that is after a saved Author role: A23, not driven for a Section
-Editor). A pure Site Administrator's admin group
+group that is after a saved Author role: A23, driven 2026-11-23 for a
+Section Editor: "Translator" on OJS in two runs; on OMP with "Author"
+and "Chapter Author" saved, "Volume editor" in one run and "Author" in
+the other, note fn-a23). A pure Site Administrator's admin group
 is site-level while the roster is context-scoped, so the same fallback
 should fire — not driven: the only site administrator on a test install is
 the seeded `admin` account every suite depends on, and the probe would
@@ -2872,6 +2975,14 @@ fallback pick from a server's one author-role group (code read).
 walked. A21's issue report names this fallback under its Reach and
 leaves it out of its fix
 ([docs/issues/U21-A21-submit-as-role-order-not-fixed.md](../issues/U21-A21-submit-as-role-order-not-fixed.md)).
+Live-probed 2026-11-23 (Rule 3a's third bullet), two runs each on OJS
+and OMP `main`, each on a new scratch context, kept script
+`shared/playwright/checks/U21/I21/i21.js`: a Section (Series) editor
+with no other role pressed "Begin Submission" (answered 200) after
+"Allow user self-registration" had been saved off on "Author" (on OMP
+on "Author" and "Chapter Author"). The account then held "Section
+editor, Translator" on OJS in both runs, and on OMP "Series editor,
+Volume editor" in one run and "Author, Series editor" in the other.
 
 <a id="fn-a24"></a>
 **fn-a24** — `SubmissionWizardPage.vue` `created()` opens the step
@@ -2894,6 +3005,59 @@ on "Upload Files", the later rail entries plain text. Before that,
 link each opened the bare address and reopened on "Contributors". No
 response of 500 or more and no page error in any run.
 Issue report: [pkp-e2e#1101](https://github.com/jardakotesovec/pkp-e2e/issues/1101) ([docs/issues/U21-A24-wizard-reload-opens-first-step.md](../issues/U21-A24-wizard-reload-opens-first-step.md)).
+
+<a id="fn-a25"></a>
+**fn-a25** — A25. Mechanism: note c (the page's Submission-stage roster
+against `PKPSubmissionController::add()`'s manager-or-author roster).
+OPS's `getSubmitUserGroups()` override lists the manager's group, so a
+Preprint Server Manager always gets the form. Live-probed 2026-11-23,
+two runs per app on OJS, OMP and OPS `main`, scratch contexts with
+throwaway users, kept script `shared/playwright/checks/U21/I21/i21.js`.
+A Journal (Press) manager with no other role got the start form, with
+no "Submit As", while the author-role groups were as installed; with
+"Allow user self-registration" unticked on "Author" (on a press on
+"Author" and "Chapter Author") the page read "Not Allowed", "You are not
+allowed to submit to this journal because authors must be registered by
+the editorial staff. If you believe this is an error, please contact I21
+Contact." (the context's contact; "press" on OMP), on a second visit
+too. On a press with "Author" alone closed the manager still got the
+form; ticked again, the form came back. A start form loaded while the
+groups were open, pressed after they were closed in a second tab: the
+screen's `POST submissions` (keys `submissionRequirements`,
+`privacyConsent`, `sectionId` on OJS, `workType` on OMP) answered 200,
+the wizard opened on "Upload Files", the draft's stage assignment was
+"Journal manager" ("Press manager") and the account's roles stayed
+unchanged. With the groups closed the manager's dashboard sidebar
+offered "Start A New Submission", which landed on the same page, its
+links "Contact" and the contact's mail address. The Preprint Server
+manager got the form at both ends. No response of 500 or more and no
+page error in any run.
+
+<a id="fn-a26"></a>
+**fn-a26** — A26. Mechanism: note e (`Repo::submission()->add()`'s
+check for `submissionProgress` never holds for an API-built draft) and
+note m (`submit()` stamps the date again). The editorial "Needs editor"
+view's collector filter (`Collector::filterByisUnassigned`) leaves out
+rows with no `dateSubmitted`. The wizard's `autosaveSucceeded()` tells
+a submission answer from a publication answer by `dateSubmitted` being
+set, so a fix that leaves drafts undated must change that test too.
+Live-probed 2026-11-23, two runs per app on OJS, OMP and OPS `main`,
+scratch contexts, kept script `shared/playwright/checks/U21/I21/i21.js`,
+as the submitting Author and a Journal Manager: the answer to the
+screen's `POST submissions` read `dateSubmitted` equal to the creation
+second with `submissionProgress` "start"; the same date was in the
+wizard page's embedded state (also when reopened), in the Author's and
+the manager's workflow `GET …/submissions/{id}`, in the editorial
+dashboard's `_submissions` list reads, and in the database row. After
+"Submit" every one of them read the submit second (OJS r1 04:20:18 →
+04:20:48; OMP r1 04:23:06 → 04:23:36; OPS r1 04:31:37 → 04:32:07).
+Statistics › "Reports": the "Articles Report" (OJS) and "Monograph
+Report" (OMP) listed the draft with "Status" "Submission" and "Date
+submitted" the creation time, to the second ("2026-11-23 04:20:18" on
+OJS r1), and after the submit the submit time ("2026-11-23 04:20:48").
+"Needs editor" (OJS, OMP) read "Needs editor (1)" with the draft's
+stage "Incomplete". My Submissions, the dashboards' "Days" column and
+the workflow screen showed no submitted date.
 
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
