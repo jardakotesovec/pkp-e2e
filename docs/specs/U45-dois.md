@@ -2580,7 +2580,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A29](#a29) | A journal upgraded from 3.3 can come out with an old leftover DOI prefix, and new DOIs are made with it | 🐞 | user-visible | — |
 | [A31](#a31) | A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref and a journal's DataCite | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered" | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
+| [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered" | 🐞 | low | issues (claude), 2026-11-23 — re-verified |
 | [OJS5](#ojs5) | DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI | 🐞 | medium · crash: server | issues (claude), 2026-10-15 — re-verified |
 | [OJS8](#ojs8) | With DataCite and "DOI Versioning" "Yes", a deposit is given only the current version, yet "Deposit All" and "Deposit DOIs" mark every published major version's DOIs "Submitted" | 🐞 | user-visible | @bozana 2026-10-08 · tracked upstream |
 | [OJS9](#ojs9) | With "Author Response" DOIs turned on, every DOI assignment gives each author response a new DOI | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
@@ -3037,20 +3037,18 @@ over a "Deposit DOI(s)" button. The manager expects "Submitted", which
 an article gets from the same action and an issue gets from "Deposit
 All".
 
-The deposit is not lost: it runs from the queue, and the agency's answer
-then sets "Registered" or "Error". Until it has run, the page says the
+The deposit is not lost: it runs from the queue, and the issue then
+reads "Registered" or "Error". Until it has run, the page says the
 issue was not sent. A second "Deposit DOIs", the issue's own "Deposit
 DOI(s)" or "Deposit All" each queues one more deposit of the same issue,
 which sends the agency the same record again.
 
-It shows where a worker or a cron job runs the queue, until the next
-run. On the default setting, where queued jobs run at the end of page
-loads, the deposit is tried within a page load, and the issue reads
-"Unregistered" only until it is. A try that cannot connect to the agency
-then sets "Error", as for an article; for an issue that was read in the
-code, not walked.
-Basis: probe, 2026-10-09. <sup>f-ojs4</sup>
-Report: refresh owed — pkp/crossref-ojs#117 and pkp/ojs#5977 (for pkp/pkp-lib#13591, on OJS `main` by 2026-11-20) record a deposit that cannot connect as "Error", so the report's reach ("Unregistered" stays on the default setting only when the deposit cannot connect, A18) and its order of fixes (after OJS2 and A18, both now fixed) no longer hold (`CrossrefExportPlugin::depositXML()`, `DataciteExportPlugin::depositXML()`, `CrossrefExportPlugin::updateDepositStatus()`) (2026-11-20)
+The wrong "Unregistered" shows on a journal whose queue a worker or a
+cron job runs, until the queue is next run. On the default setting,
+where queued jobs run at the end of page loads, the deposit runs within
+the same page load, and the issue shows the deposit's result as soon as
+the list is shown again.
+Basis: probe + walk, 2026-11-23. <sup>f-ojs4</sup>
 
 <a id="ojs5"></a>
 **OJS5 — DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI** · 🐞 · medium · crash: server.

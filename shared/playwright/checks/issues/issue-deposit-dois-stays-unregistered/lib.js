@@ -1,6 +1,8 @@
 // Helpers for walk.js (issue report U45 OJS4). Runs nothing when required.
+// runJobTool copied from checks/issues/deposited-item-reads-manually-registered/lib.js.
 const fs = require('fs');
 const path = require('path');
+const {execFileSync} = require('child_process');
 
 const REPO = path.resolve(__dirname, '../../../../..');
 const flat = (s, n = 400) => (s == null ? s : String(s).replace(/\s+/g, ' ').trim().slice(0, n));
@@ -132,4 +134,21 @@ function depositJobs(sql, app) {
     return sql(app, `select replace(substring(payload from 'displayName":"([^"]+)'), E'\\\\\\\\', E'\\\\') || ' | attempts ' || attempts || ' | reserved ' || (reserved_at is not null) from jobs where payload like '%Deposit%' order by id`).split('\n').filter(Boolean);
 }
 
-module.exports = {flat, holdQueue, releaseQueue, queueFacts, depositJobs, storedDois, rowState, depositTicked, depositFromPanel};
+/**
+ * The install's command-line job tool, as an administrator's cron job or
+ * worker runs it: `php lib/pkp/tools/jobs.php run` in the app's directory
+ * under the install's config. Returns its exit code and output.
+ */
+function runJobTool(app) {
+    const file = path.isAbsolute(app.configFile) ? app.configFile : path.join(REPO, app.configFile);
+    try {
+        const out = execFileSync('php', ['lib/pkp/tools/jobs.php', 'run'], {
+            cwd: app.root, env: {...process.env, PKP_CONFIG_FILE: file}, encoding: 'utf8', timeout: 180_000,
+        });
+        return {code: 0, output: flat(out, 1500)};
+    } catch (e) {
+        return {code: e.status, output: flat(`${e.stdout || ''}${e.stderr || ''}`, 1500)};
+    }
+}
+
+module.exports = {flat, holdQueue, releaseQueue, runJobTool, queueFacts, depositJobs, storedDois, rowState, depositTicked, depositFromPanel};

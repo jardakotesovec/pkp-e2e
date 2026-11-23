@@ -14,11 +14,12 @@
 //   7.   "Issues": tick issue 1, "Deposit DOIs" (the finding)
 //   8.   reload, "Issues", expand the issue
 //   9.   "Articles": tick submission 17, "Deposit DOIs" (the control)
-// After the steps it runs the queue once (the kit's drainJobs) and reads both
-// rows again: what the deposits' end leaves (on a test install they cannot
-// connect, U45 A18).
+//   10.  the job tool, as a cron job runs it (`php lib/pkp/tools/jobs.php run`,
+//        lib.js runJobTool), then both rows read again: what the deposits'
+//        end leaves (a test install cannot connect to the agency, which since
+//        pkp/pkp-lib#13591 reads "Error").
 // AGENCY=datacite takes the same steps with "DataCite Manager Plugin" and
-// "DataCite" (the queued DepositIssue then meets U45 OJS2 on main).
+// "DataCite".
 // WALK=again, run alone: steps 1 to 5 and 7, then the issue ticked and
 // "Deposit DOIs" pressed once more, then its expanded view's "Deposit DOI(s)".
 // WALK=default, run alone, with `job_runner = On` as the dataset ships it:
@@ -30,12 +31,12 @@
 //   a. "Issues": tick issue 1 and the unpublished issue 2, "Deposit DOIs":
 //      refused whole, nothing queued, nothing marked
 //   b. "Deposit All": issue 1 reads "Submitted", one DepositIssue queued
-// Run (reset the fleet first):
-//   npm run fleet-prep -- --feature issues-rc --dataset 6 --reset
-//   PROBE_FEATURE=issues-rc PROBE_AGENT=rc node bin/probe.js ojs shared/playwright/checks/issues/issue-deposit-dois-stays-unregistered/walk.js
-// On 3.5: PKP_E2E_LINE=stable-3_5_0 in front of both, feature issues-rc-3_5, PROBE_RUN=r35.
-const {forEachApp, launch, signIn, screen, shot, record, sql, drainJobs} = require('../../../probe');
-const {flat, holdQueue, releaseQueue, queueFacts, depositJobs, storedDois, rowState, depositTicked, depositFromPanel} = require('./lib.js');
+// Run (reset the fleet first; <feature> and <n> name a dataset fleet):
+//   npm run fleet-prep -- --feature <feature> --dataset <n> --reset
+//   PROBE_FEATURE=<feature> node bin/probe.js ojs shared/playwright/checks/issues/issue-deposit-dois-stays-unregistered/walk.js
+// On 3.5: PKP_E2E_LINE=stable-3_5_0 in front of both, a 3.5 fleet's feature, PROBE_RUN=r35.
+const {forEachApp, launch, signIn, screen, shot, record, sql} = require('../../../probe');
+const {flat, holdQueue, releaseQueue, runJobTool, queueFacts, depositJobs, storedDois, rowState, depositTicked, depositFromPanel} = require('./lib.js');
 
 const T = 30_000;
 const WALK = process.env.WALK || 'steps';
@@ -219,16 +220,17 @@ forEachApp(async (app) => {
         await dois.reload();
         fact('9 after reload', {article: await rowState(dois, articleRow, ARTICLE)});
 
-        // After the steps: the queue is run once, and both rows read again.
-        const drained = await drainJobs(app).catch((e) => `drainJobs: ${e.message}`);
+        // 10: the job tool, as a cron job runs it, then both rows read again.
+        const tool = runJobTool(app);
         await dois.goto();
         const articleAfter = await rowState(dois, articleRow, ARTICLE);
         await dois.openTab('Issues');
         const issueAfter = await rowState(dois, issueRow, ISSUE);
         await dois.expand(issueRow, ISSUE);
-        record(`${pre}-after-queue-issue-expanded`, await screen(page));
-        fact('after the queue ran', {issue: issueAfter, article: articleAfter, ...queueFacts(sql, app), dois: storedDois(sql, app),
-            drained: flat(typeof drained === 'string' ? drained : JSON.stringify(drained), 300)});
+        record(`${pre}-10-after-job-tool-issue-expanded`, await screen(page));
+        await shot(page, `${pre}-10-after-job-tool-issue-expanded`).catch(() => {});
+        const errors = sql(app, `select d.doi || ' | ' || left(s.setting_value, 200) from dois d join doi_settings s on s.doi_id = d.doi_id where s.setting_name like '%failedMsg' order by d.doi_id`).split('\n').filter(Boolean);
+        fact('10 after the job tool', {tool, issue: issueAfter, article: articleAfter, ...queueFacts(sql, app), dois: storedDois(sql, app), failedMsgs: errors});
 
         // AFTER=all: "Deposit All" once the deposits have failed (does it take the issue again?)
         if (process.env.AFTER === 'all') {
