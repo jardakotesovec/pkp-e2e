@@ -4584,7 +4584,7 @@ parents, before rendering, so a failed press creates the temporary
 files folder (A49); not driven, the fleet had it. Kept script
 `shared/playwright/checks/U27/I27/i27.js` (`PHASES=err` for the dialog
 and its "OK").
-Issue report: docs/issues/U27-A55-review-form-pdf-download-error-window.md.
+Issue report: [pkp-e2e#1112](https://github.com/jardakotesovec/pkp-e2e/issues/1112) ([docs/issues/U27-A55-review-form-pdf-download-error-window.md](../issues/U27-A55-review-form-pdf-download-error-window.md)).
 
 <a id="fn-a56"></a>
 **f-a56** — Live-probed 2026-11-23 (Rule 15; the runs of f-a55, two per
