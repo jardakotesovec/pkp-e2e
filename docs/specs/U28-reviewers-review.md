@@ -61,7 +61,7 @@ give no access to any screen in this spec. <sup>l</sup>
 | **Accept or decline** the request (step 1) | • The assigned reviewer: while the request is unanswered (the editor's side of the answer is [→ Log Response](U27-reviewer-assignment-and-management.md#unassign)) <sup>f</sup> |
 | **Download the files for review** | • The assigned reviewer: on steps 1 and 3, the files the editor ticked for them; with "Restrict File Access" on, on step 3 only, after accepting (Settings)<br>• The submission's editors: a file link from the wizard downloads for them too (Rule 15)<br>• An account with no access to the submission's files (a reviewer with no assignment on it): opening a file link is refused (Rule 15) <sup>e</sup> <sup>l</sup> |
 | **Write, save and submit the review** (step 3) | • The assigned reviewer: after accepting, until the review is submitted <sup>h</sup> <sup>i</sup> |
-| **Upload reviewer files** (step 3) | • The assigned reviewer: until the review is submitted; afterwards "Upload File" and each row's "Delete" are gone and only the row's "Edit" is offered <sup>h</sup> <sup>j</sup> |
+| **Upload reviewer files** (step 3) | • The assigned reviewer: until the review is submitted; afterwards "Upload File" and each row's "Delete" are gone and only the row's "Edit" is offered, which still renames the file (Rule 13) <sup>h</sup> <sup>j</sup> |
 | **Use the "Review Tasks & Discussions" panel** on steps 3 and 4 | • The assigned reviewer: add a discussion, reply, edit or delete their own. The mechanics are *Tasks & discussions*; this spec owns only the fact that the panel is offered here <sup>h</sup> |
 | **Read an earlier round's review** ("Previous Reviews") | • The assigned reviewer: for their own assignments on rounds the submission has moved past, their current one included once a later round opened without them (Rule 14, ⚠ [A12](#a12)) <sup>k</sup> |
 | **Open a one-click review link** | • The addressed reviewer, signed out or signed in as themselves. A browser signed in as somebody else gets a blank page (Rule 16, [A10](#a10)) <sup>m</sup> |
@@ -89,7 +89,7 @@ give no access to any screen in this spec. <sup>l</sup>
 | "For author and editor" | no | Rich text under "Review", shown when the assignment carries no review form. Nothing requires it: "Submit Review" with both boxes empty and no file under "Reviewer Files" ({OJS}: with a recommendation chosen) submits the review, as intended (Rule 13) |
 | "For editor" {OJS} / "For editor only" {OMP} | no | Rich text, same condition. Never required |
 | The review form's questions | per question, marked "*" | Shown instead of the two text boxes when the assignment carries a review form: the form's title and description, then each question as the form defines it (a text box, a checkbox group, a radio group or a drop-down). A required question left unanswered stops "Submit Review" only after its confirmation: the step stays, nothing is submitted, and the box "Please fill in required fields." / "Some required fields are not filled in. Please complete them before submitting your review." appears under the buttons ({OMP}: the first sentence prints as a raw key ⚠ [OMP3](#omp3)). On a form with a required "Single line text box" question (an item type), "This field is required." also appears under each unanswered required question, a radio group included; on a form whose only required question is a radio group, a press marks no question and a journal shows none in view ⚠ [A16](#a16). The page stays scrolled at the buttons, so a mark on a question higher up is out of sight until the reviewer scrolls up. "Save for Later" saves whether or not a required question is answered and shows "Your changes have been saved.". With that question unanswered it also shows the box and the marks, as a refused submit does; {OJS} so does any review form saved while "Recommendation" reads "Choose One", with the mark under the list ⚠ [A14](#a14). A reload keeps what was saved and clears the box and the marks |
-| "Reviewer Files" (the list under "Upload") | no | The reviewer's own attachments: "Upload File" opens the shared upload wizard (*Submission files*; here three steps, "1. Upload File", "2. Review Details" and "3. Confirm", with no file-type question), and each row offers "Edit" and "Delete". Once the review is submitted, "Upload File" and "Delete" are gone and "Edit" stays |
+| "Reviewer Files" (the list under "Upload") | no | The reviewer's own attachments. "Upload File" opens the shared upload wizard ([→ the upload wizard](U36-submission-files.md#upload-wizard)), here with three steps, "1. Upload File", "2. Review Details" and "3. Confirm", and no file-type question. It never asks which file an upload revises, even with files listed: a corrected version of a listed file is uploaded as a new file and lists beside the earlier one, which stays until deleted. As everywhere the wizard is used, "Change File" in step 1 leaves the first file in the list too ⚠ [→ Submission files A14](U36-submission-files.md#a14). Each row offers "Edit" and "Delete" ([→ deleting](U36-submission-files.md#delete)). "Edit" opens "Edit a file" with only the name box "Name the file (e.g., Manuscript; Table 1)", "Cancel" and "Save"; a saved name shows in the list at once and after a reload. Once the review is submitted, "Upload File" and "Delete" are gone and "Edit" stays (Rule 13) <sup>h</sup> |
 | "Recommendation" {OJS} | yes, on submit | Drop-down preset to "Choose One" listing the journal's active recommendations (by default "Accept Submission", "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere", "Decline Submission" and "See Comments"), in no fixed order [→ recommendation order](U29-review-setup-and-review-forms.md#a7). "Submit Review" with "Choose One" is asked for confirmation first; after "OK" the step stays and "This field is required." appears under the list. It is the only check a free-form submit meets (row 1). "Save for Later" keeps whatever is chosen. A press has no such field [OMP1](#omp1) |
 
 ## Rules & state
@@ -286,13 +286,18 @@ give no access to any screen in this spec. <sup>l</sup>
     of the work that we publish; the editor may contact you again for more
     information if needed.", with the "Review Tasks & Discussions" panel
     under them (a second copy of step 3's panel, with its own "Add"). From
-    then on nothing can be
+    then on the review can no longer be
     saved or submitted: all four tabs open; step 1's "Save and continue",
     step 2's "Continue to Step #3", "Save for Later" and "Submit Review"
     are disabled; the review boxes ({OJS}: and the "Recommendation" list)
     still take typing, which goes nowhere; and "Reviewer Files" offers no
-    "Upload File" and no "Delete", only each row's "Edit". The list's
-    "View" opens this wizard on "4. Completion". <sup>i</sup> <sup>j</sup>
+    "Upload File" and no "Delete", only each row's "Edit", which still
+    renames the file: "Save" closes the window and the new name shows in
+    "Reviewer Files", after a reload and in the editor's "Review Details" window
+    ([→ Review Details](U27-reviewer-assignment-and-management.md#read-review)).
+    The "View" on the review's row in the reviewer's submissions list
+    opens this wizard on "4. Completion".
+    <sup>i</sup> <sup>j</sup>
 <a id="round-history"></a>
 14. **Previous Reviews.** The wizard opens with a "Previous Reviews" box
     above the tabs whenever the reviewer's round is no longer the
@@ -1057,6 +1062,8 @@ Left out of the scenarios above, by reason:
     ([A15](#a15); Rule 18): the guard the issue report proposes, once
     fixed [report 2026-10-02]
   - {OPS} a user invited to a home-made "Reviewer"-level role beside Author landing on "Active submissions" after sign-in, with no "My Assignments as Reviewer" group and the typed reviewer-list address refused ([OPS1](#ops1); Purpose, scenario 17): the guard the issue report proposes, once fixed [report 2026-10-02]
+  - a second "Upload File" on step 3 with a file already under "Reviewer Files" asking no question which file it revises and listing as a second row beside the first, and a row's "Edit" opening "Edit a file" with the name box alone, the saved name showing at once and after a reload (Fields step 3 "Reviewer Files") [incidental 2026-11-23]
+  - after the review is submitted, a row's "Edit" still renaming the file, the new name showing in "Reviewer Files" after a reload and in the editor's "Review Details" window (Rule 13, Actors row 6) [incidental 2026-11-23]
 - **Rarely met**:
   - the "Read Round {N} Review" window of a round declined with an empty message, showing the "Decline Review Request" window's prefilled text in place of a typed reason (Rule 14)
 - **Nothing new to test**:
@@ -1093,6 +1100,7 @@ Left out of the scenarios above, by reason:
 - **Owned by another feature**:
   - what else Settings › Users & Roles › Roles and its "Create New Role" window list as stages beside "Production" (scenario 17; *Roles configuration*)
   - the "Review Tasks & Discussions" panel's mechanics on steps 3 and 4 (Actors row 7, Rules 12–13; *Tasks & discussions*)
+  - the upload wizard's own mechanics behind step 3's "Upload File": "Change File", "Cancel", "Add Another File" and a row's "Delete" question (Fields step 3; *Submission files*)
   - the landing precedence between this list, the editorial Dashboard and My Submissions (Rule 1; *My Submissions*)
   - the reader-side header's "Dashboard" item landing on the list (Rule 5; *Navigation menus & site chrome*)
   - the review-complete email's opt-out and the editors' other notices of a submitted review (Side effects; *Notifications center & email preferences*)
@@ -1855,6 +1863,25 @@ options after "Choose One" come in whatever order the database returns
 them; on the test installs this list has not been seen out of order (the
 order question is the review-setup feature's
 [A7](U29-review-setup-and-review-forms.md#a7)).
+Live-probed 2026-11-23 on OJS and OMP, two runs each on scratch
+journals (Fields step 3 "Reviewer Files", Actors row 6, Side effects
+"Uploading a reviewer file"): with one file listed, step 1 of "Upload
+File" showed no revision select (`select[id^="revisedFileId"]`) and no
+genre select; the second upload answered 200 `status:true` and listed as
+a second row, both files stored. A row's "Edit" opened "Edit a file" with
+the name box alone (`name-en`), "Cancel" and "Save", no file box; the
+saved name showed at once and after a reload. "Change File" in step 1:
+the wizard's removal of the first file
+(`POST api/file/manage-file-api/delete-file`) answered 200 with
+`status:false` and "The current user is not authorized to access the
+specified submission file.", nothing shown, and the server log gained
+`PHP Warning: Undefined array key "submissionFileId"` in
+`PKPManageFileApiHandler.php`; after "Complete" and after a reload both
+files were listed and stored (the shared wizard's fault,
+[→ Submission files A14](U36-submission-files.md#a14)). After
+submission the section editor's "Review Details: {title}" window listed
+every file still on the reviewer's list, by its current name, on its
+first opening in all four runs. No response of 500 in any run.
 
 <a id="fn-i"></a>
 **i** — Save vs submit: `ReviewerReviewStep3FormHandler.js` sets the hidden
@@ -1942,8 +1969,13 @@ editable (toolbar shown) with the submitted text, OJS's "Recommendation"
 enabled at its value, "Save for Later" and "Submit Review" disabled,
 "Upload File" gone, the file row's expander offering "Edit" only, the
 discussions "Add" still there; step 1's "Save and continue" and step 2's
-"Continue to Step #3" disabled. Whether the row's "Edit" still saves after
-submission was not driven.
+"Continue to Step #3" disabled. Live-probed 2026-11-23 on OJS and OMP,
+two runs each (Rule 13, Actors row 6): on a typed `?step=3` and after a
+reload, no "Upload File" and each row's expander "Edit" only; "Edit"
+opened "Edit a file" (name box, "Cancel", "Save"; no file box), "Save"
+closed it, and the new name showed in the list, after a reload, in the
+stored file and in the section editor's "Review Details: {title}"
+window.
 
 <a id="fn-k"></a>
 **k** — Previous rounds: `PKPReviewerHandler::submission()` collects the
