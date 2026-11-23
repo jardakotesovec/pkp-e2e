@@ -1,0 +1,86 @@
+--- a/classes/payment/ojs/OJSCompletedPaymentDAO.php
++++ b/classes/payment/ojs/OJSCompletedPaymentDAO.php
+@@ -179,6 +179,32 @@
+     }
+ 
+     /**
++     * When the user's membership of the journal ends, from the journal's completed
++     * OJSPaymentManager::PAYMENT_TYPE_MEMBERSHIP payments: each one adds a year, counted
++     * from its own date or from the end of the year before, whichever is later.
++     *
++     * @return ?int The end as a timestamp, or null when the user never paid a membership here
++     */
++    public function getMembershipEnd(?int $userId, int $contextId): ?int
++    {
++        if (!$userId) {
++            return null;
++        }
++        $end = null;
++        $paidAt = DB::table('completed_payments')
++            ->where('user_id', $userId)
++            ->where('context_id', $contextId)
++            ->where('payment_type', OJSPaymentManager::PAYMENT_TYPE_MEMBERSHIP)
++            ->orderBy('timestamp')
++            ->pluck('timestamp');
++        foreach ($paidAt as $timestamp) {
++            $from = max($end ?? 0, strtotime($timestamp));
++            $end = mktime(23, 59, 59, date('m', $from), date('d', $from), date('Y', $from) + 1);
++        }
++        return $end;
++    }
++
++    /**
+      * Look for a completed OJSPaymentManager::PAYMENT_TYPE_PUBLICATION payment matching the user and article IDs
+      *
+      * @param int $userId
+--- a/classes/payment/ojs/OJSPaymentManager.php
++++ b/classes/payment/ojs/OJSPaymentManager.php
+@@ -232,21 +232,8 @@
+         if ($queuedPayment) {
+             switch ($queuedPayment->getType()) {
+                 case self::PAYMENT_TYPE_MEMBERSHIP:
+-                    $user = Repo::user()->get($queuedPayment->getUserId(), true);
+-                    $dateEnd = $user->getData('dateEndMembership', 0);
+-                    if (!$dateEnd) {
+-                        $dateEnd = 0;
+-                    }
+-
+-                    // if the membership is expired, extend it to today + 1 year
+-                    $time = time();
+-                    if ($dateEnd < $time) {
+-                        $dateEnd = $time;
+-                    }
+-
+-                    $dateEnd = mktime(23, 59, 59, date('m', $dateEnd), date('d', $dateEnd), date('Y', $dateEnd) + 1);
+-                    $user->setData('dateEndMembership', $dateEnd);
+-                    Repo::user()->edit($user);
++                    // The completed payment recorded below is the membership:
++                    // see OJSCompletedPaymentDAO::getMembershipEnd()
+                     $returner = true;
+                     break;
+                 case self::PAYMENT_TYPE_PURCHASE_SUBSCRIPTION:
+--- a/pages/article/ArticleHandler.php
++++ b/pages/article/ArticleHandler.php
+@@ -663,9 +663,8 @@
+                         /* if the article has been paid for then forget about everything else
+                          * and just let them access the article */
+                         $completedPaymentDao = DAORegistry::getDAO('OJSCompletedPaymentDAO'); /** @var OJSCompletedPaymentDAO $completedPaymentDao */
+-                        $dateEndMembership = $user->getData('dateEndMembership', 0);
+                         if ($completedPaymentDao->hasPaidPurchaseArticle($userId, $submission->getId())
+-                            || (!is_null($dateEndMembership) && $dateEndMembership > time())) {
++                            || $completedPaymentDao->getMembershipEnd($userId, $context->getId()) > time()) {
+                             $this->issue = $issue;
+                             $this->article = $submission;
+                             return true;
+--- a/pages/issue/IssueHandler.php
++++ b/pages/issue/IssueHandler.php
+@@ -299,8 +299,7 @@
+ 
+                         // If the issue galley has been purchased, then allow reader access
+                         $completedPaymentDao = DAORegistry::getDAO('OJSCompletedPaymentDAO'); /** @var OJSCompletedPaymentDAO $completedPaymentDao */
+-                        $dateEndMembership = $user->getData('dateEndMembership', 0);
+-                        if ($completedPaymentDao->hasPaidPurchaseIssue($userId, $issue->getId()) || (!is_null($dateEndMembership) && $dateEndMembership > time())) {
++                        if ($completedPaymentDao->hasPaidPurchaseIssue($userId, $issue->getId()) || $completedPaymentDao->getMembershipEnd($userId, $journal->getId()) > time()) {
+                             return true;
+                         } else {
+                             // Otherwise queue an issue purchase payment and display payment form

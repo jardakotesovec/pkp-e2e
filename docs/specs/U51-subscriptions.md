@@ -1592,7 +1592,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A28](#a28) | After a refused "Save", a subscription's empty date boxes show today's date, but the form does not submit it | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A29](#a29) | Readers get the "Free to read" email twice for an issue opening on 1 March, May, July, October or December | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A31](#a31) | In Uzbek (Latin), subscription screens print "{$ x}", "{$ price}" and "{$ date}" instead of the values | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
-| [A33](#a33) | A reader who has paid the "Association Membership" is refused restricted galleys like any other reader | 🐞 | user-visible | — |
+| [A33](#a33) | A reader who has paid the "Association Membership" is refused restricted galleys like any other reader | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
 | [OPS1](#ops1) | A preprint server's "Posting Mode" says "Saved" but keeps nothing, so the server goes on posting {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A1](#a1) | "Publishing Mode" shows no choice on a new journal, which publishes as open access | ❓ | minor | — |
 | [A5](#a5) | Without payments set up, a signed-in reader pressing a locked galley lands on the home page with no word | ❓ | user-visible | — |
@@ -2000,20 +2000,23 @@ can open none of them short of making the whole journal open access.
 Since: 2026-10-21 · Basis: probe, 2026-10-23. <sup>f-a32</sup>
 
 <a id="a33"></a>
-**A33 — A reader who has paid the "Association Membership" is refused restricted galleys like any other reader** · 🐞 · user-visible.
+**A33 — A reader who has paid the "Association Membership" is refused restricted galleys like any other reader** · 🐞 · medium.
 On a journal that requires subscriptions and sets an "Association
 Membership" fee, a reader who has paid the membership expects to open
 its restricted galleys, as members did up to OJS 3.3. Instead they are
 refused as before paying: a locked article galley sends them to the
 "Subscriptions" page, and a locked "Full Issue" to a payment page for a
-"Purchase Issue Fee". The membership is not kept on the reader's
-account, and a membership end date already on the account is not read.
-With "Manual Fee Payment" nothing records the membership at all
-([Payments & APCs](U52-payments-and-apcs.md), its Rule 7a); with PayPal
-the reader pays and gets nothing. Only a journal using PayPal can take
-the payment, through an address no page links to, so few readers reach
-this; a Journal Manager can give a member an individual subscription
-instead. Basis: probe, 2026-11-23. <sup>f-a33</sup>
+"Purchase Issue Fee".
+
+The membership is not kept on the reader's account, and a membership
+recorded before the journal upgraded from 3.3 is not read. With "Manual
+Fee Payment" nothing records the membership at all; with PayPal the
+reader pays and gets nothing.
+
+Only a journal using PayPal can take the payment, through an address no
+page links to, so few readers reach this; a Journal Manager can give a
+member an individual subscription instead.
+Basis: probe + walk, 2026-11-23. <sup>f-a33</sup>
 
 ### OPS
 
@@ -2335,6 +2338,7 @@ Issue report: [pkp-e2e#1054](https://github.com/jardakotesovec/pkp-e2e/issues/10
 
 <a id="fn-f-a33"></a>
 **f-a33** — `dateEndMembership` is not a property of `lib/pkp/schemas/user.json`. `EntityDAO::_update()` passes the user through `PKPSchemaService::sanitize()`, which drops it, so `OJSPaymentManager::fulfillQueuedPayment()` (the PayPal path; note o) stores nothing; `EntityDAO::fromRow()` loads only the settings the schema names, so `ArticleHandler::userCanViewGalley()` and `IssueHandler::userCanViewGalley()` read null for it (note e). The manual method's `notify` fulfils nothing (note o). OJS 3.3 read and wrote it with `getSetting()`/`updateSetting()` on `user_settings`; the 3.4 entity DAOs (`getData()`) broke it, and stable-3_5_0 and main read `getData()`. Live-probed 2026-11-23 (Settings bullet 7; Rule 11; A33), OJS main, two runs on scratch journals requiring subscriptions with "Manual Fee Payment" set up, an "Association Membership" fee of 7 and one published issue with a "Full Issue" PDF and an article PDF. A Reader who typed the journal's address followed by `user/payMembership` got "Manual Fee Payment" for an "Individual Membership Fee" of "7.00 (USD)" and pressed "Send notification of payment" ("Payment notification sent"; the principal contact got the "Manual Payment Notification"). The "Payments" tab read "No Items" for the Journal Manager and the Subscription Manager, "Individual Subscriptions" did not list the Reader, and no `completed_payments` row or membership setting was written. Before and after, the article PDF sent the Reader to the "Subscriptions" page and the "Full Issue" to "Manual Fee Payment" for a "Purchase Issue Fee" with no "Fee" line. A second Reader with a `dateEndMembership` a year ahead written into `user_settings` by hand was refused the same way, and no Profile tab nor "My Subscriptions" showed the date. Controls: a Reader with an active individual subscription opened both PDFs in the viewer; a Reader who bought an individual type was refused while it read "Awaiting Manual Payment" and opened both once the Journal Manager edited it to "Active". The PayPal store end needs the outside service and rests on the code above.
+Issue report: docs/issues/U51-A33-paid-member-refused-restricted-galleys.md.
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Live-probed 2026-09-23 by the Navigation menus claim check (its OPS2): "Saved" shown, the next load with neither choice marked, "Archives" still in the header; the Search claim check saw every role still reach the Search page. Live-probed 2026-09-25 (td1) on a scratch server: "OPS will not be used…" and "The server will provide open access…" each saved with "Saved" and came back unselected; with the second saved, the visitor and the Reader still saw "Archives", the preprint page and its PDF. OPS `schemas/context.json` has no `publishingMode`, so the context API drops the value (note b); OPS `OpsServerMustPublishPolicy` and the archive header still read it.
