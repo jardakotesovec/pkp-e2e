@@ -1218,9 +1218,12 @@ test.describe('Submission wizard (U21)', () => {
         await expect(page.getByRole('link', {name: 'Start A New Submission'})).toHaveCount(0);
     });
 
-    test('S9: a user with no submitting role is enrolled as Author; without self-registration the start screen refuses', async ({opsApi, asUser}, testInfo) => {
+    test('S9: a user with no submitting role is enrolled as Author; without self-registration the start screen refuses, the roles that may submit still get the start form', async ({opsApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s9');
-        const server = await seedServer(opsApi, tag, ['manager', 'reader', 'reader2']);
+        // A scratch server whose roles have never been edited (Rule 3a):
+        // its Preprint Server Manager, an Author with no other role, and
+        // two bare readers.
+        const server = await seedServer(opsApi, tag, ['manager', 'author', 'reader', 'reader2']);
 
         // The bare reader holds no Author role yet: the profile's Roles tab
         // shows the self-registration "Author" box unchecked. (Checked
@@ -1269,6 +1272,30 @@ test.describe('Submission wizard (U21)', () => {
         await selfReg.uncheck();
         await managerPage.getByRole('button', {name: 'OK', exact: true}).click();
         await expect(selfReg).toBeHidden({timeout: 20_000});
+
+        // The roles that may submit: with self-registration still off, the
+        // Author and the Preprint Server Manager each open "Make a
+        // Submission" and get the start form, ending in "Begin Submission",
+        // not the "Not Allowed" page (a preprint server has no Editor; its
+        // Moderator is enrolled as Author on the visit, register OPS2, not
+        // asserted). The "Not Allowed" heading's positive control is the
+        // second reader's page below, read the same way.
+        const authorPage = await (await asUser(server.users.author.username)).newPage();
+        for (const [who, rolePage] of [['author', authorPage], ['manager', managerPage]]) {
+            await rolePage.goto(startUrl(server.path));
+            await expect(
+                rolePage.getByRole('button', {name: 'Begin Submission'}),
+                `${who}: the start form's "Begin Submission"`
+            ).toBeVisible({timeout: 20_000});
+            await expect(
+                rolePage.getByRole('heading', {name: /Make a Submission/}).first(),
+                `${who}: the start form's heading`
+            ).toBeVisible();
+            await expect(
+                rolePage.getByRole('heading', {name: 'Not Allowed'}),
+                `${who}: no "Not Allowed" page`
+            ).toHaveCount(0);
+        }
 
         const reader2Page = await (await asUser(server.users.reader2.username)).newPage();
         await reader2Page.goto(startUrl(server.path));

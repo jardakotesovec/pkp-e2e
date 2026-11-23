@@ -141,6 +141,7 @@ function makeTag(testInfo, scenarioKey) {
 async function seedPress(ompApi, tag, userKeys, {settings = {}, context = {}, userExtras = {}} = {}) {
     const roleByKey = {
         manager: ['manager'],
+        editor: ['editor'],
         author: ['author'],
         seriesEditor: ['sectionEditor'],
         reader: ['reader'],
@@ -1094,7 +1095,12 @@ test.describe('Submission wizard (U21)', () => {
 
     test('S9: a user with no submitting role is enrolled as Author; without self-registration the start screen refuses', async ({ompApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s9');
-        const press = await seedPress(ompApi, tag, ['manager', 'reader', 'reader2']);
+        // A fresh scratch press (its roles never edited, Rule 3a) with a
+        // Press Manager, a Press editor, a Series editor and an Author, each
+        // holding that one role, and two roleless readers.
+        const press = await seedPress(ompApi, tag, [
+            'manager', 'editor', 'seriesEditor', 'author', 'reader', 'reader2',
+        ]);
 
         // The bare reader holds no Author role yet: the profile's Roles tab
         // shows the self-registration "Author" box unchecked.
@@ -1146,6 +1152,25 @@ test.describe('Submission wizard (U21)', () => {
             await selfReg.uncheck();
             await managerPage.getByRole('button', {name: 'OK', exact: true}).click();
             await expect(selfReg).toBeHidden({timeout: 20_000});
+        }
+
+        // The roles that may submit: with self-registration still off, the
+        // Press editor, the Series editor and the Author each open "Make a
+        // Submission" and get the start form, ending in "Begin Submission",
+        // not "Not Allowed" (Rule 3; the Press Manager is A25's case and
+        // not read here). The page is only opened: a roleless Series
+        // editor's "Begin Submission" is A9's.
+        for (const key of ['editor', 'seriesEditor', 'author']) {
+            const rolePage = await (await asUser(press.users[key].username)).newPage();
+            await rolePage.goto(startUrl(press.path));
+            await expect(
+                rolePage.getByRole('button', {name: 'Begin Submission'}),
+                `${key}: the start form's "Begin Submission"`
+            ).toBeVisible({timeout: 20_000});
+            await expect(
+                rolePage.getByRole('heading', {name: 'Not Allowed'}),
+                `${key}: no "Not Allowed" page`
+            ).toHaveCount(0);
         }
 
         const reader2Page = await (await asUser(press.users.reader2.username)).newPage();

@@ -891,8 +891,11 @@ recipe are in the footnote. <sup>s</sup>
 
 9. **A user with no role submits**
 
-   Given: two signed-in users with no role in the journal (for example a
-   Reviewer of another journal on the same site, or a bare reader account).
+   Given: a Journal Manager, an Editor, a Section Editor with no other
+   role and an Author of the journal, and two signed-in users with no role
+   in it (for example a Reviewer of another journal on the same site, or
+   a bare reader account), on a journal whose roles have never been
+   edited (Rule 3a).
 
    - **The start screen**: the first user: open "Make a Submission", type
      No role in "Title" and press "Begin Submission": the wizard opens on
@@ -904,6 +907,14 @@ recipe are in the footnote. <sup>s</sup>
      on every author-role group (on a press that means both Author and
      Chapter Author; turning off Author alone leaves the way in open
      {OMP}).
+   - **The roles that may submit**: with self-registration still off, the
+     Editor, the Section Editor and the Author each open "Make a
+     Submission": each gets the start form, ending in the "Begin
+     Submission" button, not the "Not Allowed" page. A preprint server has
+     no Editor, and its Moderator with no other role is not one of these
+     roles: opening the screen enrolls them as Author [OPS2](#ops2). There
+     the Author and the Preprint Server Manager open it and get the start
+     form.
    - **Control**: the second user, opening "Make a Submission": the "Not
      Allowed" page with "You are not allowed to submit to this journal
      because authors must be registered by the editorial staff…"; on a
@@ -1124,7 +1135,6 @@ Left out of the scenarios above, by reason:
   - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names) [report 2026-10-01]
   - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names) [report 2026-10-01]
   - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names) [report 2026-10-01]
-  - with self-registration off on every author-role group, an Editor, a Section Editor with no other role and an Author still getting the start form (Rule 3; scenario 9's "Self-registration off") [incidental 2026-11-23]
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold
@@ -3310,8 +3320,10 @@ flips `disableSubmissions`, section flags (`editorRestricted`,
 `isInactive`, the section form's word count for 12's word-limit bullet)
 and "Reviewer Suggestion at Submission" (Settings → Workflow → Review) on a
 scratch journal; 12's policy bullet: one of the open scratch sections
-seeded with a `policy`. 9: a scratch journal, and two scratch users with
-no role in it. 10 sets
+seeded with a `policy`. 9: a scratch journal with a throwaway Journal
+Manager, two scratch users with no role in it, and for the roles bullet
+one throwaway account each in its `users[]` with the role key `editor`,
+`sectionEditor` or `author`, no other (OPS: `author` and `manager`). 10 sets
 Workflow → Emails' "Submission Confirmation" (all authors, submitting
 author only, off; the copy to the contact; an extra copy address) on a
 scratch journal, with throwaway contributor and copy addresses for

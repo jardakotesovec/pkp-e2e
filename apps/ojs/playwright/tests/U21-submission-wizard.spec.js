@@ -9,7 +9,7 @@
  *
  * Deliberately NOT covered (register IDs; OMP* and OPS* are the press's
  * and the server's): A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A12, A14,
- * A15, A16, A17, A18, A19, A21, A22, A23, A24.
+ * A15, A16, A17, A18, A19, A21, A22, A23, A24, A25, A26.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (journal-level state runs on scratch journals with throwaway
@@ -59,7 +59,7 @@ function makeTag(scenario, testInfo) {
 async function seedScratchJournal(
     ojsApi,
     tag,
-    {manager = false, sectionEditor = false, context = {}, sections, settings = {}, authorNames, authorAffiliation} = {}
+    {manager = false, sectionEditor = false, editor = false, context = {}, sections, settings = {}, authorNames, authorAffiliation} = {}
 ) {
     const users = [
         {
@@ -89,6 +89,15 @@ async function seedScratchJournal(
             roles: ['sectionEditor'],
         });
     }
+    if (editor) {
+        users.push({
+            username: `${tag}ed`,
+            givenName: 'Eda',
+            familyName: 'Editor',
+            email: `${tag}ed@mail.test`,
+            roles: ['editor'],
+        });
+    }
     const spec = {tag, context, users, ...settings};
     if (sections) {
         spec.sections = sections;
@@ -101,6 +110,7 @@ async function seedScratchJournal(
         manager: `${tag}mg`,
         managerEmail: `${tag}mg@mail.test`,
         sectionEditor: `${tag}se`,
+        editor: `${tag}ed`,
     };
 }
 
@@ -1061,9 +1071,11 @@ test.describe('submission wizard', () => {
     test('S9: a user with no role submits', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s9', testInfo);
-        // The target journal (with a manager), and a second scratch context
-        // that mints two accounts holding no role in the target journal.
-        const journal = await seedScratchJournal(ojsApi, tag, {manager: true});
+        // The target journal, its roles never edited (Rule 3a), with a
+        // Journal Manager, an Editor, a Section Editor with no other role and
+        // an Author; and a second scratch context that mints two accounts
+        // holding no role in the target journal.
+        const journal = await seedScratchJournal(ojsApi, tag, {manager: true, editor: true, sectionEditor: true});
         await ojsApi.createContext({
             tag: `${tag}h`,
             users: [
@@ -1103,9 +1115,9 @@ test.describe('submission wizard', () => {
         await expect(u1Row).toBeVisible({timeout: 30_000});
         await expect(u1Row).toContainText('Author');
 
-        // Control: with the Author role's self-registration off, the same
-        // kind of user gets the "Not Allowed" page instead. (The manager's
-        // page is still Users & Roles, read just above.)
+        // Self-registration off: the Journal Manager turns it off on the
+        // journal's one author-role group that allows it, "Author" (the
+        // manager's page is still Users & Roles, read just above).
         await managerPage.locator('#roles-button').click();
         await waitForJQueryIdle(managerPage);
         await openGridRowEdit(managerPage, 'Author', 'Edit');
@@ -1115,6 +1127,28 @@ test.describe('submission wizard', () => {
         await roleForm.getByRole('button', {name: 'OK', exact: true}).click();
         await waitForJQueryIdle(managerPage);
 
+        // The roles that may submit: with self-registration still off, the
+        // Editor, the Section Editor and the Author each open "Make a
+        // Submission" and get the start form, ending in "Begin Submission",
+        // not the "Not Allowed" page (Rule 3). The refused read below, in
+        // the same state, is the control for each absent "Not Allowed".
+        for (const [role, username] of [
+            ['Editor', journal.editor],
+            ['Section Editor', journal.sectionEditor],
+            ['Author', journal.author],
+        ]) {
+            await test.step(`${role} gets the start form`, async () => {
+                const rolePage = await (await asUser(username)).newPage();
+                const roleStart = new StartSubmissionPage(rolePage, journal.path);
+                await roleStart.goto();
+                await expect(roleStart.heading()).toBeVisible({timeout: 30_000});
+                await expect(roleStart.beginButton()).toBeVisible();
+                await expect(roleStart.notAllowedHeading()).toHaveCount(0);
+                await rolePage.close();
+            });
+        }
+
+        // Control: the second roleless user, in the same state.
         const u2Page = await (await asUser(`${tag}u2`)).newPage();
         const start2 = new StartSubmissionPage(u2Page, journal.path);
         await start2.goto();
