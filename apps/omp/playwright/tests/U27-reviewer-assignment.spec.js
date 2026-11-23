@@ -16,13 +16,18 @@
  * reviewer's own wizard (no scenario key seeds a draft). The editor-side read window is the Vue "Review Details" modal with its
  * "Modify Review" partner (pkp/pkp-lib#13156 — Rules 14a/14b). S20's
  * scratch press is created with the context's `review` passthrough (the
- * press's Settings › Workflow › Review, never driven on screen).
+ * press's Settings › Workflow › Review, never driven on screen). S10's
+ * scratch press carries an active review form (`reviewForms[]`) that its
+ * second reviewer answers in their own wizard; the PDFs are read with the
+ * app's own pdf.js (`pdfText`), the form review's XML files only after
+ * the first review's PDFs (A49), never that review's PDFs (A55).
  *
  * Not covered, by register ID (the spec's Coverage section is the record of
  * everything else left out; 🐞 findings are never asserted as contract):
  * A1, A2, A4, A6, A7, A12, A13, A15, A16, A17, A18, A19, A21, A22, A23,
  * A26, A28, A29, A30, A31, A32, A36, A37, A38, A39, A42, A43, A44,
- * A45, A46, A47, A48, A49, A50, A51, A52, A53, A54, OMP2, OMP6.
+ * A45, A46, A47, A48, A49, A50, A51, A52, A53, A54, A55, A56, A57, OMP2,
+ * OMP6.
  *
  * Seeding: scenario endpoints only. Tests that read a server-fed notice
  * ("{name} was assigned…", "Reviewer removed.") or a reviewer's mailbox or
@@ -114,6 +119,9 @@ const {
     openModifyReviewWindow,
     saveModifyReview,
     cancelReviewDetails,
+    downloadReviewExport,
+    pdfText,
+    submitFormReview,
     competingInterestsGroup,
     declarationRadio,
     typeCompetingInterests,
@@ -1573,53 +1581,107 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const tag = makeTag(testInfo, 'u27s10');
         const shared = `Shared remarks ${tag} for author and editor.`;
         const priv = `Editoronly remarks ${tag}.`;
-        const seeded = await seedExternal(ompApi, tag, [
-            {username: 'reviewer.julia', status: 'accepted'},
-        ]);
+        // Scratch press with an active review form of two text questions,
+        // "Strengths" included in the message to author and "Concerns"
+        // not. The first reviewer submits without a form, both comment
+        // blocks, on their own screen; the second, whose request carries
+        // the form, answers both questions on theirs (a review seeded
+        // `completed` on a form saves no answers, A56).
+        const formTitle = `Form ${tag}`;
+        const strengths = 'A clear argument.';
+        const concerns = 'Check the sample size.';
+        const first = `rva${tag}`;
+        const second = `rvb${tag}`;
+        const {manager, seeded} = await seedScratchPress(
+            ompApi,
+            tag,
+            [
+                {username: first, roles: ['externalReviewer'], givenName: `Free${tag}`, familyName: 'Reviewer'},
+                {username: second, roles: ['externalReviewer'], givenName: `Form${tag}`, familyName: 'Reviewer'},
+            ],
+            [
+                {username: first, status: 'accepted'},
+                {username: second, status: 'accepted', reviewForm: formTitle},
+            ],
+            {
+                context: {
+                    reviewForms: [
+                        {
+                            title: formTitle,
+                            elements: [
+                                {question: 'Strengths', type: 'smalltextfield'},
+                                {question: 'Concerns', type: 'smalltextfield', included: false},
+                            ],
+                        },
+                    ],
+                },
+            }
+        );
+        const firstName = `Free${tag} Reviewer`;
+        const secondName = `Form${tag} Reviewer`;
 
-        const juliaPage = await (await asUser('reviewer.julia')).newPage();
-        await completeReview(juliaPage, PK, seeded.submissionId, {
+        const firstPage = await (await asUser(first)).newPage();
+        await completeReview(firstPage, tag, seeded.submissionId, {
             comment: shared,
             privateComment: priv,
         });
+        const secondPage = await (await asUser(second)).newPage();
+        await submitFormReview(secondPage, tag, seeded.submissionId, {
+            Strengths: strengths,
+            Concerns: concerns,
+        });
 
-        const page = await (await asUser('manager.maya')).newPage();
-        const modal = await openEditorial(page, PK, seeded.submissionId);
-        const readModal = await openReadReview(page, modal, 'Julia Reviewer');
+        const page = await (await asUser(manager)).newPage();
+        const modal = await openEditorial(page, tag, seeded.submissionId);
+        let readModal = await openReadReview(page, modal, firstName);
 
-        const download = async (itemLabel) => {
-            await readModal
-                .getByRole('button', {name: 'Download Review Form'})
-                .click();
-            const downloaded = page.waitForEvent('download');
-            await page
-                .getByRole('menuitem', {name: itemLabel})
-                .click();
-            return downloaded;
-        };
-
-        // Both PDFs download through the browser.
-        const authorPdf = await download('Author-Only Sections Displayed (PDF)');
+        // "Download Review Form": both PDFs of the first review download
+        // through the browser.
+        const authorPdf = await downloadReviewExport(page, readModal, 'Author-Only Sections Displayed (PDF)');
         expect(authorPdf.suggestedFilename()).toMatch(/\.pdf$/i);
         expect(fs.statSync(await authorPdf.path()).size).toBeGreaterThan(0);
-        const editorPdf = await download('Editor Form Shows All Review Sections (PDF)');
+        const editorPdf = await downloadReviewExport(page, readModal, 'Editor Form Shows All Review Sections (PDF)');
         expect(editorPdf.suggestedFilename()).toMatch(/\.pdf$/i);
         expect(fs.statSync(await editorPdf.path()).size).toBeGreaterThan(0);
 
-        // The XML variants of the same two exports carry the content split:
-        // author-only omits the editor-only remarks and anonymizes the
-        // reviewer; the full export carries both blocks and the name.
-        const authorXml = await download('Author-Only Sections Displayed (XML)');
-        const authorText = fs.readFileSync(await authorXml.path(), 'utf8');
-        expect(authorText).toContain(shared);
-        expect(authorText).not.toContain(priv);
-        expect(authorText).toContain('<anonymous');
-        expect(authorText).not.toContain('Julia');
-        const editorXml = await download('Editor Form Shows All Review Sections (XML)');
-        const editorText = fs.readFileSync(await editorXml.path(), 'utf8');
-        expect(editorText).toContain(shared);
-        expect(editorText).toContain(priv);
-        expect(editorText).toContain('Julia Reviewer');
+        // The author-only PDF omits the editor-only remarks and shows the
+        // reviewer anonymized; control: the full PDF carries both comment
+        // blocks and the reviewer's name. Compared with whitespace
+        // removed (pdf.js may split a line into several text items).
+        const flat = (text) => text.replace(/\s+/g, '');
+        const authorText = flat(await pdfText(page, await authorPdf.path()));
+        const editorText = flat(await pdfText(page, await editorPdf.path()));
+        expect(editorText).toContain(flat(shared));
+        expect(editorText).toContain(flat(priv));
+        expect(editorText).toContain(flat(firstName));
+        expect(authorText).toContain(flat(shared));
+        expect(authorText).not.toContain(flat(priv));
+        expect(authorText).not.toContain(`Free${tag}`);
+        expect(authorText).toMatch(/Reviewer:[A-Z]/);
+
+        // The review form's XML files: "Cancel", then the second
+        // reviewer's "Read Review"; both XML entries download (fetched
+        // after the first review's PDFs, A49; this review's PDF entries
+        // are never pressed, A55). The author-only file lists "Strengths"
+        // with its answer and leaves "Concerns" out; control: the full
+        // file lists both questions with their answers.
+        await cancelReviewDetails(readModal);
+        await pastWindowCloseSlot(page);
+        readModal = await openReadReview(page, modal, secondName);
+        const authorXml = await downloadReviewExport(page, readModal, 'Author-Only Sections Displayed (XML)');
+        expect(authorXml.suggestedFilename()).toMatch(/\.xml$/i);
+        const authorXmlText = fs.readFileSync(await authorXml.path(), 'utf8');
+        const editorXml = await downloadReviewExport(page, readModal, 'Editor Form Shows All Review Sections (XML)');
+        expect(editorXml.suggestedFilename()).toMatch(/\.xml$/i);
+        const editorXmlText = fs.readFileSync(await editorXml.path(), 'utf8');
+        expect(editorXmlText).toContain('Strengths');
+        expect(editorXmlText).toContain(strengths);
+        expect(editorXmlText).toContain('Concerns');
+        expect(editorXmlText).toContain(concerns);
+        expect(authorXmlText).toContain('Strengths');
+        expect(authorXmlText).toContain(strengths);
+        expect(authorXmlText).not.toContain('Concerns');
+        expect(authorXmlText).not.toContain(concerns);
     });
 
     test('S11: unassign before, cancel after', async ({ompApi, asUser, pkpMail}, testInfo) => {

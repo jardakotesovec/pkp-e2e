@@ -22,6 +22,8 @@ const {expect} = require('../support/fixtures.js');
 const {topModal} = require('./ReviewStagePages.js');
 const {waitForJQueryIdle, waitForLegacyFormSettled} = require('../../../../shared/playwright/support/legacy.js');
 const {waitForEditorReady, editorIdOf} = require('../../../../shared/playwright/support/richtext.js');
+const {ReviewWizardPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
+const fs = require('fs');
 
 /** The Reviewers panel of a workflow modal. */
 function reviewerPanel(modal) {
@@ -1038,6 +1040,89 @@ async function cancelReviewDetails(readModal) {
     await expect(readModal).toBeHidden({timeout: 20_000});
 }
 
+/**
+ * Press "Download Review Form" in a settled Review Details window and pick
+ * `itemLabel` (one of the four export entries). Waits on the export's own
+ * answer first (`GET …/reviews/{submission}/{review}/export-pdf|xml`) and
+ * asserts it succeeded, so a refused export fails on its status instead of
+ * costing the whole download timeout (screen notes ccI27); then resolves
+ * with the browser's download.
+ *
+ * @returns {Promise<import('@playwright/test').Download>}
+ */
+async function downloadReviewExport(page, readModal, itemLabel) {
+    await readModal.getByRole('button', {name: 'Download Review Form'}).click();
+    const item = page.getByRole('menuitem', {name: itemLabel, exact: true});
+    await expect(item).toBeVisible({timeout: 20_000});
+    const answered = page.waitForResponse(
+        (r) => /\/reviews\/\d+\/\d+\/export-(pdf|xml)/.test(r.url()) && r.request().method() === 'GET',
+        {timeout: 60_000}
+    );
+    const downloaded = page.waitForEvent('download', {timeout: 60_000});
+    downloaded.catch(() => {});
+    await item.click();
+    const answer = await answered;
+    expect(answer.status(), `"${itemLabel}": the export's answer`).toBe(200);
+    return downloaded;
+}
+
+/**
+ * The text of a downloaded PDF, read with the app's own pdf.js (the
+ * "PDF.js PDF Viewer" plugin's build, a static file on the worker's
+ * server) in a tab of the caller's context opened for the read and
+ * closed after it. Pages are joined by a newline, a page's text items by
+ * a space; a caller compares with whitespace removed, since pdf.js may
+ * split a line into several items.
+ */
+async function pdfText(page, filePath) {
+    const reader = await page.context().newPage();
+    try {
+        await reader.goto('/plugins/generic/pdfJsViewer/pdf.js/LICENSE');
+        const data = fs.readFileSync(filePath).toString('base64');
+        return await reader.evaluate(async (b64) => {
+            const lib = await import('/plugins/generic/pdfJsViewer/pdf.js/build/pdf.mjs');
+            lib.GlobalWorkerOptions.workerSrc = '/plugins/generic/pdfJsViewer/pdf.js/build/pdf.worker.mjs';
+            const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+            const doc = await lib.getDocument({data: bytes}).promise;
+            const pages = [];
+            for (let i = 1; i <= doc.numPages; i++) {
+                const content = await (await doc.getPage(i)).getTextContent();
+                pages.push(content.items.map((x) => x.str).join(' '));
+            }
+            return pages.join('\n');
+        }, data);
+    } finally {
+        await reader.close();
+    }
+}
+
+/**
+ * Submit a review on a review form through the reviewer's own wizard: a
+ * seeded `accepted` request opens on step 1 with "Save and continue"
+ * (screen notes ccI27), step 2's "Continue to Step #3", then each text
+ * question of `answers` ({question: answer}) is filled in its own section
+ * of step 3's form, and "Submit Review" is confirmed.
+ */
+async function submitFormReview(page, contextPath, submissionId, answers) {
+    const wizard = new ReviewWizardPage(page, contextPath, {privateBoxLabel: 'For editor only'});
+    await wizard.goto(submissionId);
+    await wizard.expectStep(1);
+    await wizard.saveAndContinueButton.click();
+    await wizard.expectStep(2);
+    await wizard.continueToStep3();
+    for (const [question, answer] of Object.entries(answers)) {
+        const box = wizard.step3Form
+            .locator('.section')
+            .filter({hasText: question})
+            .last()
+            .locator('input[type="text"][name^="reviewFormResponses"]');
+        await box.fill(answer);
+        await expect(box).toHaveValue(answer);
+    }
+    await wizard.submitReview();
+    await wizard.expectCompleted();
+}
+
 /** The "Competing Interests" group of a Review Details or Modify Review window. */
 function competingInterestsGroup(scope) {
     return scope.getByRole('group', {name: 'Competing Interests', exact: true});
@@ -1139,6 +1224,9 @@ module.exports = {
     openModifyReviewWindow,
     saveModifyReview,
     cancelReviewDetails,
+    downloadReviewExport,
+    pdfText,
+    submitFormReview,
     competingInterestsGroup,
     declarationRadio,
     typeCompetingInterests,

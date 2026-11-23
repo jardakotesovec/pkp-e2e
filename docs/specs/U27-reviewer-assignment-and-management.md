@@ -892,12 +892,13 @@ review forms* unless said otherwise. <sup>n</sup>
 
 ## Canonical scenarios
 
-Scenarios 2, 3, 4, 5, 6, 7, 9, 11, 20 and 21 run on a scratch journal with
-throwaway accounts: a Journal Manager who also holds the Reviewer role and
-a reviewer pool past thirty (2), a fresh address (3), a user to enroll (4),
-an editor whose notices no other test reads (5), reviewers whose
-mailbox and task list are read (6, 7, 9, 11), an active review form (9), a review setup of the journal's own (20) and a
-competing-interests policy (21). Every other
+Scenarios 2, 3, 4, 5, 6, 7, 9, 10, 11, 20 and 21 run on a scratch journal
+with throwaway accounts: a Journal Manager who also holds the Reviewer role
+and a reviewer pool past thirty (2), a fresh address (3), a user to enroll
+(4), an editor whose notices no other test reads (5), reviewers whose
+mailbox and task list are read (6, 7, 9, 11), an active review form (9,
+10), a review setup of the journal's own (20) and a competing-interests
+policy (21). Every other
 scenario, and scenario 20's control, runs on the seeded journal with ready
 accounts and scratch submissions. Each email is read in the mailbox of the
 address it was sent to. The accounts, the passwords and the tooling recipe
@@ -1218,15 +1219,29 @@ are in the footnote. <sup>s</sup>
 10. **Download the review**
 
     Given: Editor, in the "Review Details" window of a submitted review
-    made without a review form, with both comment blocks.
+    made without a review form, with both comment blocks, on a round where
+    a second Reviewer submitted a review on a review form of two text
+    questions: "Strengths", ticked "Included in message to author" and
+    answered "A clear argument.", and "Concerns", not ticked and answered
+    "Check the sample size.".
 
     - **"Download Review Form"**: open it and fetch "Author-Only Sections
       Displayed (PDF)" and "Editor Form Shows All Review Sections (PDF)":
       both download.
     - **The author-only file**: omits the editor-only remarks and shows the
       reviewer anonymized.
-    - **Control**: the full file carries both comment blocks and the
-      reviewer's name.
+    - **The review form's XML files**: press "Cancel", then the second
+      Reviewer's "Read Review" in the Reviewers panel. Open "Download Review Form" and fetch
+      "Author-Only Sections Displayed (XML)" and "Editor Form Shows All
+      Review Sections (XML)": both download. The author-only file lists
+      "Strengths" with "A clear argument." and leaves out "Concerns"; the
+      full file lists both questions with their answers. The XML files are
+      fetched after the first review's PDFs, because on a fresh install both
+      XML entries fail until a review PDF is downloaded ⚠ [A49](#a49);
+      this review's PDF entries are not pressed, because on a review made
+      with a review form they fail ⚠ [A55](#a55).
+    - **Control**: the first review's full PDF file carries both comment
+      blocks and the reviewer's name.
 
 11. **Unassign before, cancel after**
 
@@ -1610,10 +1625,6 @@ Left out of the scenarios above, by reason:
   - the guard for A57: a "Drop-down box" question left blank on the
     reviewer's submit reads unanswered in the Review Details window and in
     the XML exports (Rules 14a, 15): waits for the fix [incidental 2026-11-23]
-  - on a review made with a review form, "Author-Only Sections Displayed
-    (XML)" leaves out a question not marked "Included in message to
-    author", which "Editor Form Shows All Review Sections (XML)" lists with
-    its answer (Rule 15) [incidental 2026-11-23]
 - **Rarely met**:
   - submitting a review for the reviewer on a "Request Resent" row, on an accepted row holding no draft, or with a comment entered, and the row's menu, the reviewer's side and the missing acceptance email after any such save (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a reminded, an accepted or a declined request with no review: "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", and the empty blocks (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -1634,7 +1645,7 @@ Left out of the scenarios above, by reason:
   - the unsaved-changes "Warning" on leaving "Modify Review" with something typed (Rule 14b): a close control
   - "View changes" opened to its "View Review" window (Side effects): scenario 16 reads the action, not the window behind it
   - "Cancel" in the Add Reviewer window with a reviewer chosen and its "Review Due Date" changed, and in the "Edit Review" window with a due date changed, closing without a question (Fields): a close control
-  - the second ends of covered controls: an edit changing only the review type (Rule 12), the XML exports (Rule 15), a logged decline (Rule 20)
+  - the second ends of covered controls: an edit changing only the review type (Rule 12), the XML exports of a review made without a review form (Rule 15), a logged decline (Rule 20)
   - "Mark as Complete" disabled beside "This review is incomplete and cannot be marked as complete yet." on a declined, a re-sent or a review-form request with no review, and an accepted request's reviewer still offered "Finish review" (Rule 14c): the same message and the same open request scenarios 9 and 21 read on an unanswered and an accepted one
   - "Resend Review Request" accepting a review due date equal to the response due date (Rule 9): the same date rule scenario 5 presses in "Add Reviewer"
   - the press's Internal Review stage running scenarios 1–12 as External Review does (Purpose; scenario 13 covers what differs)
@@ -3529,8 +3540,16 @@ roster reviewer seeded `invited`. 9: a
 scratch journal with `reviewForms[]` holding one active form, a throwaway
 reviewer seeded `accepted` who submits the review on their own screen with
 both comment blocks, and a second throwaway reviewer seeded `invited`
-without a review form, whose request's Review Details is opened. 10
-and 16: a roster reviewer seeded `completed` with `comments`. 11: a
+without a review form, whose request's Review Details is opened. 10: a
+scratch journal with `reviewForms[]` holding one active form of two
+`smalltextfield` elements, the second `included: false`, and two
+throwaway `externalReviewer` accounts seeded `accepted`, each submitting
+the review on their own screen: the first without a review form, filling
+both comment blocks (a review seeded `completed` with `comments` carries
+the "For author and editor" block only, and no seed key sets the
+editor-only one), the second with `reviewForm` naming the form, answering
+both questions (a review seeded `completed` on a form saves no answers,
+finding A56). 16: a roster reviewer seeded `completed` with `comments`. 11: a
 scratch journal with two throwaway reviewers, one seeded `invited`, the
 other holding `['externalReviewer', 'funding']`, seeded `accepted` and
 assigned to the stage through `participants[]` as `funding`. 12: a roster
@@ -3591,7 +3610,12 @@ every bullet held, "Cancel" with nothing typed asking nothing, and "View
 changes" sitting behind the log row's "Settings" arrow. Test run
 2026-11-12 (OJS and OMP): scenario 5 runs on the scratch journal (press)
 above rather than with `editor.diana` on `publicknowledge`, and every
-bullet held there.
+bullet held there. Test run 2026-11-23 (OJS and OMP): scenario 10 runs on
+the scratch journal (press) above, its first reviewer submitting through
+their own screens with both comment blocks, the second on the two-question
+form; the first review's window showed both blocks, both of its PDF files
+and both of the second review's XML files downloaded, and every bullet
+held on both apps.
 
 <a id="fn-a1"></a>
 **f-a1** — `useReviewerManagerConfig.js::getItemActions`: the guard reads

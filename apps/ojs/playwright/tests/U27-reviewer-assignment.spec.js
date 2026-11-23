@@ -11,14 +11,15 @@
  * Deliberately NOT covered (register IDs; the spec's Coverage section is
  * the record of everything else left out):
  * - 🐞 A1, A2, A7, A12, A13, A15, A16, A18, A19, A21, A22, A26, A30, A31,
- *   A32, A36, A37, A39, A43, A44, A45, A46, A47, A49, A50, A51, A54.
- * - ❓ A4, A6, A17, A23, A28, A29, A38, A42, A48, A52, A53.
+ *   A32, A36, A37, A39, A43, A44, A45, A46, A47, A49, A50, A51, A54, A55,
+ *   A57.
+ * - ❓ A4, A6, A17, A23, A28, A29, A38, A42, A48, A52, A53, A56.
  *
  * Seeding: scenario endpoints only; publicknowledge and the 18 seeded users
  * are read-only. Tests that mutate roles/accounts (S2–S4), need a private
- * toast queue, a bounded task list or a throwaway mailbox (S1, S5, S6, S7,
- * S9, S11, S12, S21) run on scratch journals with throwaway users whose addresses
- * carry app + test in the username (u27s7ojsw0…@mail.test). Mail assertions
+ * toast queue, a bounded task list, a throwaway mailbox or a review form
+ * (S1, S5, S6, S7, S9, S10, S11, S12, S21) run on scratch journals with
+ * throwaway users whose addresses carry app + test in the username (u27s7ojsw0…@mail.test). Mail assertions
  * on seeded reviewers are scoped by recipient + the scratch submission's
  * unique tag-bearing title. Silence claims are bounded (pkpMail.count after
  * a bounding find; list absences bounded by the row/response that carries
@@ -186,6 +187,52 @@ function historyLine(historyModal, label) {
     return historyModal
         .locator('.pkp_review_history > div')
         .filter({has: historyModal.page().locator('strong', {hasText: new RegExp(`^${label}:\\s*$`)})});
+}
+
+/**
+ * A review-form text question's answer box on the reviewer's step 3: the
+ * boxes carry no accessible name, so the box is read inside the innermost
+ * form section headed by its question (the step's own section wraps them
+ * all).
+ */
+function formAnswerBox(wizard, question) {
+    return wizard.step3Form
+        .locator('div.section')
+        .filter({has: wizard.page.locator('label', {hasText: new RegExp(`^${question}\\*?$`)})})
+        .filter({hasNot: wizard.page.locator('div.section')})
+        .locator('input[type="text"][name^="reviewFormResponses"]');
+}
+
+/** Text with every whitespace run removed, for reads across PDF text items. */
+function squeezed(text) {
+    return text.replace(/\s+/g, '');
+}
+
+/**
+ * A downloaded PDF's text, read with the app's own pdf.js (the PDF viewer
+ * plugin's build) in a context of the fixture's browser on the worker's
+ * server: mpdf compresses the text streams, so the bytes are not read raw.
+ */
+async function pdfText(browser, baseURL, filePath) {
+    const ctx = await browser.newContext({baseURL, storageState: {cookies: [], origins: []}});
+    try {
+        const page = await ctx.newPage();
+        await page.goto('/plugins/generic/pdfJsViewer/pdf.js/LICENSE');
+        return await page.evaluate(async (data) => {
+            const lib = await import('/plugins/generic/pdfJsViewer/pdf.js/build/pdf.mjs');
+            lib.GlobalWorkerOptions.workerSrc = '/plugins/generic/pdfJsViewer/pdf.js/build/pdf.worker.mjs';
+            const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+            const doc = await lib.getDocument({data: bytes}).promise;
+            const pages = [];
+            for (let i = 1; i <= doc.numPages; i++) {
+                const content = await (await doc.getPage(i)).getTextContent();
+                pages.push(content.items.map((item) => item.str).join(' '));
+            }
+            return pages.join('\n');
+        }, fs.readFileSync(filePath).toString('base64'));
+    } finally {
+        await ctx.close();
+    }
 }
 
 test.describe('reviewer-assignment', () => {
@@ -1496,72 +1543,154 @@ test.describe('reviewer-assignment', () => {
         expect(await pkpMail.count({to: `${unanswered}@mail.test`, contains: 'Thank you'})).toBe(0);
     });
 
-    test('S10: download the review', async ({asUser, ojsApi}, testInfo) => {
+    test('S10: download the review', async ({asUser, browser, baseURL, ojsApi}, testInfo) => {
         test.slow();
         test.setTimeout(300_000);
         const tag = makeTag('s10', testInfo);
+        const editor = `mgr${tag}`;
+        const author = `au${tag}`;
+        const freeReviewer = {username: `rev${tag}`, givenName: 'Noor', familyName: `Noform${tag}`};
+        const formReviewer = {username: `revb${tag}`, givenName: 'Fay', familyName: `Formed${tag}`};
+        const freeName = `${freeReviewer.givenName} ${freeReviewer.familyName}`;
+        const formName = `${formReviewer.givenName} ${formReviewer.familyName}`;
+        const title = `Submission ${tag}`;
+        const formTitle = `Form ${tag}`;
+        const STRENGTHS = 'A clear argument.';
+        const CONCERNS = 'Check the sample size.';
+        // Scratch journal with an active review form of two text questions,
+        // "Strengths" included in the message to the author, "Concerns" not.
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: editor, roles: ['manager']},
+                {username: author, roles: ['author']},
+                {...freeReviewer, roles: ['externalReviewer']},
+                {...formReviewer, roles: ['externalReviewer']},
+            ],
+            reviewForms: [{
+                title: formTitle,
+                elements: [
+                    {question: 'Strengths', type: 'smalltextfield'},
+                    {question: 'Concerns', type: 'smalltextfield', included: false},
+                ],
+            }],
+        });
+        // Both reviewers accepted and submitting on their own screens: the
+        // first without a form, with both comment blocks (a `completed` seed
+        // carries the author-and-editor block only); the second on the form,
+        // answering both questions (a `completed` seed on a form saves no
+        // answers, A56).
         const {submissionId} = await seedInReview(ojsApi, tag, {
-            reviewers: [{username: 'reviewer.paul', status: 'accepted'}],
+            context: tag,
+            submitter: author,
+            reviewers: [
+                {username: freeReviewer.username, status: 'accepted'},
+                {username: formReviewer.username, status: 'accepted', reviewForm: formTitle},
+            ],
         });
 
-        const reviewerPage = await (await asUser('reviewer.paul')).newPage();
-        await performReview(reviewerPage, JOURNAL, submissionId, {
+        const freePage = await (await asUser(freeReviewer.username)).newPage();
+        await performReview(freePage, tag, submissionId, {
             comments: `Shared comment ${tag}`,
             privateComments: `Private remark ${tag}`,
         });
 
-        const editorPage = await (await asUser('sectioneditor.ana')).newPage();
-        const workflow = new WorkflowPage(editorPage, JOURNAL);
-        await workflow.gotoEditorial(submissionId);
-        const row = workflow.panelRow('Reviewers', 'Paul Reviewer');
-        const readModal = await openReviewDetails(editorPage, row);
-        await expect(readModal.getByText('For author and editor')).toBeVisible({timeout: 30_000});
+        const formPage = await (await asUser(formReviewer.username)).newPage();
+        const wizard = new ReviewWizardPage(formPage, tag);
+        await wizard.goto(submissionId);
+        await wizard.expectStep(1);
+        await wizard.saveAndContinueButton.click();
+        await wizard.expectStep(2);
+        await wizard.continueToStep3();
+        await expect(wizard.step3Form.getByRole('heading', {name: formTitle})).toBeVisible();
+        await formAnswerBox(wizard, 'Strengths').fill(STRENGTHS);
+        await formAnswerBox(wizard, 'Concerns').fill(CONCERNS);
+        await wizard.chooseRecommendation('Accept Submission');
+        await wizard.submitReview();
+        await wizard.expectCompleted();
 
-        /** Open the "Download Review Form" menu and download one export. */
-        async function downloadExport(label) {
-            const item = editorPage.getByRole('menuitem', {name: label});
-            if (!(await item.isVisible())) {
-                await readModal.getByRole('button', {name: 'Download Review Form'}).click();
-                await expect(item).toBeVisible({timeout: 30_000});
-            }
-            const [download] = await Promise.all([
-                editorPage.waitForEvent('download'),
-                item.click(),
-            ]);
+        const editorPage = await (await asUser(editor)).newPage();
+        const workflow = new WorkflowPage(editorPage, tag);
+        await workflow.gotoEditorial(submissionId);
+        const freeRow = workflow.panelRow('Reviewers', freeName);
+        const formRow = workflow.panelRow('Reviewers', formName);
+        await expect(freeRow).toContainText('Review Submitted');
+        await expect(formRow).toContainText('Review Submitted');
+
+        /**
+         * Open the window's "Download Review Form" menu, press one entry and
+         * return the file, after the export's own answer (a refused export
+         * opens an "Error" window and sends no file; waiting on the answer
+         * first keeps a refusal from costing the download timeout).
+         */
+        async function downloadExport(modal, label) {
+            await modal.getByRole('button', {name: 'Download Review Form'}).click();
+            const item = editorPage.getByRole('menuitem', {name: label, exact: true});
+            await expect(item).toBeVisible({timeout: 30_000});
+            const answer = editorPage.waitForResponse((r) =>
+                /\/reviews\/\d+\/\d+\/export-(pdf|xml)/.test(r.url())
+            );
+            const download = editorPage.waitForEvent('download');
+            await item.click();
+            expect((await answer).status(), `${label} answers`).toBe(200);
             return download;
         }
 
-        // Both PDFs download through the browser.
+        // The first review's window: both PDFs download.
+        const freeModal = await openReviewDetails(editorPage, freeRow);
+        await awaitReviewDetailsSettled(freeModal);
+        await expect(freeModal.getByText(`Shared comment ${tag}`)).toBeVisible();
+        await expect(freeModal.getByText(`Private remark ${tag}`)).toBeVisible();
+        const pdfs = {};
         for (const label of [
             'Author-Only Sections Displayed (PDF)',
             'Editor Form Shows All Review Sections (PDF)',
         ]) {
-            const download = await downloadExport(label);
+            const download = await downloadExport(freeModal, label);
             expect(download.suggestedFilename()).toMatch(/\.pdf$/i);
-            const filePath = await download.path();
-            expect(fs.statSync(filePath).size).toBeGreaterThan(0);
+            pdfs[label] = await pdfText(browser, baseURL, await download.path());
         }
 
-        // The author-only / full split, asserted on the same menu's XML
-        // exports (mpdf compresses the PDFs' text streams; see header note):
-        // author-only omits the editor-only remarks and anonymizes the
-        // reviewer, the full export carries both blocks and the name.
-        const authorXml = fs.readFileSync(
-            await (await downloadExport('Author-Only Sections Displayed (XML)')).path(),
-            'utf8'
-        );
-        expect(authorXml).toContain('<anonymous');
-        expect(authorXml).not.toContain('Paul Reviewer');
-        expect(authorXml).toContain(`Shared comment ${tag}`);
-        expect(authorXml).not.toContain(`Private remark ${tag}`);
+        // The author-only file omits the editor-only remarks and shows the
+        // reviewer anonymized ("Reviewer: {letter}"), with the author-facing
+        // block as its positive read.
+        const authorPdf = pdfs['Author-Only Sections Displayed (PDF)'];
+        expect(squeezed(authorPdf)).toContain(squeezed(`Shared comment ${tag}`));
+        expect(squeezed(authorPdf)).not.toContain(squeezed(`Private remark ${tag}`));
+        expect(authorPdf).toMatch(/Reviewer:\s*[A-Z]\b/);
+        expect(squeezed(authorPdf)).not.toContain(squeezed(freeReviewer.familyName));
 
-        const editorXml = fs.readFileSync(
-            await (await downloadExport('Editor Form Shows All Review Sections (XML)')).path(),
-            'utf8'
-        );
-        expect(editorXml).toContain('Paul Reviewer');
-        expect(editorXml).toContain(`Shared comment ${tag}`);
-        expect(editorXml).toContain(`Private remark ${tag}`);
+        // Control: the full PDF carries both comment blocks and the
+        // reviewer's name.
+        const editorPdf = pdfs['Editor Form Shows All Review Sections (PDF)'];
+        expect(squeezed(editorPdf)).toContain(squeezed(`Shared comment ${tag}`));
+        expect(squeezed(editorPdf)).toContain(squeezed(`Private remark ${tag}`));
+        expect(squeezed(editorPdf)).toContain(squeezed(`Reviewer: ${freeName}`));
+
+        // The review form's XML files: "Cancel", then the second reviewer's
+        // "Read Review"; both XML entries download (after the first
+        // review's PDFs, A49; this review's PDF entries are never pressed,
+        // A55). The author-only file lists "Strengths" with its answer and
+        // leaves out "Concerns"; the full file lists both with their
+        // answers.
+        await closeReviewDetails(editorPage, freeModal);
+        const formModal = await openReviewDetails(editorPage, formRow);
+        await awaitReviewDetailsSettled(formModal);
+        await expect(formModal.getByText(STRENGTHS)).toBeVisible();
+        const xmlOf = async (label) => {
+            const download = await downloadExport(formModal, label);
+            expect(download.suggestedFilename()).toMatch(/\.xml$/i);
+            return fs.readFileSync(await download.path(), 'utf8');
+        };
+        const formItem = (question, answer) =>
+            new RegExp(`<meta-name>${question}</meta-name>\\s*<meta-value>${answer.replace('.', '\\.')}</meta-value>`);
+        const authorXml = await xmlOf('Author-Only Sections Displayed (XML)');
+        expect(authorXml).toMatch(formItem('Strengths', STRENGTHS));
+        expect(authorXml).not.toContain('Concerns');
+        expect(authorXml).not.toContain(CONCERNS);
+        const editorXml = await xmlOf('Editor Form Shows All Review Sections (XML)');
+        expect(editorXml).toMatch(formItem('Strengths', STRENGTHS));
+        expect(editorXml).toMatch(formItem('Concerns', CONCERNS));
     });
 
     test('S11: unassign before, cancel after, reinstate', async ({asUser, ojsApi, pkpMail}, testInfo) => {
