@@ -482,7 +482,9 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
 
     /**
      * Accept the request: tick the privacy box (when shown) and press the
-     * accept button; lands on step 2.
+     * accept button; lands on step 2. A request already accepted (seeded
+     * `accepted`) reopens on step 1 with "Save and continue" in the accept
+     * button's place, which is pressed instead.
      */
     async accept({privacy = true} = {}) {
         // Step 1's panel must be in before the privacy box is counted: read
@@ -492,7 +494,9 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
         if (privacy && (await this.privacyBox.count())) {
             await this.privacyBox.check();
         }
-        await this.acceptButton.click();
+        await expect(this.acceptButton.or(this.saveAndContinueButton).first()).toBeVisible();
+        const button = (await this.acceptButton.count()) ? this.acceptButton : this.saveAndContinueButton;
+        await button.click();
         await this.expectStep(2);
     }
 
