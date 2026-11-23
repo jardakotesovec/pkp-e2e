@@ -31,13 +31,26 @@ for a in ojs omp ops; do
       if [ -s "$hf" ] && read -r hpid hrest < "$hf" && kill -0 "$hpid" 2>/dev/null; then
         echo "[applock] $a held: $hrest" >&2
       fi
+    done
+    # Callers queued ahead (an exclusive trial waiting behind shared walks holds the gate).
+    for wf in "$dir/$a".waiting.*; do
+      if [ -s "$wf" ] && read -r wpid wrest < "$wf" && kill -0 "$wpid" 2>/dev/null; then
+        echo "[applock] $a queued ahead: $wrest" >&2
+      fi
     done;;
   esac
 done
+waiting=()
+for a in ojs omp ops; do
+  case ",$apps," in *",$a,"*)
+    wf="$dir/$a.waiting.$$"; echo "$$ $mode since $(date +%T) by ${PROBE_AGENT:-pid $$}: ${*:1:4}" > "$wf"; waiting+=("$wf");;
+  esac
+done
+unwait() { [ ${#waiting[@]} -gt 0 ] && rm -f "${waiting[@]}"; waiting=(); }
 # Each wait runs in the background so a signal reaches this script while it waits, and the
 # trap ends the waiting flock with it: a killed caller leaves no flock queued on a gate.
 waiter=
-trap '[ -n "$waiter" ] && kill "$waiter" 2>/dev/null; exit 143' TERM INT HUP
+trap '[ -n "$waiter" ] && kill "$waiter" 2>/dev/null; unwait; exit 143' TERM INT HUP
 take() { flock "$@" & waiter=$!; wait "$waiter"; waiter=; }
 gates=(); fds=()
 for a in ojs omp ops; do
@@ -48,6 +61,7 @@ for a in ojs omp ops; do
 done
 for g in "${gates[@]}"; do flock -u "$g"; eval "exec $g>&-"; done
 trap - TERM INT HUP
+unwait
 echo "[applock] $mode $apps: holds $(date +%T)" >&2
 held=()
 for a in ojs omp ops; do

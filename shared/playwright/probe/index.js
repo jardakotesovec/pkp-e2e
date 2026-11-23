@@ -21,7 +21,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const {execFileSync} = require('child_process');
+const {execFileSync, spawnSync} = require('child_process');
 const {chromium} = require('@playwright/test');
 const {request} = require('@playwright/test');
 const {APPS, REPO_ROOT, resolveApp, resolveLine, resolveSlot} = require('../../../bin/apps.js');
@@ -1291,7 +1291,8 @@ async function settled(page, locator, {timeout = 15_000} = {}) {
  * or reserved jobs six seconds later (a failed attempt is back after five,
  * and `--stop-when-empty` exits while it waits). It runs every feature's
  * queued jobs on the fleet, and it never throws for a job that fails:
- * the caller reads the outcome on screen or in Mailpit.
+ * the caller reads the outcome on screen or in Mailpit (`output` holds the
+ * worker's stdout and stderr, a job's PHP warnings included).
  *
  * @param {object} app the bag from withApp
  * @param {{passes?: number, timeoutMs?: number}} [options] timeoutMs per pass
@@ -1300,20 +1301,18 @@ async function settled(page, locator, {timeout = 15_000} = {}) {
  */
 async function drainJobs(app, {passes = 6, timeoutMs = 300_000} = {}) {
     const work = () => {
-        try {
-            return execFileSync('php', ['lib/pkp/tools/jobs.php', 'work', '--stop-when-empty=1'], {
-                cwd: app.root,
-                env: {...process.env, PKP_CONFIG_FILE: app.configFile},
-                encoding: 'utf8',
-                timeout: timeoutMs,
-                maxBuffer: 16 * 1024 * 1024,
-            });
-        } catch (error) {
-            if (error && typeof error.stdout === 'string') {
-                return `${error.stdout}${error.stderr || ''}`;
-            }
-            throw error;
+        // stderr too: a job's PHP warnings land there and are part of the outcome.
+        const result = spawnSync('php', ['lib/pkp/tools/jobs.php', 'work', '--stop-when-empty=1'], {
+            cwd: app.root,
+            env: {...process.env, PKP_CONFIG_FILE: app.configFile},
+            encoding: 'utf8',
+            timeout: timeoutMs,
+            maxBuffer: 16 * 1024 * 1024,
+        });
+        if (result.error && result.error.code !== 'ETIMEDOUT') {
+            throw result.error;
         }
+        return `${result.stdout || ''}${result.stderr || ''}`;
     };
     const counts = async () => {
         const response = await app.api.context.get(`${API_BASE}/jobs`, {failOnStatusCode: false});

@@ -486,7 +486,8 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   `job_runner` and `task_runner` On, so jobs run at page loads with the
   request's context, not as the suites' `runJobs()` runs them (the job
   tool, no context), and can record otherwise: a claim a suite reads
-  after jobs is walked with `php lib/pkp/tools/jobs.php run` too.
+  after jobs is walked with `job_runner = Off` in the fleet's config and
+  the kit's `drainJobs()` too.
   Every reset writes the config afresh, so a walk that needs another
   value (`strict = On`, a short `session_lifetime`, an `api_key_secret`,
   empty in the dataset) sets it in `config.test.ds<n>.inc.php` after

@@ -663,8 +663,8 @@ script.
 - `baseURL`: the probe server (base port + 50).
 - `api`: the `_test` client with that app's own key.
 - `mail`: the shared Mailpit. `find`, `count` and `expectNone` take a
-  `since`, a Date taken before the action, for an address other walks on
-  the slot also mail.
+  `to:` (required) and a `since`, a Date taken before the action, for an
+  address other walks on the slot also mail.
 - `fleetMail`: the same reads kept to the messages that name this fleet's
   own host, for a dataset user's address, which every fleet of the slot
   mails. An email whose text names no address of the install (an unassign
