@@ -1752,7 +1752,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A50](#a50) | An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A51](#a51) | A Funding coordinator's search, filters and "Next" in the Add Reviewer window are refused | 🐞 | medium | issues (claude), 2026-11-16 — re-verified |
 | [A54](#a54) | From the second date window opened on a page, screen readers cannot reach the date calendar | 🐞 | medium | issues (claude), 2026-11-19 — re-verified |
-| [A55](#a55) | On a review made with a review form, both PDF entries of "Download Review Form" fail with an "Error" window and no file | 🐞 | user-visible · crash: server | — |
+| [A55](#a55) | On a review with answers saved on a review form, both PDF entries of "Download Review Form" open an "Error" window and no file | 🐞 | medium · crash: server | issues (claude), 2026-11-23 — re-verified |
 | [A57](#a57) | A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports | 🐞 | user-visible | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
@@ -2378,22 +2378,24 @@ The silently dropped date is [A16](#a16).
 Since: 2025-07 (`main`, and 3.5 from 3.5.0-2; not 3.4 or 3.3) · Basis: probe, 2026-11-19. <sup>[f-a54](#fn-a54)</sup>
 
 <a id="a55"></a>
-**A55 — On a review made with a review form, both PDF entries of "Download Review Form" fail with an "Error" window and no file** · 🐞 · user-visible · crash: server.
-An Editor or an assigned Section Editor opens the Review Details window
-of a review the reviewer submitted through their own wizard on a review
-form with a text or drop-down question, presses "Download Review Form"
-and picks "Editor Form Shows All Review Sections (PDF)" or
-"Author-Only Sections Displayed (PDF)". The app fails instead of
-exporting: an "Error" window opens over Review Details with an "OK"
-button, and no file arrives, every time, whether the reviewer answered
-the questions or left them blank. "OK" returns to Review Details, where
-the XML entries still download. Only on a form whose every question has
-"Included in message to author" unticked does the author-only PDF
-download; the full PDF fails there too. A free-form review's PDFs
-download.
-It reads as decay: the PDFs broke on `main` alone, in a July 2025 code
-clean-up, and 3.5's code still exports them.
-Since: 2025-07-07 (`main`; 3.5 read in the code, not walked) · Basis: probe, 2026-11-23. <sup>[f-a55](#fn-a55)</sup>
+**A55 — On a review with answers saved on a review form, both PDF entries of "Download Review Form" open an "Error" window and no file** · 🐞 · medium · crash: server.
+The app fails on the server when anyone downloads, as a PDF, a review
+whose reviewer saved an answer on a review form. In the review's
+"Review Details" window, "Download Review Form" › "Editor Form Shows
+All Review Sections (PDF)" and "Author-Only Sections Displayed (PDF)"
+open an "Error" window with an "OK" button, and no file arrives, every
+time.
+
+Any saved answer is enough, whatever the question's type. A text or
+drop-down question saves one even when the reviewer leaves it blank,
+so nearly every review made on a form is affected. Only when every
+question of the form has "Included in message to author" unticked does
+the author-only PDF download. A free-form review's PDFs download.
+
+"OK" returns to Review Details, where the two XML entries still
+download and the answers can be read on screen. No released version
+has the fault yet.
+Since: 2025-07-07 (`main`; 3.5 walked: not affected) · Basis: probe + walk, 2026-11-23. <sup>[f-a55](#fn-a55)</sup>
 
 <a id="a56"></a>
 **A56 — A review on a form with no answer saved exports its PDFs as a free-form review's** · ❓ · minor.
@@ -4582,6 +4584,7 @@ parents, before rendering, so a failed press creates the temporary
 files folder (A49); not driven, the fleet had it. Kept script
 `shared/playwright/checks/U27/I27/i27.js` (`PHASES=err` for the dialog
 and its "OK").
+Issue report: docs/issues/U27-A55-review-form-pdf-download-error-window.md.
 
 <a id="fn-a56"></a>
 **f-a56** — Live-probed 2026-11-23 (Rule 15; the runs of f-a55, two per
