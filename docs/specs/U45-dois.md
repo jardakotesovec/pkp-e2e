@@ -691,8 +691,10 @@ links under the list. <sup>g</sup>
     "Automatic Deposit" (Rule 41) takes the same DOIs.
 
 29b. **What a Crossref file holds** {OJS OPS}. The files "Export DOIs"
-    downloads are the ones a deposit sends (Rule 33). A test install
-    downloads none (Rule 29): there they are read by hand on the
+    downloads are the ones a deposit sends (Rule 33), except for the
+    addresses a preprint server's deposit may give (Rule 33b).
+    <sup>f-ops8</sup> A test install downloads none (Rule 29): there
+    they are read by hand on the
     server, format check off. <sup>q49</sup> <sup>q52</sup> A work's file holds: <sup>q51</sup>
     - **Its versions**: on a journal one record per family (Rule 12),
       the newest published version's: with 1.0 and 1.1 published,
@@ -801,6 +803,19 @@ links under the list. <sup>g</sup>
     the window with its first sentence and nothing under it, and the
     agency panel has no "View Error" ⚠ [A31](#a31).
     <sup>q53</sup> <sup>f-a31</sup>
+
+33b. **Addresses in a deposit run by the job tool** {OJS OPS}. Each
+    record of a Crossref file gives the address of the version's page,
+    the page its DOI leads to. Run by the job tool, a journal's deposit
+    gives the journal's own address, as its "Export DOIs" file does. A
+    preprint server's gives the site's in place of the server's,
+    `…/index.php/index/preprint/view/…` instead of
+    `…/index.php/{server path}/preprint/view/…`, though its "Export
+    DOIs" file has the server's. That address leads a reader who is not
+    signed in to the site's "Login" page, not to the preprint
+    ⚠ [OPS8](#ops8). A deposit run at the end of a page load, the
+    install default, was only read in the code ([OPS8](#ops8)).
+    <sup>f-ops8</sup>
 
 <a id="agencies"></a>
 **Registration agencies**
@@ -1222,9 +1237,10 @@ differs. <sup>z1</sup>
 15. **How background jobs run** (the install's configuration file, no
     screen; at the end of page loads). Run by the command-line job tool
     instead, as a worker or a cron job: a deposit is sent at the tool's
-    next run, and with Crossref on a preprint server or with DataCite a
-    deposit that fails keeps no message (Rule 33a [A31](#a31)).
-    <sup>q53</sup>
+    next run; with Crossref on a preprint server or with DataCite a
+    deposit that fails keeps no message (Rule 33a [A31](#a31)); and on
+    a preprint server a Crossref deposit gives each preprint the site's
+    address (Rule 33b [OPS8](#ops8)). <sup>q53</sup> <sup>f-ops8</sup>
 
 ## Cross-feature interactions
 
@@ -2477,6 +2493,10 @@ Left out of the scenarios above, by reason:
     with the queue held, a published issue ticked on the "Issues" tab
     reading "Submitted" right after "Deposit DOIs" is confirmed, an
     unticked article beside it still "Unregistered" {OJS} [upstream 2026-10-09]
+  - the guard for OPS8 (Rule 33b), written once the fix lands: the file
+    a preprint server's Crossref deposit run by the job tool sends,
+    copied on the server as the job runs ([note f-ops8](#fn-f-ops8)),
+    giving each preprint's address under the server's own path {OPS} [incidental 2026-11-23]
 - **Rarely met**:
   - a press with "Chapters" or "Publication Formats" ticked and "Monographs" not: the same books listed, each with only those kinds' rows, the badge read from the first row {OMP} (Rule 46)
   - under "Upon reaching the copyediting stage", a new version of a work whose earlier version was published as a "Published Manuscript Under Review": made while the work is at Copyediting or Production, it gets the DOIs it lacks at once; made at Review, none until its own publication {OJS OMP} (Rules 5, 12)
@@ -2535,6 +2555,7 @@ Left out of the scenarios above, by reason:
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
   - A31 (a failed deposit run by the job tool keeping no message, with Crossref on a preprint server and with DataCite; Rule 33a; scenarios 13 and 16 pass it)
+  - OPS8 (a preprint server's Crossref deposit run by the job tool giving each preprint the site's address; Rule 33b)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
   - OPS2 ("Automatic Deposit" on a preprint server; Rule 41)
   - OMP1 ("Files" alone listing nothing, and "Needs DOI" ignoring a missing file DOI; Rules 4, 22)
@@ -2592,6 +2613,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS3](#ops3) | A preprint server's Crossref "Username" help reads "see the advise above" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS6](#ops6) | A preprint server's Crossref deposit names a DOI once per posted version that shares it | 🐞 | medium | issues (claude), 2026-10-20 — re-verified |
+| [OPS8](#ops8) | A preprint server's Crossref deposit run by the job tool gives each preprint the site's address, so its DOI would lead to the "Login" page | 🐞 | user-visible | — |
 | [A1](#a1) | A new journal arrives in a DOI state its own Setup tab refuses to save | ❓ | minor | — |
 | [A5](#a5) | The Registration tab keeps a new agency even when its fields are refused | ❓ | minor | — |
 | [A6](#a6) | Choosing an agency silently unticks the kinds it does not accept | ❓ | minor | — |
@@ -3364,6 +3386,27 @@ shows only when versions made under "No" are deposited after the server
 switched to "Yes": two major versions on one DOI. `main` has that case
 too, and the open fix `pkp/crossref-ops#67` leaves it.
 Basis: probe, 2026-10-20. <sup>f-ops6</sup>
+
+<a id="ops8"></a>
+**OPS8 — A preprint server's Crossref deposit run by the job tool gives each preprint the site's address, so its DOI would lead to the "Login" page** · 🐞 · user-visible.
+A preprint server registers its DOIs with Crossref and runs its
+background jobs with the command-line job tool, as a worker or a cron
+job. A manager deposits a posted preprint. The manager expects
+Crossref to be given the preprint's page, so that its DOI leads there.
+Instead, the file the deposit sends gives the page under the site's
+path, `…/index.php/index/preprint/…`, where the server's own path
+belongs. That address leads a reader who is not signed in to the
+site's "Login" page, so every DOI such a deposit registers would lead
+there instead of to the preprint. No screen shows the address a
+deposit sends. The file "Export DOIs" builds has the right address,
+and a journal's deposit run the same way has the journal's.
+
+Read in the code, not seen: on the default setting, a deposit run at
+the end of one of the server's own pages has the right address, and
+one run at the end of a page outside the server, such as a site
+administration page, has the site's too. 3.5 builds the address the
+same way.
+Basis: probe, 2026-11-23. <sup>f-ops8</sup>
 
 
 ### Retired
@@ -4991,7 +5034,14 @@ the index renders the plugin's `templates/index.tpl`:
 `management/importexport/plugin/{name}`. The export plugins'
 `getSettingsFormClassName()` throw ("DOI settings no longer managed via
 plugin settings form."), which no link on the Plugins list opens.
-Live-probed 2026-09-26 (Rule 44): see q26.
+Live-probed 2026-09-26 (Rule 44): see q26. Checked 2026-11-23 on
+`main`, both apps (Rule 44, "where DOIs are exported"):
+`php tools/importExport.php list` names no Crossref plugin (a
+journal: DOAJ, Native, Users, PubMed; a preprint server: Native), and
+`tools/importExport.php CrossrefExportPlugin export <file> <context> articles <id>`
+prints the tool's usage and writes nothing: the export
+plugin is registered by the Crossref Manager Plugin inside a context,
+which the tool does not load.
 
 <a id="fn-q26"></a>
 **q26** — Live-probed 2026-09-26 (Rule 44; A20), all three apps: Tools ›
@@ -6475,6 +6525,37 @@ a journal and a press listed no draft.
 versions). What Crossref answers to one file
 naming a DOI twice was not tried: the test installs reach no agency.
 Issue report: [pkp-e2e#980](https://github.com/jardakotesovec/pkp-e2e/issues/980) ([docs/issues/U45-OPS6-preprint-crossref-file-doi-twice.md](../issues/U45-OPS6-preprint-crossref-file-doi-twice.md)).
+
+<a id="fn-f-ops8"></a>
+**f-ops8** — Live-probed 2026-11-23 (Rules 29b, 33b; OPS8), two runs, each
+on a scratch preprint server and a scratch journal with Crossref
+chosen and configured (prefix `10.1234`; the journal's publisher and
+ISSN saved): OPS `main` `69d3cf6bad` (crossref-ops `0bcf460`), OJS
+`main` `1e1d3fc49b` (crossref-ojs `08da83b`), lib/pkp `3ea73a1a7e`.
+One posted preprint (one published article) ticked, "Deposit DOIs"
+confirmed (answered 200), then the queue run with the job tool
+(`php lib/pkp/tools/jobs.php run`, the `DepositSubmission` job), the
+file the job sent copied from the install's files `temp/` folder while
+it ran. Both preprint-server runs' files held
+`<resource>http://127.0.0.1:8800/index.php/index/preprint/view/{id}/version/{id}</resource>`;
+fetched without a session, that address redirected to
+`…/index/en/preprint/…` and then to `…/index/en/login?source=…`. The
+file the DOIs page's "Export DOIs" built on the same server
+(`crossrefplugin-<date>-<time>-preprints-<userId>.xml`) read
+`/index.php/{server path}/preprint/view/51/version/51`. The journal's
+job-run deposit read `/index.php/{journal path}/article/view/77` and
+its galley's `…/article/download/77/3`. Cause, code-read: crossref-ops
+`PreprintCrossrefXmlFilter::createPostedContentNode()` passes `null`
+as the context path to `Dispatcher::url()`, which then takes the
+current request's context (`PKPRouter::_urlGetBaseAndContext()`),
+falling back to the site's path `index` when the job tool runs
+`DepositSubmission` with no request context; crossref-ojs
+`ArticleCrossrefXmlFilter::createJournalArticleNode()` passes
+`$context->getPath()`. A job run at the end of a page load
+(`job_runner = On`) takes that page's context, so the server's own
+pages give the right path and a site administration page the site's
+(code-read, not seen). `stable-3_5_0`'s filter passes the same `null`
+(since pkp/pkp-lib#6091, 2022), code-read.
 
 ## Reference — entry points & surfaces
 
