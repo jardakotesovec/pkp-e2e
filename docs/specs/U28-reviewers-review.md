@@ -278,7 +278,7 @@ give no access to any screen in this spec. <sup>l</sup>
     "Recommendation" left at "Choose One", keep the step with their
     messages. Nothing else stops the submit: a review with nothing typed
     and no file is allowed and goes through on a journal and a press
-    alike, whatever the journal's step-3 sentence says ([A7](#a7)). A
+    alike, despite the journal's sentence under "Recommendation" ([A7](#a7)). A
     submit that passes moves to
     step 4. Step 4 ("4. Completion") reads "Review Submitted" and "Thank
     you for completing the review of this submission. Your review has been
@@ -293,7 +293,7 @@ give no access to any screen in this spec. <sup>l</sup>
     still take typing, which goes nowhere; and "Reviewer Files" offers no
     "Upload File" and no "Delete", only each row's "Edit", which still
     renames the file: "Save" closes the window and the new name shows in
-    "Reviewer Files", after a reload and in the editor's "Review Details" window
+    "Reviewer Files", after a reload and in the window the editor's "Read Review" opens
     ([→ Review Details](U27-reviewer-assignment-and-management.md#read-review)).
     The "View" on the review's row in the reviewer's submissions list
     opens this wizard on "4. Completion".
@@ -669,6 +669,16 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      "Review Tasks & Discussions" panel with its "Add" button, {OJS} the
      "Recommendation" list, and last the link "Go Back" and the buttons
      "Save for Later" and "Submit Review".
+   - **Two files, then "Edit"**: press "Upload File" under "Upload",
+     attach a file and finish: it lists under "Reviewer Files" in place
+     of "No Files". Press "Upload File" again: the wizard's tabs
+     "1. Upload File", "2. Review Details" and "3. Confirm" ask nothing
+     about which listed file the upload revises; attach a second file and
+     finish: it lists as a second row beside the first, which stays. On the first row press "Edit": the
+     window "Edit a file" holds only the name box "Name the file (e.g.,
+     Manuscript; Table 1)", "Cancel" and "Save"; type "Annotated
+     manuscript" into the box and press "Save": the row shows "Annotated
+     manuscript" at once, and again after a reload of the page.
    - **The submit**: type "Sound method, thin data." into "For author and
      editor" and "Check the second table." into the other box, {OJS}
      choose "Revisions Required", press "Submit Review" and "OK" on "Are
@@ -690,20 +700,21 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      subject ({OMP}: "Review complete: {reviewer} reviewed #{id} …", no
      recommendation); the first Section
      Editor's header "Tasks" panel gains no entry; the Reviewers panel row
-     reads "Review Submitted", and the submission's activity log records
-     "The round 1 review assigned to {reviewer} for submission {id} has
-     been completed.".
+     reads "Review Submitted", its "Read Review" opens "Review Details", listing both
+     files under "Reviewer Files", and the submission's activity log
+     records "The round 1 review assigned to {reviewer} for submission
+     {id} has been completed.".
    - **The editor added with "Assign"**: the second Section Editor's
      mailbox holds the same "Review complete: …" as the editors assigned
      when the submission came in.
    - **A review submitted in French**: second Reviewer: on step 3 type
      "Clear and complete." into "For author and editor" ({OJS}: choose
-     "Accept Submission") and press "Save for Later"; switch the interface
-     to French and, on the same step, press "Submit Review" and confirm,
+     "Accept Submission") and press "Save for Later"; reopen the step with
+     "/fr_CA" for "/en" in its address, press "Submit Review" and confirm,
      both now in French. Each editor's mailbox, the second Section
      Editor's included, holds a second email, "Évaluation terminée: …",
      its body reading "{reviewer} a terminé son évaluation : …" and its
-     links opening the French pages, although the editors work in
+     links opening the French pages, although the editors' screens show
      English.
    - **The Journal Manager**: the Journal Manager's mailbox holds neither
      "Review complete: …" nor "Évaluation terminée: …".
@@ -879,10 +890,11 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
       Due Date" only.
     - **Control**: no line names round 2, the round each wizard is open on.
 
-12. **Nothing can be saved after submission**
+12. **A submitted review can no longer be saved**
 
     Given: Reviewer, with a submitted review that carries one reviewer
-    file, and a second, still-open assignment.
+    file on a submission with an assigned Section Editor, and an accepted,
+    unsubmitted second request.
 
     - **"View"**: press it on the list row: the wizard opens on
       "4. Completion", and every tab opens.
@@ -893,8 +905,20 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
       though nothing on the step can keep it; after a reload the submitted
       text is back without it. "Reviewer Files" offers no "Upload File",
       and the file's row offers "Edit" but no "Delete".
-    - **Control**: the same Reviewer's other, still-open assignment offers
-      all of them.
+    - **"Edit" on the file's row**: press it: the window "Edit a file"
+      opens with the name box "Name the file (e.g., Manuscript; Table 1)";
+      type "Final remarks" into the box and press "Save": the window
+      closes and the row shows "Final remarks". Reload the page and open
+      "3. Download & Review": the row still shows "Final remarks".
+    - **The editor's "Review Details"**: Section Editor: on the
+      Reviewers panel the Reviewer's "Read Review" opens the "Review
+      Details" window, whose "Reviewer Files" lists the file as "Final
+      remarks"
+      ([→ Review Details](U27-reviewer-assignment-and-management.md#read-review)).
+    - **Control**: the second request has
+      "Save and continue", "Continue to Step #3", "Save for Later" and
+      "Submit Review" enabled, and its step 3 offers "Upload File", a file
+      uploaded there offering "Edit" and "Delete".
 
 13. **Declare competing interests**
 
@@ -1062,8 +1086,6 @@ Left out of the scenarios above, by reason:
     ([A15](#a15); Rule 18): the guard the issue report proposes, once
     fixed [report 2026-10-02]
   - {OPS} a user invited to a home-made "Reviewer"-level role beside Author landing on "Active submissions" after sign-in, with no "My Assignments as Reviewer" group and the typed reviewer-list address refused ([OPS1](#ops1); Purpose, scenario 17): the guard the issue report proposes, once fixed [report 2026-10-02]
-  - a second "Upload File" on step 3 with a file already under "Reviewer Files" asking no question which file it revises and listing as a second row beside the first, and a row's "Edit" opening "Edit a file" with the name box alone, the saved name showing at once and after a reload (Fields step 3 "Reviewer Files") [incidental 2026-11-23]
-  - after the review is submitted, a row's "Edit" still renaming the file, the new name showing in "Reviewer Files" after a reload and in the editor's "Review Details" window (Rule 13, Actors row 6) [incidental 2026-11-23]
 - **Rarely met**:
   - the "Read Round {N} Review" window of a round declined with an empty message, showing the "Decline Review Request" window's prefilled text in place of a typed reason (Rule 14)
 - **Nothing new to test**:
@@ -2406,7 +2428,8 @@ seed, since a seeded participant is not everything "Assign" leaves, and
 `manager.maya` the Journal Manager on no Participants panel; paul saves in
 English and submits from the wizard opened at `{journal}/fr_CA/reviewer/submission/{id}`
 (the French interface; the email follows the request's language,
-footnote n); 16's round 2 is "Create New Review
+footnote n); julia's two reviewer files are uploaded and the first
+renamed on screen; 16's round 2 is "Create New Review
 Round" recorded on screen and julia added again through "Add Reviewer".
 7: two submissions, julia `accepted` on both. 8: a scratch journal with
 `reviewForms[]` holding one active form of four `elements[]`, a
@@ -2438,8 +2461,9 @@ screen with the typed reason (an API-seeded decline stores the email
 template with its placeholders unresolved, so the decline is made on
 screen); on each, "Create New Review Round" is recorded on screen and the
 reviewer added again through "Add Reviewer" (its "Reassign" entry). 12:
-two submissions, julia `accepted` on both; on the first she uploads a
-reviewer file and submits on screen. 13: a scratch journal with `review:
+two submissions, julia `accepted` on both, `sectioneditor.ana` the
+participant of the first; on the first she uploads a reviewer file and
+submits on screen, then renames it through the row's "Edit". 13: a scratch journal with `review:
 {competingInterests: "<policy text>", reviewGuidelines: "<guidelines
 text>"}` and a throwaway `manager`, `author` and `externalReviewer`
 seeded `invited`. 14: three submissions: julia `accepted` on the first,

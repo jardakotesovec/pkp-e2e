@@ -69,6 +69,7 @@ const {
     resendReviewRequest,
     daysFromNow,
 } = require('../pages/ReviewerAssignmentPages.js');
+const {EditFileWindow, NAME_LABEL} = require('../../../../shared/playwright/pages/SubmissionFilesPages.js');
 
 const PK = 'publicknowledge';
 const ANA = 'sectioneditor.ana';
@@ -696,6 +697,9 @@ test.describe("Reviewer's review (U28)", () => {
 
     test('S6: submit a free-form review', async ({ompApi, asUser, pkpMail}, testInfo) => {
         const tag = makeTag(testInfo, 'u28s6');
+        const firstFile = `${tag}-first.txt`;
+        const secondFile = `${tag}-second.txt`;
+        const RENAMED = 'Annotated manuscript';
         const seeded = await seedExternal(ompApi, tag, [
             {username: JULIA, status: 'accepted'},
             {username: PAUL, status: 'accepted'},
@@ -747,6 +751,66 @@ test.describe("Reviewer's review (U28)", () => {
             'Submit Review',
         ]);
         expect(order.every((i) => i >= 0)).toBe(true);
+
+        // Two files, then "Edit": the first upload lists in place of "No
+        // Files"; a second "Upload File" asks, on none of its three tabs,
+        // which listed file it revises (no list on any tab; each tab's own
+        // control is the positive read) and lists beside the first.
+        await expect(wizard.noReviewerFiles).toBeVisible();
+        await wizard.uploadReviewerFile(firstFile);
+        await expect(wizard.noReviewerFiles).toBeHidden();
+        const upload = await wizard.openReviewerUploadWizard();
+        const uploadStep1 = upload.getByRole('tabpanel', {name: '1. Upload File'});
+        await expect(uploadStep1.getByRole('button', {name: 'Choose File', exact: true})).toBeVisible({timeout: 30_000});
+        await expect(uploadStep1.getByRole('combobox')).toHaveCount(0);
+        await expect(upload.locator('select[id^="revisedFileId"]')).toHaveCount(0);
+        await page.locator('input[type="file"]').last().setInputFiles({
+            name: secondFile,
+            mimeType: 'text/plain',
+            buffer: Buffer.from(`Reviewer file ${secondFile}`),
+        });
+        await expect(upload.getByRole('button', {name: /Change File/})).toBeVisible({timeout: 30_000});
+        await expect(uploadStep1.getByRole('combobox')).toHaveCount(0);
+        await upload.getByRole('button', {name: 'Continue', exact: true}).click();
+        await expect(upload.getByRole('tab', {name: '2. Review Details'})).toHaveAttribute('aria-selected', 'true', {timeout: 30_000});
+        const uploadStep2 = upload.getByRole('tabpanel', {name: '2. Review Details'});
+        await expect(uploadStep2.getByRole('textbox', {name: NAME_LABEL})).toBeVisible({timeout: 30_000});
+        await expect(uploadStep2.getByRole('combobox')).toHaveCount(0);
+        await upload.getByRole('button', {name: 'Continue', exact: true}).click();
+        await expect(upload.getByRole('tab', {name: '3. Confirm'})).toHaveAttribute('aria-selected', 'true', {timeout: 30_000});
+        const uploadStep3 = upload.getByRole('tabpanel', {name: '3. Confirm'});
+        await expect(upload.getByRole('button', {name: 'Complete', exact: true})).toBeVisible({timeout: 30_000});
+        await expect(uploadStep3.getByRole('combobox')).toHaveCount(0);
+        await upload.getByRole('button', {name: 'Complete', exact: true}).click();
+        await expect(upload).toBeHidden({timeout: 30_000});
+        await expect(wizard.reviewerFileRow(secondFile)).toBeVisible({timeout: 30_000});
+        await expect(wizard.reviewerFileRow(firstFile)).toBeVisible();
+        await expect(wizard.reviewerFilesGrid.locator('tbody tr.gridRow')).toHaveCount(2);
+
+        // The first file's "Edit": "Edit a file" holds only the name box,
+        // "Cancel" and "Save"; the saved name shows at once and after a
+        // reload.
+        const firstControls = await wizard.reviewerFileActions(wizard.reviewerFileRow(firstFile));
+        await firstControls.getByRole('link', {name: 'Edit', exact: true}).click();
+        const edit = new EditFileWindow(page);
+        await edit.expectOpen();
+        await expect(edit.nameBox()).toHaveValue(firstFile);
+        const editForm = edit.dialog().locator('form');
+        await expect(editForm.getByRole('textbox')).toHaveCount(1);
+        await expect(editForm.getByRole('button')).toHaveText(['Cancel', 'Save']);
+        await expect(editForm.getByRole('combobox')).toHaveCount(0);
+        await expect(editForm.locator('input[type="file"]')).toHaveCount(0);
+        await edit.nameBox().fill(RENAMED);
+        await edit.save();
+        await expect(wizard.reviewerFileRow(RENAMED)).toBeVisible({timeout: 30_000});
+        await expect(wizard.reviewerFileRow(firstFile)).toHaveCount(0);
+        await expect(wizard.reviewerFileRow(secondFile)).toBeVisible();
+        await page.reload();
+        await wizard.expectStep(3);
+        await wizard.expectReviewerFilesSettled();
+        await expect(wizard.reviewerFileRow(RENAMED)).toBeVisible({timeout: 30_000});
+        await expect(wizard.reviewerFileRow(firstFile)).toHaveCount(0);
+        await expect(wizard.reviewerFileRow(secondFile)).toBeVisible();
 
         // The submit: "4. Completion" with "Review Submitted", the thank-you
         // text and the discussions panel under them.
@@ -810,6 +874,16 @@ test.describe("Reviewer's review (U28)", () => {
                 `The round 1 review assigned to Julia Reviewer for submission ${seeded.submissionId} has been completed.`
             )
         ).toBeVisible();
+        await log.getByRole('button', {name: 'Close', exact: true}).click();
+        await expect(log).toBeHidden({timeout: 20_000});
+
+        // The row's "Read Review" opens "Review Details", whose "Reviewer
+        // Files" lists both files, the first by its new name.
+        const details = await openReadReview(anaPage, modal, 'Julia Reviewer');
+        const detailsFiles = details.getByRole('table', {name: 'Reviewer Files'});
+        await expect(detailsFiles.getByRole('row').filter({hasText: RENAMED})).toBeVisible({timeout: 30_000});
+        await expect(detailsFiles.getByRole('row').filter({hasText: secondFile})).toBeVisible();
+        await expect(detailsFiles.getByRole('row').filter({hasText: firstFile})).toHaveCount(0);
 
         // A review submitted in French: paul types "Clear and complete." on
         // step 3 and saves for later in English, then submits the same step
@@ -1385,10 +1459,12 @@ test.describe("Reviewer's review (U28)", () => {
         }
     });
 
-    test('S12: nothing can be saved after submission', async ({ompApi, asUser}, testInfo) => {
+    test('S12: a submitted review can no longer be saved', async ({ompApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u28s12');
         const openTag = makeTag(testInfo, 'u28s12o');
         const fileName = `${tag}.txt`;
+        const openFileName = `${openTag}.txt`;
+        const RENAMED = 'Final remarks';
         const reviewText = `Review ${tag}`;
         const seeded = await seedExternal(ompApi, tag, [{username: JULIA, status: 'accepted'}]);
         const open = await seedExternal(ompApi, openTag, [{username: JULIA, status: 'accepted'}]);
@@ -1438,8 +1514,36 @@ test.describe("Reviewer's review (U28)", () => {
         await expect(wizard.reviewerFilesGrid.getByRole('link', {name: 'Edit', exact: true})).toBeVisible();
         await expect(wizard.reviewerFilesGrid.getByRole('link', {name: 'Delete', exact: true})).toHaveCount(0);
 
-        // Control: the same reviewer's other, still-open assignment offers
-        // all of them.
+        // "Edit" on the file's row still renames it: "Edit a file" with the
+        // name box; "Save" closes the window and the row shows the new name,
+        // again after a reload of the page on "3. Download & Review".
+        await wizard.reviewerFilesGrid.getByRole('link', {name: 'Edit', exact: true}).click();
+        const edit = new EditFileWindow(page);
+        await edit.expectOpen();
+        await expect(edit.nameBox()).toHaveValue(fileName);
+        await edit.nameBox().fill(RENAMED);
+        await edit.save();
+        await expect(wizard.reviewerFileRow(RENAMED)).toBeVisible({timeout: 30_000});
+        await expect(wizard.reviewerFileRow(fileName)).toHaveCount(0);
+        await wizard.goto(seeded.submissionId);
+        await wizard.expectStep(4);
+        await wizard.selectStep(3);
+        await wizard.expectReviewerFilesSettled();
+        await expect(wizard.reviewerFileRow(RENAMED)).toBeVisible({timeout: 30_000});
+        await expect(wizard.reviewerFileRow(fileName)).toHaveCount(0);
+
+        // The editor's "Review Details": the Section Editor's "Read Review"
+        // lists the file under "Reviewer Files" as the new name.
+        const anaPage = await (await asUser(ANA)).newPage();
+        const modal = await openEditorial(anaPage, PK, seeded.submissionId);
+        const details = await openReadReview(anaPage, modal, 'Julia Reviewer');
+        const detailsFiles = details.getByRole('table', {name: 'Reviewer Files'});
+        await expect(detailsFiles.getByRole('row').filter({hasText: RENAMED})).toBeVisible({timeout: 30_000});
+        await expect(detailsFiles.getByRole('row').filter({hasText: fileName})).toHaveCount(0);
+
+        // Control: the accepted, unsubmitted second request has all four
+        // buttons enabled, and its step 3 offers "Upload File", a file
+        // uploaded there offering "Edit" and "Delete".
         await wizard.goto(open.submissionId);
         await expect(wizard.saveAndContinueButton).toBeEnabled();
         await wizard.saveAndContinueButton.click();
@@ -1450,6 +1554,10 @@ test.describe("Reviewer's review (U28)", () => {
         await expect(wizard.uploadFileLink).toBeVisible();
         await expect(wizard.submitReviewButton).toBeEnabled();
         await expect(wizard.saveForLaterButton).toBeEnabled();
+        await wizard.uploadReviewerFile(openFileName);
+        const openControls = await wizard.reviewerFileActions(wizard.reviewerFileRow(openFileName));
+        await expect(openControls.getByRole('link', {name: 'Edit', exact: true})).toBeVisible();
+        await expect(openControls.getByRole('link', {name: 'Delete', exact: true})).toBeVisible();
     });
 
     test('S13: declare competing interests', async ({ompApi, asUser}, testInfo) => {

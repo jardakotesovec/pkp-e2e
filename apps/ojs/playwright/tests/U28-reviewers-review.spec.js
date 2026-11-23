@@ -66,6 +66,7 @@ const {
     signInAtContext,
 } = require('../../../../shared/playwright/pages/ReviewerPages.js');
 const {TasksPanel} = require('../../../../shared/playwright/pages/NotificationsPages.js');
+const {EditFileWindow} = require('../../../../shared/playwright/pages/SubmissionFilesPages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
 
@@ -236,6 +237,27 @@ async function downloadByAddress(page, href) {
         page.goto(href).catch(() => null),
     ]);
     return download;
+}
+
+/**
+ * A "Reviewer Files" row's "Edit": the window "Edit a file" holds only the
+ * name box, "Cancel" and "Save" (no file box, no other field); type the new
+ * name and press "Save" (the window closes), then wait for the row to show it.
+ */
+async function renameReviewerFile(page, wizard, fileName, newName) {
+    const actions = await wizard.reviewerFileActions(wizard.reviewerFileRow(fileName));
+    await actions.getByRole('link', {name: 'Edit', exact: true}).click();
+    const editWindow = new EditFileWindow(page);
+    await editWindow.expectOpen();
+    const dialog = editWindow.dialog();
+    await expect(dialog.getByRole('textbox')).toHaveCount(1);
+    await expect(dialog.locator('input[type="file"]')).toHaveCount(0);
+    await expect(dialog.locator('select, input[type="checkbox"], input[type="radio"]')).toHaveCount(0);
+    await expect(editWindow.cancelButton()).toBeVisible();
+    await expect(editWindow.saveButton()).toBeVisible();
+    await editWindow.nameBox().fill(newName);
+    await editWindow.save();
+    await expect(wizard.reviewerFileRow(newName)).toBeVisible({timeout: 30_000});
 }
 
 /** The reviewer's header "Tasks" rows reading "Review pending." for the title (the caller closes). */
@@ -696,6 +718,42 @@ test.describe('reviewer\'s review', () => {
         ]);
         await expect(wizard.goBackLink).toBeVisible();
 
+        // Two files, then "Edit": the first file lists in place of "No Files";
+        // the second upload's wizard asks nothing about which listed file it
+        // revises (no revision list on "1. Upload File", where the editor's
+        // wizard asks it, nor a file-type list; read with its tabs and file
+        // box on screen) and lists a second row beside the first, which stays.
+        const firstFile = `review-notes-${tag}.txt`;
+        const secondFile = `review-table-${tag}.txt`;
+        const renamed = 'Annotated manuscript';
+        await expect(wizard.noReviewerFiles).toBeVisible();
+        await wizard.uploadReviewerFile(firstFile);
+        await expect(wizard.noReviewerFiles).toBeHidden();
+        const secondUpload = await wizard.openReviewerUploadWizard();
+        for (const name of ['1. Upload File', '2. Review Details', '3. Confirm']) {
+            await expect(secondUpload.getByRole('tab', {name})).toBeVisible();
+        }
+        await expect(secondUpload.locator('input[type="file"]')).toBeAttached();
+        await expect(secondUpload.locator('select[id^="revisedFileId"]')).toHaveCount(0);
+        await expect(wizard.uploadGenreSelect(secondUpload)).toHaveCount(0);
+        await wizard.finishReviewerUpload(secondUpload, secondFile);
+        const fileRows = wizard.reviewerFilesGrid.locator('tbody tr.gridRow');
+        await expect(fileRows).toHaveCount(2);
+        await expect(wizard.reviewerFileRow(firstFile)).toBeVisible();
+        await expect(wizard.reviewerFileRow(secondFile)).toBeVisible();
+
+        // On the first file's row, "Edit" renames it: the row shows the new
+        // name at once and again after a reload.
+        await renameReviewerFile(page, wizard, firstFile, renamed);
+        await expect(wizard.reviewerFileRow(firstFile)).toHaveCount(0);
+        await expect(fileRows).toHaveCount(2);
+        await page.reload();
+        await wizard.expectStep(3);
+        await wizard.expectReviewerFilesSettled();
+        await expect(wizard.reviewerFileRow(renamed)).toBeVisible({timeout: 30_000});
+        await expect(wizard.reviewerFileRow(secondFile)).toBeVisible();
+        await expect(fileRows).toHaveCount(2);
+
         // The submit.
         await wizard.typeComments(`Sound method, thin data. ${tag}`);
         await wizard.typePrivateComments(`Check the second table. ${tag}`);
@@ -759,7 +817,17 @@ test.describe('reviewer\'s review', () => {
         // The editor's row and the activity log.
         const workflow = new WorkflowPage(editorPage, JOURNAL);
         await workflow.gotoEditorial(submissionId);
-        await expect(workflow.panelRow('Reviewers', REVIEWER_NAME)).toContainText('Review Submitted');
+        const reviewerRow = workflow.panelRow('Reviewers', REVIEWER_NAME);
+        await expect(reviewerRow).toContainText('Review Submitted');
+        // Its "Read Review" opens "Review Details", listing both files under
+        // "Reviewer Files" (the first by its new name).
+        const details = await openReviewDetails(editorPage, reviewerRow);
+        await awaitReviewDetailsSettled(details);
+        const detailsFiles = details.getByRole('table', {name: 'Reviewer Files'});
+        await expect(detailsFiles.getByRole('rowheader', {name: renamed, exact: true})).toBeVisible({timeout: 30_000});
+        await expect(detailsFiles.getByRole('rowheader', {name: secondFile, exact: true})).toBeVisible();
+        await expect(detailsFiles.getByRole('rowheader')).toHaveCount(2);
+        await closeReviewDetails(editorPage, details);
         await expectLogged(
             editorPage,
             `The round 1 review assigned to ${REVIEWER_NAME} for submission ${submissionId} has been completed.`
@@ -1407,7 +1475,7 @@ test.describe('reviewer\'s review', () => {
         await expect(paulWizard.previousReviewLine(2)).toHaveCount(0);
     });
 
-    test('S12: nothing can be saved after submission', async ({asUser, ojsApi}, testInfo) => {
+    test('S12: a submitted review can no longer be saved', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s12', testInfo);
         const {submissionId} = await seedInReview(ojsApi, tag, {
@@ -1467,7 +1535,34 @@ test.describe('reviewer\'s review', () => {
         await expect(actions.getByRole('link', {name: 'Edit', exact: true})).toBeVisible();
         await expect(actions.getByRole('link', {name: 'Delete', exact: true})).toHaveCount(0);
 
-        // Control: the same reviewer's other, still-open assignment offers all of them.
+        // "Edit" on the file's row still renames it: "Edit a file" with the
+        // name box; "Save" closes the window and the row shows the new name,
+        // again after a reload with "3. Download & Review" opened.
+        const renamed = 'Final remarks';
+        await renameReviewerFile(page, wizard, fileName, renamed);
+        await expect(wizard.reviewerFileRow(fileName)).toHaveCount(0);
+        await wizard.goto(submissionId);
+        await wizard.expectCompleted();
+        await wizard.selectStep(3);
+        await wizard.expectReviewerFilesSettled();
+        await expect(wizard.reviewerFileRow(renamed)).toBeVisible({timeout: 30_000});
+        await expect(wizard.reviewerFileRow(fileName)).toHaveCount(0);
+
+        // The editor's "Review Details": the Section Editor's "Read Review"
+        // lists the file under "Reviewer Files" as the new name.
+        const editorPage = await (await asUser(EDITOR)).newPage();
+        const workflow = new WorkflowPage(editorPage, JOURNAL);
+        await workflow.gotoEditorial(submissionId);
+        const editorRow = workflow.panelRow('Reviewers', REVIEWER_NAME);
+        await expect(editorRow).toContainText('Review Submitted', {timeout: 30_000});
+        const details = await openReviewDetails(editorPage, editorRow);
+        await awaitReviewDetailsSettled(details);
+        const detailsFiles = details.getByRole('table', {name: 'Reviewer Files'});
+        await expect(detailsFiles.getByRole('rowheader', {name: renamed, exact: true})).toBeVisible({timeout: 30_000});
+        await expect(detailsFiles.getByRole('rowheader')).toHaveCount(1);
+        await closeReviewDetails(editorPage, details);
+
+        // Control: the same reviewer's accepted, unsubmitted second request offers all of them.
         await wizard.goto(controlId);
         await expect(wizard.saveAndContinueButton).toBeEnabled();
         await wizard.saveAndContinueButton.click();
