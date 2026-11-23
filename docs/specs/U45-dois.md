@@ -6554,7 +6554,7 @@ falling back to the site's path `index` when the job tool runs
 pages give the right path and a site administration page the site's
 (code-read, not seen). `stable-3_5_0`'s filter passes the same `null`
 (since pkp/pkp-lib#6091, 2022), code-read.
-Issue report: docs/issues/U45-OPS8-preprint-deposit-job-tool-site-address.md.
+Issue report: [pkp-e2e#1110](https://github.com/jardakotesovec/pkp-e2e/issues/1110) ([docs/issues/U45-OPS8-preprint-deposit-job-tool-site-address.md](../issues/U45-OPS8-preprint-deposit-job-tool-site-address.md)).
 
 ## Reference — entry points & surfaces
 
