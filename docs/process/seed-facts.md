@@ -412,9 +412,10 @@ validation-variant server (harness.md) covers the config-file settings.
 - {OJS} Payments are off on a fresh journal: the "Payments" page's "Payment
   Types" has every box empty and "Payments" reads "No Items". "Currency" has
   no empty choice, so a journal with no currency comes only from the
-  `payments` key without `currency`. `{journal}/user/payMembership` creates a
-  queued payment request even when it fails: never open it on
-  `publicknowledge`.
+  `payments` key without `currency`. `{journal}/user/payMembership` adds a
+  queued payment row each time it opens the payment page (payments set up,
+  with or without a membership fee) and none when it fails (signed out, or
+  payments not set up): never open it on `publicknowledge`.
 - Settings › Distribution › "Access" shows no "Publishing Mode" choice ticked
   on `publicknowledge` or on a scratch journal, so both publish openly; a
   preprint server never stores its "Posting Mode" choice. OJS and OPS.

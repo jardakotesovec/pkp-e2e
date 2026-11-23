@@ -62,7 +62,7 @@ other on the journal's Users & Roles (*Users management*). <sup>c</sup>
 | **Choose "Publishing Mode" and "Delayed Open Access"** (Rules 1–6) | • Whoever opens the Settings pages ([→ settings access](U07-journal-identity-and-about-pages.md#settings-access)), on Settings › Distribution › "Access" <sup>d</sup> |
 | **Set an issue's "Access status" and "Open access date", or tick an article's "Open Access"** | • Manager-level roles, on the issue's "Access" and "Table of Contents" tabs ([Issues](U50-issues.md), its Actors row 1 and Rule 13); what the values do is Rules 7–9 here |
 | **Read an article's page and an issue's page on a journal that requires subscriptions** (Rule 8) | • Anyone who may read them on an open journal, signed out included: the restriction covers the galleys only <sup>e</sup> |
-| **Open a restricted galley** (Rules 7, 11) | • Subscribers, visitors from a subscribing institution's addresses, buyers of the article or its issue, and paid-up members (Rule 11)<br>• Reading roles, and the article's own Author (Rule 11a)<br>• Anyone else is turned away as Rule 12 says <sup>e</sup> <sup>td9</sup> |
+| **Open a restricted galley** (Rules 7, 11) | • Subscribers, visitors from a subscribing institution's addresses, and buyers of the article or its issue (Rule 11)<br>• Reading roles (above) and the article's Author (Rule 11a)<br>• Anyone else is turned away as Rule 12 says <sup>e</sup> <sup>td9</sup> |
 | **Read the "Subscriptions" page** (Rule 26) | • Anyone, signed out included, while payments are set up (Settings bullet 4); otherwise nobody: its address opens the journal's home page <sup>f</sup> |
 | **Open "My Subscriptions", buy and renew** (Rules 27–31) | • Any signed-in user, on a journal that requires subscriptions and has at least one subscription type; buying and renewing also need payments set up <sup>f</sup> |
 | **Receive the subscription emails** (Side effects) | • The subscriber, the subscription contact and the journal's users, each email as Side effects names them <sup>g</sup> |
@@ -309,8 +309,6 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
       (Rule 18), signed in or not;
     - signed in, having paid "Purchase Article" for this article, or
       "Purchase Issue" for its issue while an issue fee is set; <sup>p</sup>
-    - signed in, with a paid-up "Association Membership" while a
-      membership fee is set (Settings bullet 7); <sup>p</sup>
     - signed in, with an expired subscription that still covers the
       article under "Partial expiry" (Rule 23).
 
@@ -319,10 +317,10 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
     subscription, the institution and the issue purchase alone, so it
     locks galleys that the reading roles, the article's Author and a
     reader under "Partial expiry" can open ⚠ [A7](#a7).
-11a. **Reading roles and the article's Author.** A signed-in user holding
-    a reading role opens every restricted galley, article and "Full
-    Issue" alike, without a subscription; so does an Author of the
-    article, for that article's galleys. <sup>e</sup> <sup>td9</sup>
+11a. **Reading roles and the article's Author.** A user with a reading
+    role (Actors intro: not the Reader) opens every restricted galley,
+    article and "Full Issue"; so does the article's Author, for its
+    galleys. <sup>e</sup> <sup>td9</sup>
 12. **Everyone else.** A visitor for whom Rule 11 does not hold, pressing
     a restricted galley: <sup>e</sup> <sup>td7</sup> <sup>td8</sup>
     - signed out, is sent to the Login page with the message
@@ -686,8 +684,10 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
    12), and a "Full Issue" asks a signed-in reader for an issue fee of
    no amount [A20](#a20). <sup>td7</sup> <sup>td8</sup>
 
-   A paid-up member opens restricted galleys (Rule 11). <sup>p</sup>
-   Paying for membership is *Payments & APCs*'s.
+   A reader who has paid the membership opens nothing more than any
+   other reader ⚠ [A33](#a33). Paying for membership is
+   [Payments & APCs](U52-payments-and-apcs.md)'s, its Rule 7a.
+   <sup>f-a33</sup>
 8. **"Subscription Expiry"** — the "Payments" page › "Subscription
    Policies". Default: "Full expiry". "Partial expiry": Rule 23.
 9. **"Subscription Expiry Reminders"** — the same tab. Default: all four
@@ -1381,7 +1381,9 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A12 (issue report
     `docs/issues/U52-A9-membership-address-signed-out-blank-page.md`):
-    a signed-out visitor at the "Purchase Individual Subscription", "Purchase Institutional Subscription" and membership addresses sent to the Login page [report 2026-10-01]
+    a signed-out visitor at the "Purchase Individual Subscription",
+    "Purchase Institutional Subscription" and membership addresses sent to
+    the Login page <sup>f-a12</sup> [report 2026-10-01]
   - the guard for OPS1 (issue report
     `docs/issues/U51-OPS1-posting-mode-says-saved-keeps-nothing.md`): on a
     preprint server, Settings › Distribution › "Access" offers "Enable OAI"
@@ -1437,8 +1439,9 @@ Left out of the scenarios above, by reason:
     "contains") lists only the subscriptions that match. [report 2026-10-02]
   - the guard for A10 (issue report
     `docs/issues/U51-A10-purchase-on-active-subscription-removes-access.md`):
-    on "My Subscriptions" a running subscription offers only "Renew", and
-    its purchase address changes nothing. [report 2026-10-02]
+    a running subscription offers only "Renew" on "My Subscriptions", and
+    its purchase address, typed and submitted if a page opens, leaves its
+    "Expires:" date unchanged. <sup>f-a10</sup> [report 2026-10-02]
   - the guard for A25 (issue report
     `docs/issues/U51-A25-institutional-purchase-ip-ranges-read-array.md`):
     the institutional purchase page opened for an existing institutional
@@ -1457,9 +1460,13 @@ Left out of the scenarios above, by reason:
     boxes stay empty. [report 2026-10-02]
   - the guard for A27 (issue report
     `docs/issues/U51-A27-expiry-reminder-task-stops-with-error.md`): the
-    "Subscription Expiry Reminders" task, run from the command line with a
-    reminder set, sends the reminder to an individual and an institutional
+    "Subscription Expiry Reminders" task, run by hand <sup>td29</sup> with
+    a reminder set, sends the reminder to an individual and an institutional
     subscription ending on the reminder's day. [report 2026-10-02]
+  - the guard for A33, written with the fix, which names how membership
+    is recorded as paid: on a journal with an "Association Membership"
+    fee, such a member opens a restricted article galley and a "Full
+    Issue" (Settings bullet 7). [incidental 2026-11-23]
 - **Nothing new to test**:
   - subscriptions set to "Needs Information", "Needs Approval" or
     "Other, See Notes", which open nothing and read "Inactive" on "My
@@ -1529,13 +1536,12 @@ Left out of the scenarios above, by reason:
     tab and the "Subscription Policies" tab; Rules 10, 27, 33)
   - A32 (an article published with no issue that no screen can make
     open access; Rule 7)
+  - A33 (a paid membership opening nothing; Settings bullet 7)
   - OPS1 (a preprint server's "Posting Mode" not kept; Purpose;
     scenario 16 passes it)
 - **No seed**:
   - an institutional subscription matched by its "Domain" (Rule 18; no
     test install is reached by a domain name)
-  - a paid-up "Association Membership" opening restricted galleys
-    (Settings bullet 7; Rule 11)
   - a completed online payment and what follows it: the "Online Payment
     Notifications" emails, the subscription made "Active" or "Needs
     Approval", and the renewal (Settings bullet 10; Side effects)
@@ -1586,6 +1592,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A28](#a28) | After a refused "Save", a subscription's empty date boxes show today's date, but the form does not submit it | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A29](#a29) | Readers get the "Free to read" email twice for an issue opening on 1 March, May, July, October or December | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A31](#a31) | In Uzbek (Latin), subscription screens print "{$ x}", "{$ price}" and "{$ date}" instead of the values | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A33](#a33) | A reader who has paid the "Association Membership" is refused restricted galleys like any other reader | 🐞 | user-visible | — |
 | [OPS1](#ops1) | A preprint server's "Posting Mode" says "Saved" but keeps nothing, so the server goes on posting {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A1](#a1) | "Publishing Mode" shows no choice on a new journal, which publishes as open access | ❓ | minor | — |
 | [A5](#a5) | Without payments set up, a signed-in reader pressing a locked galley lands on the home page with no word | ❓ | user-visible | — |
@@ -1661,6 +1668,7 @@ The article's own page shows editors and authors the right state; for
 the former subscriber's "Full Issue" no page does. The editorial roles
 and "Partial expiry" both showed correctly on this page in OJS 2.x; the
 author never did. Basis: probe, 2026-10-01. <sup>f-a7</sup>
+Report: refresh owed — its reach says both download handlers open the galleys for a reader with a paid "Association Membership" (`dateEndMembership`), and "What goes with it" offers to add that check to this page; live-probed 2026-11-23, a paid or stored membership opens no galley at all (A33), so the member bullet and the member remark go; it touches `ArticleHandler::userCanViewGalley()`, `IssueHandler::userCanViewGalley()` and `dateEndMembership` (2026-11-23)
 
 <a id="a8"></a>
 **A8 — Most subscribers get no expiry reminder: the reminder task runs once a month and matches one end date** · 🐞 · medium.
@@ -1835,6 +1843,7 @@ reader is invited to pay for something the journal does not sell, and
 "Send notification of payment" tells the journal's contact that a
 "Purchase Issue Fee" costing 0 is to be processed. Basis: probe,
 2026-10-01. <sup>f-a20</sup>
+Report: refresh owed — its "Proposed fix" says the issue handler's branch keeps "a paid issue or a current membership" opening the galley; live-probed 2026-11-23, a paid or stored membership opens no galley at all (A33), so the membership half of that remark goes; it touches `IssueHandler::userCanViewGalley()` and `dateEndMembership` (2026-11-23)
 
 <a id="a21"></a>
 **A21 — A subscription whose end date is before its start date is saved as active and grants no access** · 🐞 · medium.
@@ -1990,6 +1999,22 @@ Lean: yes; otherwise a journal that publishes articles outside issues
 can open none of them short of making the whole journal open access.
 Since: 2026-10-21 · Basis: probe, 2026-10-23. <sup>f-a32</sup>
 
+<a id="a33"></a>
+**A33 — A reader who has paid the "Association Membership" is refused restricted galleys like any other reader** · 🐞 · user-visible.
+On a journal that requires subscriptions and sets an "Association
+Membership" fee, a reader who has paid the membership expects to open
+its restricted galleys, as members did up to OJS 3.3. Instead they are
+refused as before paying: a locked article galley sends them to the
+"Subscriptions" page, and a locked "Full Issue" to a payment page for a
+"Purchase Issue Fee". The membership is not kept on the reader's
+account, and a membership end date already on the account is not read.
+With "Manual Fee Payment" nothing records the membership at all
+([Payments & APCs](U52-payments-and-apcs.md), its Rule 7a); with PayPal
+the reader pays and gets nothing. Only a journal using PayPal can take
+the payment, through an address no page links to, so few readers reach
+this; a Journal Manager can give a member an individual subscription
+instead. Basis: probe, 2026-11-23. <sup>f-a33</sup>
+
 ### OPS
 
 <a id="ops1"></a>
@@ -2045,7 +2070,7 @@ in its note (p, q, r, s, t, u).
 **d** — OJS `classes/components/forms/context/AccessForm.php` (`FORM_ACCESS`, PUT to the context API), mounted by `templates/management/additionalDistributionTabs.tpl` as tab `access` (`manager.distribution.access` "Access"): `publishingMode` `FieldOptions` radio (`Journal::PUBLISHING_MODE_OPEN` 0, `_SUBSCRIPTION` 1, `_NONE` 2; labels `manager.distribution.publishingMode.*`), `delayedOpenAccessDuration` `FieldSelect` (`about.delayedOpenAccess`, options `common.disabled` then `manager.subscriptionPolicies.xMonths` "{$x} Months" for 1..60, `showWhen` the subscription mode), `enableOai`. OJS `schemas/context.json` `publishingMode` nullable `in:0,1,2`, no default; a fresh journal has no row (seed-facts, U08 claim check 2026-09-23), and every reader of the mode compares with `PUBLISHING_MODE_SUBSCRIPTION` or `_NONE`, so no row behaves as open.
 
 <a id="fn-e"></a>
-**e** — Reader access, OJS. `IssueAction::subscriptionRequired()`: `publishingMode == PUBLISHING_MODE_SUBSCRIPTION` and, with no issue, nothing more; with an issue, `accessStatus != ISSUE_ACCESS_OPEN` and (`openAccessDate` null or `strtotime(openAccessDate) > time()`). `ArticleHandler::userCanViewGalley()`: `Repo::submission()->canPreview()` first (its `_roleCanPreview()` admits `ROLE_ID_MANAGER`, `ROLE_ID_SUB_EDITOR`, `ROLE_ID_ASSISTANT`, `ROLE_ID_SUBSCRIPTION_MANAGER` held in the context, then any user with an Author stage assignment on the submission); then, for a published publication, in an issue or (since OJS `dde4cc70f4`, note f-a30) with none: `restrictArticleAccess` redirect to Login unless `subscribedDomain()`; when a subscription is required and no domain match, `subscribedUser()`, a paid issue (`hasPaidPurchaseIssue`, only while `purchaseIssueEnabled()` and the article has an issue), the publication's `accessStatus == ARTICLE_ACCESS_OPEN`; failing those, with `purchaseArticleEnabled() || membershipEnabled()`: `onlyPdfEnabled()` lets a non-PDF galley through, a signed-out visitor goes to Login (`payment.loginRequired.forArticle`), a paid article or `dateEndMembership > time()` passes, else with `purchaseArticleEnabled()` a `PAYMENT_TYPE_PURCHASE_ARTICLE` queued payment and the method's form; otherwise signed out → Login (`reader.subscriptionRequiredLoginText`), signed in → `about/subscriptions`. `ArticleHandler::view()` (no galley) renders the landing page for everyone; its `hasAccess` only styles the links. `IssueHandler::userCanViewGalley()`: `IssueAction::allowedIssuePrePublicationAccess()` (manager, sub-editor, assistant, subscription manager roles) first, then the same chain with `purchaseIssueEnabled()`, `PAYMENT_TYPE_PURCHASE_ISSUE` and `payment.loginRequired.forIssue`. `IssueAction::subscribedUser()` / `subscribedDomain()` and the partial-expiry branches: note td21. Not-online mode: `OjsJournalMustPublishPolicy` (permits `ROLE_ID_MANAGER`, `_SITE_ADMIN`, `_ASSISTANT`, `_SUB_EDITOR`, `_SUBSCRIPTION_MANAGER`; denies everyone else under `PUBLISHING_MODE_NONE` with `user.authorization.journalDoesNotPublish` "This journal does not publish its content online."), added by `ArticleHandler`, `IssueHandler`, `SearchHandler` and the issues API. Additional files: `article_details.tpl` lists supplementary galleys through the same `galley_link.tpl` and `ArticleHandler::download()` runs `userCanViewGalley()` for every galley.
+**e** — Reader access, OJS. `IssueAction::subscriptionRequired()`: `publishingMode == PUBLISHING_MODE_SUBSCRIPTION` and, with no issue, nothing more; with an issue, `accessStatus != ISSUE_ACCESS_OPEN` and (`openAccessDate` null or `strtotime(openAccessDate) > time()`). `ArticleHandler::userCanViewGalley()`: `Repo::submission()->canPreview()` first (its `_roleCanPreview()` admits `ROLE_ID_MANAGER`, `ROLE_ID_SUB_EDITOR`, `ROLE_ID_ASSISTANT`, `ROLE_ID_SUBSCRIPTION_MANAGER` held in the context, then any user with an Author stage assignment on the submission); then, for a published publication, in an issue or (since OJS `dde4cc70f4`, note f-a30) with none: `restrictArticleAccess` redirect to Login unless `subscribedDomain()`; when a subscription is required and no domain match, `subscribedUser()`, a paid issue (`hasPaidPurchaseIssue`, only while `purchaseIssueEnabled()` and the article has an issue), the publication's `accessStatus == ARTICLE_ACCESS_OPEN`; failing those, with `purchaseArticleEnabled() || membershipEnabled()`: `onlyPdfEnabled()` lets a non-PDF galley through, a signed-out visitor goes to Login (`payment.loginRequired.forArticle`), a paid article or `dateEndMembership > time()` passes (never loaded: note f-a33), else with `purchaseArticleEnabled()` a `PAYMENT_TYPE_PURCHASE_ARTICLE` queued payment and the method's form; otherwise signed out → Login (`reader.subscriptionRequiredLoginText`), signed in → `about/subscriptions`. `ArticleHandler::view()` (no galley) renders the landing page for everyone; its `hasAccess` only styles the links. `IssueHandler::userCanViewGalley()`: `IssueAction::allowedIssuePrePublicationAccess()` (manager, sub-editor, assistant, subscription manager roles) first, then the same chain with `purchaseIssueEnabled()`, `PAYMENT_TYPE_PURCHASE_ISSUE` and `payment.loginRequired.forIssue`. `IssueAction::subscribedUser()` / `subscribedDomain()` and the partial-expiry branches: note td21. Not-online mode: `OjsJournalMustPublishPolicy` (permits `ROLE_ID_MANAGER`, `_SITE_ADMIN`, `_ASSISTANT`, `_SUB_EDITOR`, `_SUBSCRIPTION_MANAGER`; denies everyone else under `PUBLISHING_MODE_NONE` with `user.authorization.journalDoesNotPublish` "This journal does not publish its content online."), added by `ArticleHandler`, `IssueHandler`, `SearchHandler` and the issues API. Additional files: `article_details.tpl` lists supplementary galleys through the same `galley_link.tpl` and `ArticleHandler::download()` runs `userCanViewGalley()` for every galley.
 
 <a id="fn-f"></a>
 **f** — Reader pages, OJS. `pages/about/AboutHandler.php::subscriptions()` redirects to the journal index unless `paymentsEnabled && PaymentManager::isConfigured()` (the method plugin configured: for the manual method, non-empty `manualInstructions`); it lists `SubscriptionTypeDAO::getByInstitutional($journalId, false|true, false)` (public types only) into `templates/frontend/pages/subscriptions.tpl` (`about.subscriptions`, `about.subscriptions.individual`, `subscriptions.individualDescription`, `about.subscriptionTypes.name|format|duration|cost`, `user.subscriptions.purchaseNewSubscription` under `{if $isUserLoggedIn}`) and `templates/frontend/components/subscriptionContact.tpl` (`about.subscriptionsContact` "Subscriptions Contact", `about.contact.phone`). `pages/user/UserHandler.php`: `subscriptions()` redirects to the index without a user, outside `PUBLISHING_MODE_SUBSCRIPTION`, or with no type of either kind; `templates/frontend/pages/userSubscriptions.tpl` (status strings `subscriptions.status.*`, `subscriptions.inactive` "Inactive", `user.subscriptions.expires` "Expires: {$date}", `user.subscriptions.expired` "Expired: {$date}", buttons `user.subscriptions.purchase` "Purchase" → `completePurchaseSubscription` for `AWAITING_ONLINE_PAYMENT`, `user.subscriptions.renew` "Renew" → `payRenewSubscription` and "Purchase" → `purchaseSubscription/{kind}/{id}` for `ACTIVE`). `purchaseSubscription()` / `payPurchaseSubscription()` check the mode and `isConfigured()` and redirect to the index otherwise, refuse an existing individual subscription by redirect, and accept an existing subscription only in `ACTIVE`, `AWAITING_ONLINE_PAYMENT` or `AWAITING_MANUAL_PAYMENT`. Forms: `classes/subscription/form/UserIndividualSubscriptionForm.php` (types `getByInstitutional(…, false, false)`, labels "{name} ({cost} {currency})"; `execute()` sets `AWAITING_MANUAL_PAYMENT` when the method plugin's name is `ManualPayment`, else `AWAITING_ONLINE_PAYMENT`, and `dateStart`/`dateEnd` to today unless non-expiring, then queues `PAYMENT_TYPE_PURCHASE_SUBSCRIPTION` and displays the method's form) with `templates/frontend/pages/purchaseIndividualSubscription.tpl` (no `formErrors.tpl` include); `UserInstitutionalSubscriptionForm.php` (required `institutionName`; domain regexp; domain or `ipRanges`; IP pattern `manager.subscriptions.form.ipRangeValid`; `execute()` adds a new `Institution` every time) with `purchaseInstitutionalSubscription.tpl` (`common/formErrors.tpl`, `common.continue`, `common.cancel` → `user/subscriptions`).
@@ -2078,7 +2103,7 @@ in its note (p, q, r, s, t, u).
 **o** — Payments, OJS `classes/payment/ojs/OJSPaymentManager.php`: `isConfigured()` = `paymentsEnabled` and the method plugin's `isConfigured()`; `purchaseArticleEnabled()`, `purchaseIssueEnabled()`, `membershipEnabled()` = configured and the fee > 0; `onlyPdfEnabled()` = configured and `restrictOnlyPdf`; `getPaymentName()` (`payment.type.subscription` "Subscription Fee" + " ({type})", `payment.type.purchaseArticle` "Purchase Article Fee", `payment.type.purchaseIssue` "Purchase Issue Fee"); `fulfillQueuedPayment()` activates an individual subscription, sets an institutional one to `NEEDS_APPROVAL`, renews, and sends the online payment notifications. Its callers: `plugins/paymethod/paypal/PaypalPaymentPlugin.php` and, for submission (publication) fees only, `api/v1/_submissions/BackendSubmissionsController.php`. `plugins/paymethod/manual/ManualPaymentPlugin.php`: `isConfigured()` = non-empty `manualInstructions`; `getPaymentForm()` renders `templates/paymentForm.tpl` (`plugins.paymethod.manual` "Manual Fee Payment", `.purchase.title` "Title", `.purchase.fee` "Fee", `.sendNotificationOfPayment` "Send notification of payment"); `handle('notify')` emails `ManualPaymentNotify` to the journal's contact and fulfils nothing. Payment Types: `classes/subscription/form/PaymentTypesForm.php` (`purchaseArticleFee`, `purchaseIssueFee`, `membershipFee`, `restrictOnlyPdf`; labels `manager.payment.options.purchaseArticleFee` "Purchase Article", `.purchaseIssueFee` "Purchase Issue", `.onlypdf`, `.membershipFee` "Association Membership").
 
 <a id="fn-p"></a>
-**p** — Read from the code (note e: `hasPaidPurchaseArticle()`, `hasPaidPurchaseIssue()`, `dateEndMembership`); it cannot be seen on the test installs. Only a completed payment opens these paths, and the one method that works there without an outside service, "Manual Fee Payment", completes none (Rule 30; note o); PayPal needs the outside service. Live-probed 2026-09-25: a signed-in reader pressing a locked galley with a "Purchase Article" fee of 5 got the "Manual Fee Payment" page, and nothing on any screen marked the purchase or a membership paid. Settled by a completed purchase-article (or membership) payment for a reader, then the galley pressed.
+**p** — Read from the code (note e: `hasPaidPurchaseArticle()`, `hasPaidPurchaseIssue()`); it cannot be seen on the test installs. Only a completed payment opens these paths, and the one method that works there without an outside service, "Manual Fee Payment", completes none (Rule 30; note o); PayPal needs the outside service. Live-probed 2026-09-25: a signed-in reader pressing a locked galley with a "Purchase Article" fee of 5 got the "Manual Fee Payment" page, and nothing on any screen marked the purchase paid. Settled by a completed purchase-article payment for a reader, then the galley pressed. The membership's path is driven and opens nothing: note f-a33.
 
 <a id="fn-q"></a>
 **q** — Read from the code (`InstitutionalSubscriptionDAO::isValidInstitutionalSubscription()` with the request's host name, note k). It cannot be seen on the test installs: they are reached as "localhost", and the subscription window and the test tooling both refuse a "Domain" without a dot ("Please enter a valid domain.", live-probed 2026-09-25). Settled by a visitor whose host name ends in a dotted domain saved on the subscription.
@@ -2183,7 +2208,7 @@ in its note (p, q, r, s, t, u).
 **td28** — Live-probed 2026-09-25 (Side effects, "Subscription Notification"; Settings bullet 12; A4): with a contact saved, a new subscription with the box ticked sent the subscriber "Subscription Notification" from the contact's name and email, naming the journal, "K1 Six - 6 months - 6.00 USD" and the username; an "Edit" with the box ticked sent a second, one without none. Without a contact, "Save" was refused with A4's message. Nothing else sent mail: a plain "Edit", "Renew", "Delete", a new type, a policies "Save", the publishing mode switched and back, and the readers' purchases, "Renew", "Purchase" and "Cancel" left the mail catcher empty but for the manual method's "Manual Payment Notification" to the principal contact.
 
 <a id="fn-td29"></a>
-**td29** — Live-probed 2026-09-25 (Side effects, expiry reminders; A8, A27): the site's schedule list shows the task at `0 0 1 * *` (monthly, on the first). Run twice by hand as the scheduler runs it (`php lib/pkp/tools/scheduler.php test --name=…SubscriptionExpiryReminder`), on a journal with "1 Months" and "1 Weeks" before and subscriptions ending on the matching days, it stopped with a fatal error and sent nothing.
+**td29** — Live-probed 2026-09-25 (Side effects, expiry reminders; A8, A27): the site's schedule list shows the task at `0 0 1 * *` (monthly, on the first). Run twice by hand as the scheduler runs it (`php lib/pkp/tools/scheduler.php test --name='APP\tasks\SubscriptionExpiryReminder'`, from the application's root), on a journal with "1 Months" and "1 Weeks" before and subscriptions ending on the matching days, it stopped with a fatal error and sent nothing.
 
 <a id="fn-f-a1"></a>
 **f-a1** — Seen by the Navigation menus and Issues claim checks, 2026-09-23 and 2026-09-25 (seed-facts: "Settings › Distribution › "Access" shows no "Publishing Mode" choice ticked on `publicknowledge` or on a scratch journal, so both publish openly"), and live-probed 2026-09-25 (td4): no choice selected, the journal's galleys open to a visitor with no lock, the issue window without "Access", "Delayed Open Access" hidden. Mechanism: note d.
@@ -2217,7 +2242,7 @@ Issue report: [pkp-e2e#405](https://github.com/jardakotesovec/pkp-e2e/issues/405
 Issue report: [pkp-e2e#388](https://github.com/jardakotesovec/pkp-e2e/issues/388) ([docs/issues/U51-A9-individual-purchase-refusal-says-nothing.md](../issues/U51-A9-individual-purchase-refusal-says-nothing.md)).
 
 <a id="fn-f-a10"></a>
-**f-a10** — `userSubscriptions.tpl` offers `purchaseSubscription/{kind}/{id}` on an `ACTIVE` subscription; `UserIndividualSubscriptionForm::execute()` (and the institutional one) set the existing subscription's status to `AWAITING_MANUAL_PAYMENT` (or `_ONLINE_`) and both dates to today before any payment. Live-probed 2026-09-25 (td18), individual and institutional.
+**f-a10** — `userSubscriptions.tpl` offers `{journal}/user/purchaseSubscription/{individual|institutional}/{id}` (the purchase address, `{id}` the subscription's) on an `ACTIVE` subscription; `UserIndividualSubscriptionForm::execute()` (and the institutional one) set the existing subscription's status to `AWAITING_MANUAL_PAYMENT` (or `_ONLINE_`) and both dates to today before any payment. Live-probed 2026-09-25 (td18), individual and institutional.
 Issue report: [pkp-e2e#398](https://github.com/jardakotesovec/pkp-e2e/issues/398) ([docs/issues/U51-A10-purchase-on-active-subscription-removes-access.md](../issues/U51-A10-purchase-on-active-subscription-removes-access.md)).
 
 <a id="fn-f-a11"></a>
@@ -2225,7 +2250,7 @@ Issue report: [pkp-e2e#398](https://github.com/jardakotesovec/pkp-e2e/issues/398
 Issue report: [pkp-e2e#400](https://github.com/jardakotesovec/pkp-e2e/issues/400) ([docs/issues/U51-A11-institutional-purchase-adds-institution-each-time.md](../issues/U51-A11-institutional-purchase-adds-institution-each-time.md)).
 
 <a id="fn-f-a12"></a>
-**f-a12** — `UserHandler::purchaseSubscription()` has no sign-in check: with no user, `$user->getId()` is called on nothing (the individual path in `subscriptionExistsByUserForJournal()`, the institutional path in the form's constructor). The page router authorises page requests by default. Live-probed 2026-09-25 (td19): signed out, `GET {journal}/user/purchaseSubscription/individual` and `GET …/institutional` answered HTTP 500 with an empty body.
+**f-a12** — `UserHandler::purchaseSubscription()` has no sign-in check: with no user, `$user->getId()` is called on nothing (the individual path in `subscriptionExistsByUserForJournal()`, the institutional path in the form's constructor). The page router authorises page requests by default. Live-probed 2026-09-25 (td19): signed out, `GET {journal}/user/purchaseSubscription/individual` and `GET …/institutional` answered HTTP 500 with an empty body. The membership address is typed, no page linking to it: `{journal}/user/payMembership` (note f-a33).
 Issue report: [pkp-e2e#358](https://github.com/jardakotesovec/pkp-e2e/issues/358) ([docs/issues/U52-A9-membership-address-signed-out-blank-page.md](../issues/U52-A9-membership-address-signed-out-blank-page.md)).
 
 <a id="fn-f-a13"></a>
@@ -2307,6 +2332,9 @@ Issue report: [pkp-e2e#1054](https://github.com/jardakotesovec/pkp-e2e/issues/10
 
 <a id="fn-f-a32"></a>
 **f-a32** — Live-probed 2026-10-23 (Rule 7; A32), OJS main (ojs `3cf9aa91a8`, lib/pkp `1f415a07ca`), PKP's default test dataset (pkp/datasets `300c68e`), two runs, the data reset between them, as rvaca (Journal Manager). "The journal will require subscriptions…" saved on Settings › Distribution › "Access" (stored `publishingMode` 1). Article 17, published in "Vol. 1 No. 2 (2014)" with a PDF galley, was unpublished and published again from "Review Publishing Details" with "Don't Assign To An Issue" (the window had preselected "Assign To Current/Back Issue"); stored afterwards: status 3, `issue_id` NULL, `access_status` 0. Neither the publish window nor any Publication page of the published version ("Title & Abstract", "Contributors", "Metadata", "References", "Funding", "JATS XML", "Body Text", "Galleys", "Media", "Permissions & Disclosure", "Publication Settings") held an access checkbox, radio or list. "Publication Settings" showed the groups "Placement" ("Issue Assignment" with "Don't Assign To An Issue" selected, "Section", "Categories"), "Publication Timing", "Version and Updates", "Display" ("Cover Image", "Pages"), "Access" ("URL Path" alone) and "Identity"; "JATS XML"'s one box reads "Make available with publication". Neither issue's "Table of Contents" grid listed article 17. Signed out: the landing page's link `a.obj_galley_link.pdf.restricted` ("Requires Subscription PDF"); pressing it opened the Login page with `loginMessage=reader.subscriptionRequiredLoginText`, and `article/download/17/3` answered 302 there. Control: with the journal saved back to open access, the same link had no `restricted` class and the download answered 200 `application/pdf`. Code, OJS main `3cf9aa91a8`: `ArticleHandler::view()` and `userCanViewGalley()` already let through a publication whose `accessStatus` is `Submission::ARTICLE_ACCESS_OPEN`, with an issue or without (note e); the only screen that writes `accessStatus` is `TocGridHandler::setAccessStatus()` (note m), whose grid lists one issue's articles. The fix behind A30 (OJS `dde4cc70f4`) restricted such articles and added no setting to open them (note f-a30). Not driven: institutional (domain/IP) subscriptions and purchases on such an article (note f-a30 covers the subscriber and the Reader without one).
+
+<a id="fn-f-a33"></a>
+**f-a33** — `dateEndMembership` is not a property of `lib/pkp/schemas/user.json`. `EntityDAO::_update()` passes the user through `PKPSchemaService::sanitize()`, which drops it, so `OJSPaymentManager::fulfillQueuedPayment()` (the PayPal path; note o) stores nothing; `EntityDAO::fromRow()` loads only the settings the schema names, so `ArticleHandler::userCanViewGalley()` and `IssueHandler::userCanViewGalley()` read null for it (note e). The manual method's `notify` fulfils nothing (note o). OJS 3.3 read and wrote it with `getSetting()`/`updateSetting()` on `user_settings`; the 3.4 entity DAOs (`getData()`) broke it, and stable-3_5_0 and main read `getData()`. Live-probed 2026-11-23 (Settings bullet 7; Rule 11; A33), OJS main, two runs on scratch journals requiring subscriptions with "Manual Fee Payment" set up, an "Association Membership" fee of 7 and one published issue with a "Full Issue" PDF and an article PDF. A Reader who typed the journal's address followed by `user/payMembership` got "Manual Fee Payment" for an "Individual Membership Fee" of "7.00 (USD)" and pressed "Send notification of payment" ("Payment notification sent"; the principal contact got the "Manual Payment Notification"). The "Payments" tab read "No Items" for the Journal Manager and the Subscription Manager, "Individual Subscriptions" did not list the Reader, and no `completed_payments` row or membership setting was written. Before and after, the article PDF sent the Reader to the "Subscriptions" page and the "Full Issue" to "Manual Fee Payment" for a "Purchase Issue Fee" with no "Fee" line. A second Reader with a `dateEndMembership` a year ahead written into `user_settings` by hand was refused the same way, and no Profile tab nor "My Subscriptions" showed the date. Controls: a Reader with an active individual subscription opened both PDFs in the viewer; a Reader who bought an individual type was refused while it read "Awaiting Manual Payment" and opened both once the Journal Manager edited it to "Active". The PayPal store end needs the outside service and rests on the code above.
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Live-probed 2026-09-23 by the Navigation menus claim check (its OPS2): "Saved" shown, the next load with neither choice marked, "Archives" still in the header; the Search claim check saw every role still reach the Search page. Live-probed 2026-09-25 (td1) on a scratch server: "OPS will not be used…" and "The server will provide open access…" each saved with "Saved" and came back unselected; with the second saved, the visitor and the Reader still saw "Archives", the preprint page and its PDF. OPS `schemas/context.json` has no `publishingMode`, so the context API drops the value (note b); OPS `OpsServerMustPublishPolicy` and the archive header still read it.
