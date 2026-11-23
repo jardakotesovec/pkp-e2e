@@ -231,6 +231,11 @@ instead).
     navigation: it returns null, nothing reloads, an open window stays open.
     Leave the page first (goto another address) or assert on the tab strip,
     not the response.
+18. **An open side panel hides the window under it from role queries.**
+    With a side panel up over a workflow window, `getByRole('dialog')`
+    finds the panel alone, so a dialog count around a panel's "Close"
+    reads 1 before and after. Read "nothing asked" as no "OK" or "Cancel"
+    button in any dialog, plus a `page.on('dialog')` listener.
 
 ## Fixture selection
 
