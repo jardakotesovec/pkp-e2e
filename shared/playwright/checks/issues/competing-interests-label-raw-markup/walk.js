@@ -5,7 +5,8 @@
 // Takes the report's Steps through the screens on a dataset fleet freshly reset to PKP's default
 // test dataset, as the dataset's `dbarnes` on `publicknowledge`: Settings › Workflow ›
 // "Submission" › "Metadata", the competing-interests requirement ticked and saved; the lib.js
-// CASES submission's "Contributors", "Add Contributor"; then the row "Edit" of its contributor.
+// CASES submission's "Contributors", "Add Contributor"; then the row "Edit" of its contributor,
+// and "Save" on it with the statement empty: the footer's error list, which a screen reader reads.
 // OJS and OMP take the same steps as the control. The kit builds nothing.
 //
 // Modes (first argument):
@@ -18,7 +19,7 @@
 // Reset first:  npm run fleet-prep -- --feature <feature> --dataset <n> --reset
 // Run (main):   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/competing-interests-label-raw-markup/walk.js [steps|french]
 // Run (3.5):    PKP_E2E_LINE=stable-3_5_0 in front of both, the line's feature, PROBE_RUN=r35.
-// Fix trial:    PROBE_RUN=fix (steps), french-in / french-out (french), with fix.diff applied or not.
+// Fix trial:    PROBE_RUN=fix (steps) and nb-in (french) with fix.diff applied, nb-out (french) after the revert.
 // Facts: .reports/<feature>/<id>/ci-label-facts[-<run>]-<app>.json
 const {forEachApp, launch, signIn, screen, shot, record} = require('../../../probe');
 const L = require('./lib');
@@ -67,6 +68,10 @@ forEachApp(async (app) => {
             const dlg = await L.openEdit(page, wf, c.contributor);
             fact('Edit: competing-interests field', await L.ciField(dlg));
             await shot(page, `ci-label-edit${run}`);
+            // step 6: the empty save's error list
+            fact('6 empty save: footer and error list', await L.emptySave(page, dlg));
+            record(`ci-label-empty-save${run}`, await screen(page));
+            await shot(page, `ci-label-empty-save${run}`);
             await L.closeForm(page, dlg);
         }
     } catch (e) {

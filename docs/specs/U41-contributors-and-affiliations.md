@@ -1182,7 +1182,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A9](#a9) | On an article, book or preprint page, screen readers announce the ROR logo beside an affiliation or funder as an unnamed link | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A10](#a10) | The typed affiliation's per-language name boxes are announced wrongly by a screen reader | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A12](#a12) | The button that deletes a contributor role is labelled with a warning question, not the action | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [OPS2](#ops2) | On a preprint server, the contributor form labels "Competing Interests" with raw link markup | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [OPS2](#ops2) | On a preprint server, the contributor form labels "Competing Interests" with raw link markup | 🐞 | low | issues (claude), 2026-11-23 — re-verified |
 | [A25](#a25) | A contributor's later CRediT rows have unnamed drop-downs, and a click on their labels edits the first row | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A26](#a26) | On an article, book or preprint page with several contributors, a contributor's affiliations print in reverse order | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A27](#a27) | A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ" | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
@@ -1768,18 +1768,15 @@ code-like text instead of the plain "Competing Interests" a journal or
 press shows. The label reads
 `Competing interests <a target="_new" class="action" href="{$competingInterestGuidelinesUrl}">CI Policy</a>`,
 with an unfilled placeholder and visible link markup. It is an old
-label that OPS's own language files still carry for this field. The
-same text names the field in the error list a screen reader reads after
-an empty save:
-`Go to Competing interests <a target="_new" class="action" href="{$competingInterestGuidelinesUrl}">CI Policy</a>: This field is required.`
+label that OPS's own language files still carry for this field.
 
-The field's guidance, its required mark and saving all work, so the
-statement is filled in and saved as usual; only the field's name is
-wrong. A French interface shows the same markup in French. Readers never
-see it: the public preprint page shows no competing-interests
-statement.
-Basis: probe + code reading, 2026-10-03. <sup>f-ops2</sup>
-Report: refresh owed — drift sweep 2026-11-20: the screen reader's error list after an empty save was read and names the field with the same raw text (`Go to Competing interests <a target="_new" …>CI Policy</a>: This field is required.`), where the report's Reach lists the error list as unverified, read in the code only (`FormErrors.vue`, `author.competingInterests`) (2026-11-20)
+The field's guidance and its required mark work; only its name is
+wrong, on screen and in the list of errors a screen reader user moves
+through after saving without a statement, which names the field by the
+same raw text. A French interface shows the same markup in French.
+Readers never see it: the public preprint page shows no
+competing-interests statement.
+Basis: probe + code reading, 2026-11-23. <sup>f-ops2</sup>
 
 ### Retired
 

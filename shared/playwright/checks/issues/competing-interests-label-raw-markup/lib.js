@@ -122,4 +122,42 @@ async function changeLanguage(page, label, locale) {
     await idle(page);
 }
 
-module.exports = {T, flat, sleep, CASES, requireCompetingInterests, openPage, openAdd, openEdit, ciField, closeForm, changeLanguage};
+/**
+ * Press the form's "Save" with the competing-interests statement as it is (empty on the dataset's
+ * contributor) and read what the footer gives: the visible message and "Jump to next error", the
+ * screen-reader list of "Go to <field>: <error>" buttons, the field's own error, and whether a
+ * request left the browser (the required check runs in the browser first).
+ */
+async function emptySave(page, dlg) {
+    const frame = dlg.locator('iframe[id*="competingInterests"]').first();
+    const statement = (await frame.count())
+        ? flat(await frame.contentFrame().locator('body').innerText().catch(() => null), 200)
+        : null;
+    const sent = [];
+    const onReq = (r) => {
+        if (/\/api\/v1\//.test(r.url()) && r.method() !== 'GET') sent.push(`${r.method()} ${r.url().replace(/^https?:\/\/[^/]+/, '')}`);
+    };
+    page.on('request', onReq);
+    await dlg.getByRole('button', {name: /^(Save|Enregistrer)$/}).last().click();
+    await dlg.locator('.pkpFormErrors').first().waitFor({timeout: 10_000}).catch(() => {});
+    await idle(page);
+    await sleep(800);
+    page.off('request', onReq);
+    const read = await dlg.evaluate((d) => {
+        const f = (s) => (s || '').replace(/\s+/g, ' ').trim();
+        const box = d.querySelector('.pkpFormErrors');
+        const field = d.querySelector('label[for*="competingInterests"]');
+        const wrap = field ? field.closest('.pkpFormField') : null;
+        return {
+            footer: box ? f(box.innerText) : null,
+            errorList: box ? [...box.querySelectorAll('ul button')].map((b) => f(b.textContent)) : [],
+            listHidden: box ? !!box.querySelector('ul.-screenReader') : null,
+            fieldError: wrap ? [...wrap.querySelectorAll('.pkpFieldError')].map((x) => f(x.innerText)) : [],
+        };
+    });
+    // the footer as the accessibility tree gives it to a screen reader
+    const a11y = await dlg.locator('.pkpFormErrors').first().ariaSnapshot({timeout: 5_000}).catch((e) => `unread: ${flat(e.message, 120)}`);
+    return {statementBefore: statement, requestsSent: sent, ...read, a11y};
+}
+
+module.exports = {T, flat, sleep, CASES, requireCompetingInterests, openPage, openAdd, openEdit, ciField, closeForm, changeLanguage, emptySave};
