@@ -14,8 +14,8 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `df1583e5f3` | 2026-11-19 | claude (merge of the PR review of the `ore` port of pkp/pkp-lib#13789, VM s2) |
-| pkp-lib | `4b60635195` (the branch tip, the merge of pkp/pkp-lib#13841; ojs at its head `b1a1545571`); ui-library `b48195c3` (the branch tip, pkp/ui-library#1037; ojs at it) | 2026-11-18 | claude (daily upstream session, VM s1: `=main`) |
+| ojs | `372fc18701` | 2026-11-23 | claude (merge of the PR review of the `ore` ports of pkp/pkp-lib#11972, VM s1) |
+| pkp-lib | `663955ef34` (the branch tip, the merge of pkp/pkp-lib#13865; ojs at its head `eb496f125a`); ui-library `1358f5e2` (the branch tip, the merge of pkp/ui-library#1062; ojs at its head `f57dfe21`); ojs `plugins/generic/jatsTemplate` `d6ff313256` | 2026-11-23 | claude (merge of the PR review of the `ore` ports of pkp/pkp-lib#11972, VM s1: `=main`) |
 
 The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U14 A6 retired, U30 and U26 follow pkp/ui-library#981), its specs brought to the present template by script: the Planned lists dropped, retired entries one line. CI from the folder at the same OJS commit as the branch's last run, the same counts (run 43259507107 against 43211539187: 543 + 38 + 33 passed, 1 skipped).
 
@@ -39,6 +39,7 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
 
 ## Read log
 
+- **2026-11-23 — merge of the PR review of the `ore` ports of pkp/pkp-lib#11972 (pinged in the thread, VM s1): pkp-lib#13865 → `663955ef34`, ui-library#1062 → `1358f5e2`, ojs#6112 → `372fc18701`, each merging the reviewed head. No other commit on the three tips; baselines advanced. `=main` of pkp-lib `19ca682321` + `b18c557ff2` and ui-library `0549a357`: the `lines/ore/` folder takes the same spec edits as `main`'s fold (`upstream-sync.md`).**
 - **2026-11-23 — PR review of the `ore` ports of pkp/pkp-lib#11972 (asked in the thread, VM s1): pkp/pkp-lib#13865 (bozana `ore`, `50261bb5ea` + `eb496f125a` on the tip `4b60635195`), pkp/ui-library#1062 (`f57dfe2117` on the tip `b48195c3`), pkp/ojs#6112 (`ba2cddfed2` on the tip `df1583e5f3`: pointers to the two heads and jatsTemplate `d6ff313256`). `git range-diff` against the reviewed `main` commits: pkp-lib `19ca682321` and `b18c557ff2` both `=`, ui-library `0549a357` `=`; the jatsTemplate bump `2e50ada..d6ff313` carries pkp/jatsTemplate#128 (reviewed) and the tree-equal merge of #127; the pkp-lib range between the ojs pointer `b1a1545571` and the tip is the tree-equal merge `4b60635195`. Nothing outstanding. No companion (no `lines/ore/` test changes; no red). Not merged; baselines not advanced.**
   - Driven on the ore fleet at the PR heads (`checks/sync/pkp-lib-13624/` `walk.js`, `same-type.js`, `jats.js`, `import.js`, `PKP_E2E_LINE=ore PROBE_RUN=ore`): every result as on `main` round 3 (markers, email rules, ORCID person-only, the ORCID-off type switch removes the iD and tokens, same-type edits save, JATS without `<email>`, import), no server error logged.
   - CI [45167753203](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45167753203) (`--line ore`, ojs from bozana/ojs at `ba2cddfed2`): 3/3 green.
