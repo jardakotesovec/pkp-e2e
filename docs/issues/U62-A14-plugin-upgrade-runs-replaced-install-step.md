@@ -477,8 +477,8 @@ pattern, tried on all three apps.
 - Plugin Gallery read (2026-11-23): `pkp/plugin-gallery`'s
   `plugins.xml`, and every release package (72) of the seven plugins
   whose packages carried an `upgrade.xml` in the 2026-10-27 read of all
-  593 releases (pkp/pln, deiaSurvey, OASwitchboard, dataverse,
-  reviewReminder, doiInSummary, plaudit), compared release by release
+  593 releases (PKP's own PN plugin, pkp/pln, among them), compared
+  release by release
   within each application line: the installation step's class
   (`getInstallMigration()`), its file, and whether `upgrade.xml`
   exists. pln: `SchemaMigration` and its empty `upgrade.xml`
