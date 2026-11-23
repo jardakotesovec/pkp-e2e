@@ -15,7 +15,8 @@
  * other options go to `browser.newContext()`. API calls go through the
  * page (`page.evaluate(() => fetch(…))`): `page.request` and
  * `context.request` ignore the bypass list and fail on the dead proxy
- * (ECONNREFUSED 127.0.0.1:9) for every host, the pod's included.
+ * (ECONNREFUSED 127.0.0.1:9) for every host, the pod's included. A POST
+ * that 3.5 sends on to its localized URL is warned about on the console.
  *
  * Two layers. The context's proxy is a dead port with only the open hosts
  * bypassed (and `<-loopback>`, so other loopback ports, the slots' apps
@@ -69,6 +70,21 @@ async function newGuardedContext(browser, logFile, {allow = [], ...options} = {}
         }
         const from = request.redirectedFrom();
         log(request, ` [${failure}]${from ? ` (redirect from ${from.url().slice(0, 200)})` : ''}`);
+    });
+    context.on('response', (response) => {
+        const request = response.request();
+        const to = response.headers().location;
+        if (request.method() !== 'POST' || ![301, 302, 303].includes(response.status()) || !to) {
+            return;
+        }
+        // 3.5 sends an unlocalized URL to its localized one; the browser
+        // follows with a GET, so the POST's body never lands, silently.
+        const from = new URL(request.url()).pathname.split('/');
+        const into = new URL(to, request.url()).pathname.split('/');
+        const i = into.findIndex((part, n) => part !== from[n]);
+        if (i > 0 && /^[a-z]{2}(_[A-Z]{2})?$/.test(into[i]) && [...into.slice(0, i), ...into.slice(i + 1)].join('/') === from.join('/')) {
+            console.warn(`drive-guard: POST ${request.url()} was sent on to ${to} and became a GET; post to the localized URL (page.url() after a GET)`);
+        }
     });
     return context;
 }

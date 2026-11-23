@@ -3073,6 +3073,7 @@ also leaves galley DOIs unsent when the article's DOI is already
 "Registered" (galley DOIs turned on after the articles were registered)
 and when "Articles" is unticked.
 Basis: probe, 2026-10-15. <sup>f-ojs5</sup>
+Report: refresh owed — A18 retired 2026-11-20 (pkp/crossref-ojs#117 and pkp/ojs#5977, for pkp/pkp-lib#13591): a deposit that cannot connect now reads "Error", so the report's Expected sentence and link on the unreachable agency (the deleted A18 report) no longer hold; the fix catches only connection failures in `DataciteExportPlugin::depositXML()`, so this fault's server failure still leaves the row "Submitted" by the code, to be walked (2026-11-23)
 
 <a id="ojs7"></a>
 **OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ✅ · minor.
@@ -3230,6 +3231,7 @@ The way round is to empty the file's "Subject" (unpublish, the galley's
 hand, since "Deposit All" skips "Submitted" rows. The record then leaves
 the subject out.
 Since: 2026-01-12 (pkp/pkp-lib#11557) · Basis: probe, 2026-11-05. <sup>f-ojs13</sup>
+Report: refresh owed — A18 retired 2026-11-20 (pkp/crossref-ojs#117 and pkp/ojs#5977, for pkp/pkp-lib#13591): the report's Cause bullet links the deleted A18 report for why the DOIs stay "Submitted"; the fix catches only connection failures in `DataciteExportPlugin::depositXML()`, so `DepositSubmission` still has no failure handler and this fault's failure still leaves the rows "Submitted" by the code, to be walked (2026-11-23)
 
 
 ### OMP

@@ -417,7 +417,8 @@ async function canary() {
 /**
  * One SQL statement on the pod's database, as the app's own role (the
  * config's [database] section), through the `php` door: a SELECT prints a
- * header line and its rows tab-separated, anything else the count of rows it
+ * header line and its rows tab-separated and nothing else ("0 row(s)" when
+ * none, so a `$(…)` capture holds only data), anything else the count of rows it
  * changed, and a failure prints the database's own message and exits 1
  * (a bare `php -r` with PDO exits 255 with nothing on a missing table or a
  * second statement). One statement per call, on one line.
@@ -432,7 +433,7 @@ const SQL_PHP = [
     '  $cell = fn($v) => $v === null ? "NULL" : str_replace(["\\t", "\\n"], ["\\\\t", "\\\\n"], (string) $v);',
     '  if ($rows) echo implode("\\t", array_keys($rows[0])), "\\n";',
     '  foreach ($rows as $r) echo implode("\\t", array_map($cell, $r)), "\\n";',
-    '  fwrite(STDERR, count($rows) . " row(s)\\n");',
+    '  if (!$rows) echo "0 row(s)\\n";',
     '} catch (Throwable $e) { echo "SQL error: ", $e->getMessage(), "\\n"; exit(1); }',
 ].join(' ');
 

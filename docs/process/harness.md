@@ -475,20 +475,22 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   it), Laravel cache `cache/opcache-ds<n>` and config
   `config.test.ds<n>.inc.php`. Only the checkout's code is shared with the
   campaign fleet.
-- **The reset** (`shared/playwright/dataset.js`, about 3 s per app on
-  `main`): the config is the dataset's own `config.inc.php` with the
-  harness's keys patched in (`base_url`, `allowed_hosts`, a session
-  cookie of its own, the campaign's DB role and the fleet's DB name,
-  files and public dirs, the cache path, SMTP to this slot's Mailpit, the
-  dead-port `[proxy]`); everything else stays the team's (`job_runner`
-  and `task_runner` On, the dataset's `app_key`; `enable_minified` Off on
-  `main` but On in the stable-3_5_0 dataset, so a `lib/pkp/js/` fix tried
-  there sets it Off after each reset).
+- **The reset** (`shared/playwright/dataset.js`): the config is the
+  dataset's own `config.inc.php` with the harness's keys patched in
+  (`base_url`, `allowed_hosts`, a session cookie of its own, the
+  campaign's DB role and the fleet's DB name, files and public dirs, the
+  cache path, SMTP to this slot's Mailpit, the dead-port `[proxy]`);
+  everything else stays the team's: the dataset's `app_key`;
+  `enable_minified` Off on `main` but On in the stable-3_5_0 dataset, so
+  a `lib/pkp/js/` fix tried there sets it Off after each reset; and
+  `job_runner` and `task_runner` On, so jobs run at page loads with the
+  request's context, not as the suites' `runJobs()` runs them (the job
+  tool, no context), and can record otherwise: a claim a suite reads
+  after jobs is walked with `php lib/pkp/tools/jobs.php run` too.
   Every reset writes the config afresh, so a walk that needs another
   value (`strict = On`, a short `session_lifetime`, an `api_key_secret`,
-  which the dataset leaves empty so its emailed unsubscribe links open
-  "404 Not Found") sets it in `config.test.ds<n>.inc.php` after each
-  reset, and the Steps name the setting as the team sets it in
+  empty in the dataset) sets it in `config.test.ds<n>.inc.php` after
+  each reset, and the Steps name the setting as the team sets it in
   `config.inc.php`.
   `database.sql` is a `pg_dump --clean` dump owned by `<app>-ci`: the
   load leaves out the leading drops and the `OWNER TO` lines and runs the
