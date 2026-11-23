@@ -2613,7 +2613,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS3](#ops3) | A preprint server's Crossref "Username" help reads "see the advise above" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS6](#ops6) | A preprint server's Crossref deposit names a DOI once per posted version that shares it | 🐞 | medium | issues (claude), 2026-10-20 — re-verified |
-| [OPS8](#ops8) | A preprint server's Crossref deposit run by the job tool gives each preprint the site's address, so its DOI would lead to the "Login" page | 🐞 | user-visible | — |
+| [OPS8](#ops8) | A preprint server's Crossref deposit run by the job tool sends the site's address, so DOIs lead to "Login" | 🐞 | high | issues (claude), 2026-11-23 — re-verified |
 | [A1](#a1) | A new journal arrives in a DOI state its own Setup tab refuses to save | ❓ | minor | — |
 | [A5](#a5) | The Registration tab keeps a new agency even when its fields are refused | ❓ | minor | — |
 | [A6](#a6) | Choosing an agency silently unticks the kinds it does not accept | ❓ | minor | — |
@@ -3388,25 +3388,23 @@ too, and the open fix `pkp/crossref-ops#67` leaves it.
 Basis: probe, 2026-10-20. <sup>f-ops6</sup>
 
 <a id="ops8"></a>
-**OPS8 — A preprint server's Crossref deposit run by the job tool gives each preprint the site's address, so its DOI would lead to the "Login" page** · 🐞 · user-visible.
+**OPS8 — A preprint server's Crossref deposit run by the job tool sends the site's address, so DOIs lead to "Login"** · 🐞 · high.
 A preprint server registers its DOIs with Crossref and runs its
 background jobs with the command-line job tool, as a worker or a cron
-job. A manager deposits a posted preprint. The manager expects
-Crossref to be given the preprint's page, so that its DOI leads there.
-Instead, the file the deposit sends gives the page under the site's
-path, `…/index.php/index/preprint/…`, where the server's own path
-belongs. That address leads a reader who is not signed in to the
-site's "Login" page, so every DOI such a deposit registers would lead
-there instead of to the preprint. No screen shows the address a
-deposit sends. The file "Export DOIs" builds has the right address,
-and a journal's deposit run the same way has the journal's.
+job. A manager deposits a posted preprint and expects Crossref to be
+given the preprint's page.
 
-Read in the code, not seen: on the default setting, a deposit run at
-the end of one of the server's own pages has the right address, and
-one run at the end of a page outside the server, such as a site
-administration page, has the site's too. 3.5 builds the address the
-same way.
-Basis: probe, 2026-11-23. <sup>f-ops8</sup>
+Instead, the deposit gives the preprint's address under the site,
+`…/index.php/index/preprint/view/…`, where the server's own path
+belongs. A reader who follows the DOI lands on the site's "Login" page.
+No screen shows the address a deposit sends, so nobody notices, and the
+manager cannot correct it.
+
+Where jobs run at the end of page loads (`job_runner = On`, as an
+install ships), a deposit run at the end of one of the server's own
+pages sends the right address. One run at the end of a site
+administration page sends the site's.
+Basis: probe + walk, 2026-11-23. <sup>f-ops8</sup>
 
 
 ### Retired
@@ -6556,6 +6554,7 @@ falling back to the site's path `index` when the job tool runs
 pages give the right path and a site administration page the site's
 (code-read, not seen). `stable-3_5_0`'s filter passes the same `null`
 (since pkp/pkp-lib#6091, 2022), code-read.
+Issue report: docs/issues/U45-OPS8-preprint-deposit-job-tool-site-address.md.
 
 ## Reference — entry points & surfaces
 

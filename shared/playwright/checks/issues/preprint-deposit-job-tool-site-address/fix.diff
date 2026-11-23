@@ -1,0 +1,13 @@
+--- a/plugins/generic/crossref/filter/PreprintCrossrefXmlFilter.php
++++ b/plugins/generic/crossref/filter/PreprintCrossrefXmlFilter.php
+@@ -214,8 +214,9 @@
+         $this->appendRelationships($doc, $postedContentNode, $parentDoi, $vorDoi, $publication);
+ 
+         // DOI data
++        // The server's own path, not the request's: a deposit job runs with no context, or another one
+         $dispatcher = $this->_getDispatcher($request);
+-        $url = $dispatcher->url($request, Application::ROUTE_PAGE, null, 'preprint', 'view', [$submission->getCurrentPublication()->getData('urlPath') ?? $submission->getId(), 'version', $publication->getId()], null, null, true, '');
++        $url = $dispatcher->url($request, Application::ROUTE_PAGE, $deployment->getContext()->getPath(), 'preprint', 'view', [$submission->getCurrentPublication()->getData('urlPath') ?? $submission->getId(), 'version', $publication->getId()], null, null, true, '');
+         $postedContentNode->appendChild($this->createDOIDataNode($doc, $publication->getDoi(), $url));
+ 
+         return $postedContentNode;
