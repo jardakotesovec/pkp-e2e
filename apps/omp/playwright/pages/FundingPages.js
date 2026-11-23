@@ -19,14 +19,16 @@
  * - stubRegistrySearch — routes the browser-side ROR registry query
  *   (api.ror.org, fired straight from the Funder field) to an empty result
  *   set, or to given registry records the query names, so no test depends
- *   on the public registry being reachable. The
+ *   on the public registry being reachable; its handle switches the
+ *   registry to unreachable, out of service (503) or rate-limited (429)
+ *   for the failed-search leg (spec footnote s1). The
  *   typed-text option the tests pick renders independently of the
  *   suggestions payload (Autosuggest `allowCustom`), so the manual-name
  *   path under test is unchanged by the stub.
  *
  * OMP note: on the wizard's Details step, saving a funder leaves the
  * section's table stale ("No funders have been added." — spec A4 🐞), so
- * `addFunder` takes `{expectRow: false}` there: the save itself is still
+ * `addFunder` and `addRegistryFunder` take `{expectRow: false}` there: the save itself is still
  * bounded by the funders API response and the panel closing; nothing is
  * asserted about the (stale) table either way.
  *
@@ -34,7 +36,7 @@
  * from lib/ui-library src/managers/FunderManager/* and
  * src/components/Form/fields/FieldFunder*.vue, confirmed against the
  * running OMP app while this suite was built (2026-08-28) and revised
- * (2026-09-16).
+ * (2026-09-16, 2026-11-23).
  */
 const {expect} = require('@playwright/test');
 
@@ -44,17 +46,38 @@ const {expect} = require('@playwright/test');
  * call. With no `records` every query gets an empty result set (no
  * suggestions, no error dialog). `records` are ROR API v2 organization
  * records (the shape `pkpApi.setSite({rors})` seeds the install's copy
- * with, scenarios.md "POST site" › `rors`): a query that is part of a
- * record's `ror_display` name, case aside, is answered `{items: [record]}`,
- * any other query empty. Call once per page before opening the panel.
+ * with, scenarios.md "POST site" › `rors`; fixtures/ror-nserc-v2.json and
+ * fixtures/ror-nih-v2.json): a query that is part of a record's
+ * `ror_display` name, case aside, is answered `{items: [record]}`, any
+ * other query empty. Call once per page before opening the panel.
+ *
+ * The returned handle switches the registry's state for the queries that
+ * follow (spec footnote s1, the kept check SW23's `a9` leg):
+ * `answer('records')` (the default) as above; `answer('unreachable')` drops
+ * the connection; `answer('unavailable')` answers 503 (out of service);
+ * `answer('rateLimited')` answers 429 (too many searches).
  *
  * @param {import('@playwright/test').Page} page
  * @param {{records?: object[]}} [options]
+ * @returns {Promise<{answer: (mode: 'records'|'unreachable'|'unavailable'|'rateLimited') => void}>}
  */
 exports.stubRegistrySearch = async function stubRegistrySearch(page, {records = []} = {}) {
     const displayName = (record) =>
         (record.names.find((n) => (n.types || []).includes('ror_display')) || {value: ''}).value;
+    const FAILURES = {unavailable: 503, rateLimited: 429};
+    let mode = 'records';
     await page.route('https://api.ror.org/**', (route) => {
+        if (mode === 'unreachable') {
+            return route.abort('failed');
+        }
+        if (FAILURES[mode]) {
+            return route.fulfill({
+                status: FAILURES[mode],
+                contentType: 'application/json',
+                headers: {'Access-Control-Allow-Origin': '*'},
+                body: '{}',
+            });
+        }
         const query = (
             new URL(route.request().url()).searchParams.get('query') || ''
         ).toLowerCase();
@@ -68,6 +91,14 @@ exports.stubRegistrySearch = async function stubRegistrySearch(page, {records = 
             body: JSON.stringify({items}),
         });
     });
+    return {
+        answer(next) {
+            if (next !== 'records' && next !== 'unreachable' && !FAILURES[next]) {
+                throw new Error(`stubRegistrySearch: unknown registry state "${next}"`);
+            }
+            mode = next;
+        },
+    };
 };
 
 exports.FundingScreen = class FundingScreen {
@@ -121,6 +152,20 @@ exports.FundingScreen = class FundingScreen {
         return this.rows().filter({hasText: name});
     }
 
+    /**
+     * The rows whose name cell carries the ROR mark (registry funders).
+     * A registry funder saved nameless (spec A3) has no text to find its
+     * row by, so it is found by its mark (footnote s1).
+     */
+    rorRows() {
+        return this.rows().filter({has: this.page.locator('div.text-lg-normal .pkpIcon--inline')});
+    }
+
+    /** A row given by funder name, or a row locator passed through (rorRows()). */
+    rowOf(target) {
+        return typeof target === 'string' ? this.row(target) : target;
+    }
+
     addFunderButton() {
         return this.page.getByRole('button', {name: 'Add Funder', exact: true});
     }
@@ -139,7 +184,7 @@ exports.FundingScreen = class FundingScreen {
      * is reached positionally — the first button in the row is "up".
      */
     async moveRowUp(name) {
-        await this.row(name).locator('button').first().click();
+        await this.rowOf(name).locator('button').first().click();
     }
 
     /** Press "Save Order", bounded by the funders order API answering OK. */
@@ -327,7 +372,7 @@ exports.FundingScreen = class FundingScreen {
      * role queries — which skip hidden nodes — count it 0 there.
      */
     rowMoreActions(name) {
-        return this.row(name).getByRole('button', {name: 'More Actions'});
+        return this.rowOf(name).getByRole('button', {name: 'More Actions'});
     }
 
     /**
@@ -398,6 +443,73 @@ exports.FundingScreen = class FundingScreen {
     /** The ROR mark beside a row's funder name (FunderManagerCellFunder's icon). */
     rowRorMark(name) {
         return this.row(name).locator('td').first().locator('.pkpIcon--inline svg');
+    }
+
+    /**
+     * Pick a registry suggestion already shown (searchRegistry), bounded by
+     * the pick's own `POST rors` (the install's copy asked for the record);
+     * returns its status: 200 when the copy holds the record, 404 when it
+     * lacks it and the server cannot reach the registry (spec A3).
+     */
+    async pickRegistrySuggestion(suggestion) {
+        const rorPost = this.page.waitForResponse(
+            (r) => r.request().method() === 'POST' && /\/rors\/?$/.test(new URL(r.url()).pathname),
+            {timeout: 30_000}
+        );
+        await suggestion.click();
+        return (await rorPost).status();
+    }
+
+    /**
+     * Add a registry funder the install's copy holds: "Add Funder", the
+     * name searched, the record's suggestion picked (its `POST rors`
+     * answering 200), the panel showing the registry link, Save. By
+     * default waits for the named row; `expectRow: false` on the OMP
+     * wizard, where the table does not refresh (spec A4).
+     *
+     * @param {string} name the record's display name
+     * @param {string} ror the record's address (https://ror.org/…)
+     * @param {{expectRow?: boolean}} [options]
+     */
+    async addRegistryFunder(name, ror, {expectRow = true} = {}) {
+        await this.addFunderButton().click();
+        const panel = this.dialog('Add Funder');
+        await expect(panel).toBeVisible({timeout: 30_000});
+        const suggestion = await this.searchRegistry(panel, name, ror);
+        expect(await this.pickRegistrySuggestion(suggestion), "the pick's POST rors").toBe(200);
+        await expect(this.chosenRegistryLink(panel, ror)).toBeVisible({timeout: 30_000});
+        await this.savePanel(panel);
+        if (expectRow) {
+            await expect(this.row(name)).toBeVisible({timeout: 30_000});
+        }
+    }
+
+    /**
+     * The window a failed registry search or pick opens over the panel
+     * ("Error" or "ROR API Error"), found by its message.
+     *
+     * @param {string} message the window's message text
+     */
+    registryErrorWindow(message) {
+        return this.page.getByRole('dialog').filter({hasText: message});
+    }
+
+    /** Press a registry error window's "OK" and wait for it to close. */
+    async dismissRegistryError(window) {
+        await window.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(window).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
+     * The "* Required" mark of a name box's label (FormFieldLabel's
+     * required span: a visible "*" and a screen-reader "Required").
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {import('@playwright/test').Locator} box one of nameBoxes(panel)
+     */
+    async requiredMark(panel, box) {
+        const id = await box.getAttribute('id');
+        return panel.locator(`label[for="${id}"] .pkpFormFieldLabel__required`);
     }
 
     /**

@@ -279,12 +279,14 @@ and the mail catcher's address are in its footnote.
      it. This is the *registry funder*. Two exceptions, neither failing
      this scenario. The search must answer in the browser: a window
      "Error" or "ROR API Error" over the panel means the registry did not
-     answer ([A16](#a16)), and Ordering and Delete below run only with the
-     registry funder recorded. If the pick instead pops up "An unexpected
-     error has occurred. Please reload the page and try again.", the
-     journal's server cannot reach the registry ⚠ [A3](#a3): dismiss it
-     ("OK") and Save: the row shows the ROR mark with no name and still
-     serves as the registry funder below (Fields; Rule 4).
+     answer (the bullet "A registry search that fails" below walks that
+     case), and Ordering and Delete below run only with the registry funder
+     recorded. If the pick instead pops up "An unexpected error has
+     occurred. Please reload the page and try again.", the journal's
+     server cannot reach the registry and the install's copy lacks the
+     funder ⚠ [A3](#a3): dismiss it ("OK") and Save: the row shows the
+     ROR mark and serves as the registry funder below; what the row shows
+     beside the mark is A3's and is not judged here (Fields; Rule 4).
    - **Ordering**: press "Order", move the registry funder up with its
      arrow, and press "Save Order"; reload the page: the registry funder
      is still listed first (Rule 7).
@@ -299,6 +301,32 @@ and the mail catcher's address are in its footnote.
      action cannot be undone."; press "Cancel": it is still listed;
      delete again and press "OK": the row is gone, and the typed-name
      funder alone remains (Rule 6).
+   - **A registry search that fails**: the footnote says how each
+     registry state below is made. <sup>s1</sup> With the registry
+     unreachable, press "Add Funder" and type "Natural Sciences" in
+     "Search for a funder by name": a window titled "Error" opens over the
+     panel, reading "An unexpected error has occurred. Please reload the
+     page and try again."; press "OK", then "Delete" under the chosen
+     funder: the search box is back. Behind the window the typed text
+     already stood in a name box as if picked ⚠ [A16](#a16); this
+     scenario only clears it with "Delete". With the registry out of
+     service, type it again: the window is titled "ROR API Error" and
+     reads "The ROR API service is currently unavailable. Please refresh
+     the page or try again later."; press "OK", then "Delete". With the
+     registry refusing too many searches, type it again: the window is
+     titled "ROR API Error" and reads "Too many requests have been sent
+     to the ROR API. Please wait a moment before continuing to search.";
+     press "OK", then "Delete". With the registry answering again, type
+     "Natural Sciences and Engineering Research Council of Canada": the
+     suggestion of that name shows, with a country and the ROR mark
+     (Fields).
+   - **An unsaved funder dropped**: pick that suggestion: the panel shows
+     the name and its registry link; press "Close" at the panel's top
+     without saving: nothing is asked, the panel closes and the list
+     still shows "Test Foundation" alone; press "Add Funder": the panel
+     opens empty; type "Unsaved Foundation", pick the typed text, and
+     reload the page with the panel open: nothing is asked, and after the
+     reload the list still shows "Test Foundation" alone (Rule 5).
    - **A registry funder the install already holds**: press "Add
      Funder", type "Natural Sciences and Engineering Research Council of
      Canada" and pick the suggestion of that name showing a country and
@@ -330,20 +358,32 @@ and the mail catcher's address are in its footnote.
 2. **Declare funding while submitting**
 
    Given: Author, on the seeded journal, which asks the author for
-   funder metadata during submission.
+   funder metadata during submission and whose install's own copy of the
+   ROR registry already holds "Natural Sciences and Engineering Research
+   Council of Canada".
 
    - **The Details step**: start a submission and walk to the Details
      step: its last section (on a press, the section before Chapters) is
-     headed "Funding" and holds the funders list; press "Add Funder" and record scenario 1's typed-name
-     funder (type "Test Foundation", pick the typed text, Save): the section's table shows the row; on a
-     press or preprint server it still reads "No funders have been
-     added." until you reload the page, after which the row is there
-     (⚠ [A4](#a4)) (Rule 10).
-   - **The Review step**: go on to the Review step: "Test Foundation" is
-     listed under "Details"; complete the submission (Rule 10).
+     headed "Funding" and holds the funders list; press "Add Funder" and
+     record scenario 1's typed-name funder (type "Test Foundation", pick
+     the typed text, Save); on a press or preprint server, where the
+     table refreshes only after a reload ⚠ [A4](#a4), reload the page
+     and return to the Details step: the section's table shows the row
+     "Test Foundation" (Rule 10).
+   - **A registry funder the install already holds**: press "Add
+     Funder", type "Natural Sciences and Engineering Research Council of
+     Canada" and pick the suggestion of that name showing a country and
+     the ROR mark (the search must answer in the browser, as in scenario
+     1); Save, and on a press or preprint server reload and return to the
+     Details step again: the section's table shows "Natural Sciences and
+     Engineering Research Council of Canada" (Fields; Rule 10).
+   - **The Review step**: go on to the Review step: "Test Foundation"
+     and "Natural Sciences and Engineering Research Council of Canada"
+     are listed under "Details"; complete the submission (Fields;
+     Rule 10).
    - **The Journal Manager's list**: Journal Manager: open the new
      submission's workflow, then its Publication area, then "Funding":
-     the author's funder is there (Rule 1).
+     both of the author's funders are there (Rule 1).
    - **Control**: before the add, the section's table read "No funders
      have been added." (Rules 3, 10). <sup>s2</sup>
 
@@ -352,10 +392,12 @@ and the mail catcher's address are in its footnote.
    Given: Reader, on the seeded journal, with a published scratch article
    whose funders list holds two hand-named funders, "Test Foundation"
    with one grant ("Field Study", "1234", DOI "10.1234/example") and
-   "Second Foundation", and a registry-backed funder, all recorded
-   through the workflow as in scenario 1 and ordered there with "Save
-   Order" so that "Second Foundation" comes first; and a second published
-   scratch article with no funders.
+   "Second Foundation", and a registry-backed funder, "Natural Sciences
+   and Engineering Research Council of Canada", which the install's own
+   copy of the ROR registry holds, all recorded through the workflow as
+   in scenario 1 and ordered there with "Save Order" so that "Second
+   Foundation" comes first; and a second published scratch article with
+   no funders.
 
    - **The "Funders" block**: open the article's landing page (on a press
      the catalog's book page, on a preprint server the preprint's page):
@@ -364,42 +406,42 @@ and the mail catcher's address are in its footnote.
      "https://doi.org/10.1234/example" (Rule 9).
    - **The saved order**: "Second Foundation" is listed before "Test
      Foundation", the order saved in the workflow (Rule 7).
-   - **The registry funder**: its ROR mark links to its record on the
-     registry site; its name shows beside the mark when the install's
-     copy of the registry holds the funder; a mark with no name means the
-     copy lacks it and the journal's server cannot reach the registry
-     ([A3](#a3)) (Rule 9).
+   - **The registry funder**: "Natural Sciences and Engineering Research
+     Council of Canada" shows beside its ROR mark, and the mark links to
+     its record on the registry site; a mark with no name beside it
+     fails here, since the copy holds the funder ([A3](#a3) is the
+     nameless case) (Fields; Rule 9).
    - **Control**: the published article with no funders shows no
      "Funders" section at all (Rule 9). <sup>s3</sup>
 
 4. **The journal opts out**
 
    Given: Journal Manager, on a scratch journal, which starts at "Ask the
-   author for funder metadata during submission.", with one published
-   scratch submission whose funders list already holds a hand-named
-   funder recorded through the workflow as in scenario 1, and a throwaway
-   Author.
+   author for funder metadata during submission." and does not enable
+   the Funding Statement, with one published scratch submission whose
+   funders list already holds a hand-named funder recorded through the
+   workflow as in scenario 1, and a throwaway Author's draft with its
+   file uploaded.
 
    - **The setting off**: on the workflow settings' Metadata screen,
      untick "Enable funder metadata" and save: the submission's workflow
-     now shows no "Funding" entry in its Publication area (Rule 2;
+     shows no "Funding" entry in its Publication area (Rule 2;
      Settings).
-   - **The wizard with the setting off**: Author: start a submission,
-     upload its file and walk to the Details step: it has no Funders
-     section (Rule 2).
+   - **The wizard with the setting off**: Author: open the draft at its
+     Details step: it has no Funders section (Rule 2).
    - **The published page with the setting off**: open the published
      submission's landing page: its "Funders" block still lists the
-     funder (Rule 2; Rule 9).
+     funder (Rules 2, 9).
    - **The setting on again**: Journal Manager: re-tick "Enable funder
      metadata": the choice arrives on "Do not request funder metadata
      from the author during submission." rather than the "Ask…" level
      saved before (⚠ [A8](#a8)); save it as it stands: the submission's
-     workflow shows the "Funding" entry again, and the Author's draft,
-     opened again at its Details step, still has no Funders section
-     (Rule 2, the enabled level; Settings).
+     workflow shows the "Funding" entry again, and the draft's Details
+     step still has no Funders section (Rule 2, the enabled level;
+     Settings).
    - **"Ask" again**: pick "Ask the author for funder metadata during
      submission." and save: both surfaces are back, the "Funding" entry
-     and the Funders section on the Author's Details step, and the
+     and the Funders section on the draft's Details step, and the
      submission's "Funding" list still holds its funder (Rule 2).
    - **"Require"**: pick "Require the author to add funder metadata
      before accepting their submission." and save (Settings).
@@ -410,7 +452,7 @@ and the mail catcher's address are in its footnote.
      information below and make the requested changes.", and "Submit" is
      grayed out (Rule 11).
    - **Control**: before the untick, the same submission's Publication
-     area showed "Funding" and the Author's Details step ended with its
+     area showed "Funding" and the draft's Details step ended with its
      Funders section (Rule 2). <sup>s4</sup>
 
 5. **The read-only list**
@@ -445,13 +487,13 @@ and the mail catcher's address are in its footnote.
      dashboard: the review screen shows no funders list and "Test
      Foundation" appears nowhere on it; press "View All Submission
      Details": the window names no funder; in the browser's network view
-     read the window's own request for the publication, never one you
-     send: it carries no funders list at all, and "Test Foundation"
-     appears nowhere in it (Rule 13).
+     read the publication request the window itself makes (address and
+     field name in the footnote <sup>s6</sup>): it has no funders list,
+     not even an empty one, and "Test Foundation" appears nowhere in it
+     (Rule 13).
    - **The open assignment**: the same walk on the open assignment: the
-     review screen and the "View All Submission Details" window likewise
-     show no funders list, and the publication the window requests
-     likewise carries no funders list (Rule 13).
+     screen and the window show no funders list, and the same request
+     likewise has none, empty or not (Rule 13).
    - **Control**: Journal Manager: open the same submission's workflow,
      then its Publication area, then "Funding": the row shows "Test
      Foundation", and in the network view the screen's own request for
@@ -472,32 +514,6 @@ Left out of the scenarios above, by reason:
     hand-entered funder's name boxes, each named for its own language
     alone [report 2026-10-03]
   - the guard for A4 (issue report `docs/issues/U42-A10-wizard-data-citations-funders-stale-press-server.md`): on a press and a preprint server, a funder added in the submission wizard shows in its table and on "Review" at once, without a reload [report 2026-10-04]
-  - at "Require", an author with no funders on the Review step: "Funders
-    are required." under "Details", the problems notice, and "Submit"
-    grayed out (Rule 11; scenario 4) [report 2026-11-23]
-  - a registry search that fails: the window "Error" or "ROR API Error"
-    with its message over the panel, and after "OK" and "Delete" the
-    next search answering (Fields) [report 2026-11-23]
-  - scenario 1's registry funder, picked as its bullet says (its save
-    with no name included), and the "Ordering" and "Delete" legs run on it
-    rather than on a second typed-name funder (scenario 1) [sweep 2026-11-23]
-  - scenario 3's registry funder: its ROR mark linking to its registry
-    record, its name beside the mark when the install's copy holds it
-    (Rule 9; scenario 3) [sweep 2026-11-23]
-  - a funder the install's registry copy holds, picked in the wizard:
-    its registry name in the section's table and on the Review step
-    (Fields; Rule 10) [sweep 2026-11-23]
-  - "Close", or leaving the page, with an unsaved funder in "Add Funder":
-    nothing asked, nothing stored, the next "Add Funder" empty (Rule 5)
-    [sweep 2026-11-23]
-  - scenario 1's typed-name funder: the name box marked "* Required"; and
-    its "Edit": the panel offering "Close" and "Save" and no "Cancel"
-    (scenario 1) [sweep 2026-11-23]
-  - scenario 2's Details step: the section headed "Funding", and its
-    table showing "Test Foundation" (scenario 2) [sweep 2026-11-23]
-  - scenario 6: the publication the reviewer's window requests carrying
-    no funders list at all, not even an empty one (Rule 13; scenario 6)
-    [sweep 2026-11-23]
 - **Nothing new to test**:
   - grant validation on while the registry service is unreachable, the
     check skipped and the save going through (Settings): the save
@@ -518,7 +534,7 @@ Left out of the scenarios above, by reason:
   - A15 (a grant row deleted or added in "Edit Funder" and left with
     "Close" kept, and stored by the next "Save"; Fields)
   - A16 (a failed search leaving the half-typed text in the name box as
-    the chosen funder; Fields)
+    the chosen funder; Fields; scenario 1 passes it)
 - **No seed**:
   - a hand-named funder's grants never checked against a grant registry
     (Fields): the checked case needs a server that reaches the registry,
@@ -1062,10 +1078,20 @@ publication) in the seeded journal; Journal Manager account. Needs the
 journal's funders setting at its default ("ask" or any enabled level).
 The registry leg needs internet BOTH browser-side (the suggestions come
 live from the public registry) and server-side (the record cache) — the
-campaign's test installs block server-side egress, so there the registry
-leg deterministically fails per A3, and the suites record a second
-typed-name funder in the registry funder's place. "Search a well-known
-funder" — e.g. "National Institutes of Health"; the grant DOI needs
+campaign's test installs block server-side egress, so there the pick of
+"National Institutes of Health" (`https://ror.org/01cwqze88`, which the
+install's copy lacks) deterministically raises A3's window. The suites
+answer the browser's search for it with NIH's ROR API v2 record, dismiss
+the window, save, and run "Ordering" and "Delete" on that row, found by
+its ROR mark; nothing reads what the row shows beside the mark (A3,
+PRINCIPLES M3). The failed-search leg makes its registry states on the
+browser's own registry query (`https://api.ror.org/v2/organizations`,
+fn d), answering it: unreachable, with a dropped connection; out of
+service, with a 503; refusing too many searches, with a 429 (the three
+windows fn d records); answering again, with NSERC's record; the kept
+check `shared/playwright/checks/U43/SW23/sw23.js` drives the same three
+failures. The unsaved-funder leg's "Close" and reload with the panel open
+are fn d's 2026-11-23 probe (Rule 5). The grant DOI needs
 only the right shape, not a real DOI (validation is format-only unless the
 grant-validation setting is on). There is no funder seed key: funders
 are always recorded through the panel, here and in every scenario whose
@@ -1085,9 +1111,9 @@ suites put the record there before the pick with `POST site` `rors`
 fixture `ror-nserc-v2.json`. The key is idempotent (a held id is
 rewritten and keeps its id) and parallel-safe, as long as no test reads
 the absence of a record another test seeds. The browser-side search is
-answered with the same record: the suites' `stubRegistrySearch` returns
-it as `{items: [record]}` to a query its names match, and an empty set
-to every other query. The pick then needs no server fetch (fn d), so it
+answered with the same record (and NIH's, for the registry funder): the
+suites' `stubRegistrySearch` returns a record as `{items: [record]}` to
+a query its names match, and an empty set to every other query. The pick then needs no server fetch (fn d), so it
 holds on the test installs' blocked egress: on the 2026-11-12 runs, on
 all three apps, the pick's `POST rors` answered 200 with the held
 record, no error window appeared, and the list showed "Natural Sciences
@@ -1100,7 +1126,13 @@ fn i's.
 **s2 — scenario 2 seeding.** A roster author account; journal at the
 default funders level ("ask"). The wizard reaches Details after Files;
 the section sits at the step's end. The manual-name path avoids the
-internet dependency if the registry is unreachable.
+internet dependency if the registry is unreachable. The held registry
+funder is scenario 1's NSERC, put into the install's copy with `POST
+site` `rors` and answering the browser-side search stub exactly as in
+s1, so the author's pick needs no server fetch; its name in the wizard's
+table and on the Review step is the 2026-11-23 walk (f-a10). On a press
+or preprint server the suites reload the page after the last save and
+walk back to Details before reading the table (A4, PRINCIPLES M3).
 
 <a id="fn-s3"></a>
 **s3 — scenario 3 seeding.** One scratch submission published with a
@@ -1113,20 +1145,27 @@ allows it on a published item, Actors), and the order is saved with the
 workflow's "Order" / "Save Order" after all three are recorded, so A7's
 jump-ahead does not apply. On a press the landing page is the catalog
 book page; on a preprint server the posted preprint's page. Live-run
-2026-08-28 on all three apps, absence controls clean. Where the server
-cannot reach the registry the registry funder renders nameless (A3) — its
-ROR-mark link still resolves (fn-f) — which is why the name, grant and
-order assertions ride on the manual funders; the suites cover the manual
-funders only.
+2026-08-28 on all three apps, absence controls clean. The registry
+funder is NSERC, put into the install's copy with `POST site` `rors` and
+picked through the panel with the browser-side search stubbed, as in s1,
+so it renders with its name on the test installs (fn f, 2026-11-23);
+a funder the copy lacks would render nameless there (A3), its ROR-mark
+link still resolving (fn f). The grant and order assertions ride on the
+manual funders.
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** Scratch journal (the setting is mutated;
-fresh scratch contexts start at "Ask…", fn c), one scratch submission
+fresh scratch contexts start at "Ask…", fn c, with "Enable funding
+statement metadata" unticked, read on all three apps on the 2026-11-23
+sweep's scratch journals), one scratch submission
 seeded `published: true` with a funder recorded through the workflow
 panel afterwards (no funder seed key, s1), so the landing-page read with
-the setting off has a page (fn c), plus a throwaway author account for
-the wizard leg. The "previously recorded funders intact" check is the
-"Ask" re-pick leg's observable; the save on "Do not request…" before it
+the setting off has a page (fn c), plus a throwaway author account
+whose one draft (`submitted: false`) exists, its file uploaded, before
+the untick: the suites seed it, then upload the file as the Author on
+the way to the control's Details read, and every later wizard read
+reopens that draft. The "previously recorded funders intact" check is
+the "Ask" re-pick leg's observable; the save on "Do not request…" before it
 is Rule 2's enabled level. The author's draft carries an uploaded,
 genre-assigned file, so that at "Require" the funders problem is the
 only one on the Review step and the disabled Submit is down to it
@@ -1155,11 +1194,13 @@ the assignment's review type from the context's default (seed-facts,
 2026-09-05), and one manual funder recorded on it through the workflow
 panel by the journal's manager (no funder seed key, s1). The read is the
 page's own traffic, the publication request the reviewer's "View All
-Submission Details" window makes (`GET
-…/submissions/{id}/publications/{pubId}`), captured in the browser's
-network view or by the suite's response listener; fn h holds the probed
-shape (no `funders` key on the publication either assignment fetches,
-the withholding sitting on the submission map that no reviewer screen
+Submission Details" window makes
+(`GET …/submissions/{id}/publications/{pubId}`), captured in the
+browser's network view or by the suite's response listener. A funders
+list is a `funders` key in its JSON answer; the read fails on any
+`funders` key, an empty `[]` included. fn h holds the probed shape (no
+`funders` key on the publication either assignment fetches, the
+withholding sitting on the submission map that no reviewer screen
 requests). The control is the manager's own Funding screen reopened on
 the same submission, whose `GET …/submissions/{id}` carries the funder's
 name: the same read finds the name where a screen does fetch the

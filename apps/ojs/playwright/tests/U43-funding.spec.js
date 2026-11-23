@@ -9,39 +9,43 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A3 🐞: the registry funder of S1 and S3 (a pick the install's copy
- *   lacks) is stood in for by a second typed-name funder; only S1's held
- *   record (NSERC, seeded into the copy) takes the registry path.
- * - A1 ❓: S4 reads the Review step's "Funders are required." warning
- *   only, never whether the submit is enabled.
+ * - A3 🐞: S1's registry funder (NIH, which the install's copy lacks) has
+ *   its pick's error window dismissed and its row found by the ROR mark;
+ *   nothing reads what the row shows beside the mark.
+ * - A4 🐞: a press and preprint-server matter; S2 reads the table at once.
  * - A5 🐞: the ordering arrows are reached positionally; nothing reads
- *   their names.
+ *   their names, nor the name boxes' labels.
  * - A7 ❓: S1 and S3 add every funder before ordering; the funder S1 adds
  *   through the French panel is read for presence, never position.
  * - A8 ❓: S4 picks the "Do not request…" level itself on the re-tick.
- * - A10 ❓: S1 reads the held registry funder's name on the workflow list
- *   only, never in the wizard or on the published page.
+ * - A10 ❓, A11 ❓: not on these scenarios' paths (no server reaching
+ *   the registry).
  * - A12 ❓: every name box is left as it arrives or filled.
  * - A15 🐞: S1 leaves "Edit Funder" with "Close" only after a saved
  *   change, with no grant row added or deleted.
- * - A2, A4, A6, A9, A11: not on these scenarios' paths; OPS1 is the
- *   preprint server's, in that tree.
+ * - A16 ❓: S1's failed searches are cleared with "Delete"; what stood in
+ *   the name box behind the window is never read.
+ * - A2, A6: not on these scenarios' paths; OPS1 is the preprint
+ *   server's, in that tree.
  *
  * Hermeticity: the Funder field queries the public ROR registry from the
  * BROWSER; the suite stubs that query (FundingPages.stubRegistrySearch):
- * an empty result set everywhere but S1, whose stub answers a query
- * NSERC's names match with NSERC's registry record (the fixture
- * ../fixtures/ror-nserc-v2.json, the same record S1 seeds into the
- * install's copy), so no test depends on api.ror.org — the typed-name
- * path renders its typed-text option independently of the suggestions
- * payload.
+ * an empty result set unless records are given; S1, S2 and S3 answer a
+ * query NSERC's names match with NSERC's registry record (the fixture
+ * ../fixtures/ror-nserc-v2.json, the same record each seeds into the
+ * install's copy), and S1 a query NIH's names match with NIH's
+ * (../fixtures/ror-nih-v2.json, never seeded into the copy). S1's failed
+ * searches switch the same stub to a dropped connection, a 503 and a 429
+ * (footnote s1). No test depends on api.ror.org — the typed-name path
+ * renders its typed-text option independently of the suggestions payload.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only for settings (S4 and S6 run on scratch journals with
  * throwaway users). There is no funder seeding key — the add/edit panel IS
- * the surface under test, so funders are always recorded through it. S1's
- * given, NSERC held in the install's registry copy, is `POST site` `rors`
- * (idempotent, parallel-safe; no test of this suite reads an empty copy).
+ * the surface under test, so funders are always recorded through it. The
+ * given of S1–S3, NSERC held in the install's registry copy, is `POST
+ * site` `rors` (idempotent, parallel-safe; no test of this suite reads an
+ * empty copy).
  * S1's French leg runs last in that test: a /fr_CA/ visit switches the
  * test's own session to French. The
  * mailbox silence (S1) is read in the shared Mailpit scoped to a throwaway
@@ -80,6 +84,33 @@ const FUNDERS_REQUIRED = 'Funders are required.';
 const NSERC = require('../fixtures/ror-nserc-v2.json');
 const NSERC_NAME = 'Natural Sciences and Engineering Research Council of Canada';
 const NSERC_ROR = 'https://ror.org/01h531d29';
+/**
+ * The registry funder of S1 (footnote s1): NIH's ROR API v2 record, which
+ * answers the browser-side search only; the install's copy lacks it, so
+ * on the test installs its pick takes A3's path.
+ */
+const NIH = require('../fixtures/ror-nih-v2.json');
+const NIH_NAME = 'National Institutes of Health';
+const NIH_ROR = 'https://ror.org/01cwqze88';
+/** The windows a failed registry search opens over the panel (Fields; footnote s1). */
+const SEARCH_FAILED = {
+    unreachable: {
+        title: 'Error',
+        message: 'An unexpected error has occurred. Please reload the page and try again.',
+    },
+    unavailable: {
+        title: 'ROR API Error',
+        message:
+            'The ROR API service is currently unavailable. Please refresh the page or try again later.',
+    },
+    tooMany: {
+        title: 'ROR API Error',
+        message:
+            'Too many requests have been sent to the ROR API. Please wait a moment before continuing to search.',
+    },
+};
+const PROBLEMS_NOTICE =
+    'There are one or more problems that need to be fixed before you can submit. Please review the information below and make the requested changes.';
 /** The French list's strings (Rule 14; footnote i). */
 const FR = {
     order: 'Trier',
@@ -297,13 +328,21 @@ test.describe('funding', () => {
             ojsApi.setSite({rors: [NSERC]}),
         ]);
         const nameA = `Test Foundation ${tag}`;
-        const nameB = `Beta Foundation ${tag}`;
+        const nameUnsaved = `Unsaved Foundation ${tag}`;
         const nameFr = `Fondation Exemple ${tag}`;
 
-        // The browser-side registry search answers with NSERC's record for
-        // a query its names match, and with nothing otherwise.
+        // The browser-side registry search answers with NSERC's and NIH's
+        // records for a query their names match, and with nothing
+        // otherwise; its switch makes the failed-search states.
         const page = await (await asUser('manager.maya')).newPage();
-        await stubRegistrySearch(page, [NSERC]);
+        const registry = await stubRegistrySearch(page, [NSERC, NIH]);
+        // "Nothing is asked": every browser dialog (a leave-page prompt) is
+        // recorded, and accepted so a reload is never held up by one.
+        const asked = [];
+        page.on('dialog', async (dialog) => {
+            asked.push(`${dialog.type()}: ${dialog.message()}`);
+            await dialog.accept().catch(() => {});
+        });
         const pub = new PublicationScreen(page, JOURNAL);
         let funding = await openFunding(page, JOURNAL, submissionId);
 
@@ -340,7 +379,7 @@ test.describe('funding', () => {
         // back to the search box; search and pick again (Fields; Rule 5).
         await funding.pickTypedFunder(addPanel, nameA);
         await expect(funding.funderNameBoxes(addPanel).first()).toHaveValue(nameA);
-        await expect(funding.funderField(addPanel).getByText('Required')).toBeVisible();
+        await expect(funding.funderField(addPanel)).toContainText('* Required');
         await expect(funding.funderSearchInput(addPanel)).toHaveCount(0);
         await funding.deleteChosenFunderButton(addPanel).click();
         await expect(funding.funderSearchInput(addPanel)).toBeVisible({timeout: 30_000});
@@ -366,20 +405,63 @@ test.describe('funding', () => {
         await funding.savePanel(addPanel);
         await expect(funding.row(nameA)).toBeVisible({timeout: 30_000});
 
-        // A second typed-name funder stands in for the registry funder
-        // (A3 🐞 — see the file header) in Ordering and Delete below.
-        await funding.addFunder(nameB);
+        // The registry funder: NIH's suggestion shows its country and the
+        // ROR mark; picked, the panel shows the name and its registry link.
+        // The install's copy lacks NIH and the test server cannot reach the
+        // registry, so the pick's lookup is refused and the window "An
+        // unexpected error has occurred…" opens (A3 🐞, footnote s1): it is
+        // dismissed with "OK" and the funder saved; its row is the one with
+        // the ROR mark, and nothing reads what it shows beside the mark
+        // (M3). A copy that held NIH would answer the lookup and the row
+        // would read its name (Fields; Rule 4).
+        await funding.addFunderButton().click();
+        const nihPanel = funding.dialog('Add Funder');
+        await expect(nihPanel).toBeVisible({timeout: 30_000});
+        const nihSuggestion = await funding.searchRegistry(nihPanel, NIH_NAME);
+        await expect(nihSuggestion.locator('sub')).toHaveText('United States');
+        await expect(nihSuggestion.locator('svg').first()).toBeVisible();
+        await expect(nihSuggestion.locator(`a[href="${NIH_ROR}"]`)).toBeVisible();
+        const nihLookup = await funding.pickRegistrySuggestion(nihSuggestion);
+        if (!nihLookup.ok()) {
+            await funding.dismissErrorWindow(funding.errorWindow(SEARCH_FAILED.unreachable.message));
+        }
+        await expect(funding.funderField(nihPanel)).toContainText(NIH_NAME, {timeout: 30_000});
+        await expect(funding.funderField(nihPanel).locator(`a[href="${NIH_ROR}"]`).first()).toBeVisible();
+        await funding.savePanel(nihPanel);
+        await expect(funding.markedRows()).toHaveCount(1, {timeout: 30_000});
+        if (nihLookup.ok()) {
+            await expect(funding.markedRows().first()).toContainText(NIH_NAME);
+        }
+        // Control: the typed-name row beside it carries no ROR mark.
+        await expect(funding.rorMark(nameA)).toHaveCount(0);
+        await expect(funding.rows()).toHaveCount(2);
+        await expect(funding.rows().nth(0)).toContainText(nameA);
+        await expect(funding.rows().nth(1).getByRole('img')).toHaveCount(1);
 
-        // Ordering: move the stand-in up, save the order, reload: it is
-        // still listed first (Rule 7).
-        await orderFirst(page, funding, nameB);
+        // Ordering: move the registry funder up with its arrow (the arrows
+        // carry no name, A5 🐞, so the row's first button is "up"), save
+        // the order, reload: the registry funder is still listed first
+        // (Rule 7).
+        await funding.orderButton().click();
+        await expect(funding.saveOrderButton()).toBeVisible({timeout: 30_000});
+        await funding.rows().nth(1).locator('button').first().click();
+        const orderSaved = page.waitForResponse(
+            (r) =>
+                r.url().includes('/funders/order') &&
+                r.request().method() === 'POST' &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await funding.saveOrderButton().click();
+        await orderSaved;
         funding = await openFunding(page, JOURNAL, submissionId);
-        await expect(funding.rows().first()).toContainText(nameB, {timeout: 30_000});
+        await expect(funding.rows()).toHaveCount(2, {timeout: 30_000});
+        await expect(funding.rows().first().getByRole('img')).toHaveCount(1);
         await expect(funding.rows().nth(1)).toContainText(nameA);
 
         // Edit: the panel is titled "Edit Funder", prefilled with the name
         // and the one grant row, the blank second row gone; the grant
-        // number changed and saved; reopened, "5678" is there; Cancel
+        // number changed and saved; reopened, "5678" is there; "Close"
         // (Fields; Rule 5).
         await funding.openRowAction(nameA, 'Edit');
         let editPanel = funding.dialog('Edit Funder');
@@ -401,14 +483,17 @@ test.describe('funding', () => {
         await expect(editPanel.locator('input[name="grantNumber"]')).toHaveValue('5678', {
             timeout: 30_000,
         });
-        // The panel offers no "Cancel": its only way out without saving is
-        // the header's "Close" (T-ojs-2 in .reports/U43/test-ojs-findings.md).
+        // The panel offers "Close" and "Save" and no "Cancel" (Rule 5).
+        await expect(editPanel.getByRole('button', {name: 'Close', exact: true})).toBeVisible();
+        await expect(funding.saveButton(editPanel)).toBeVisible();
+        await expect(editPanel.getByRole('button', {name: 'Cancel', exact: true})).toHaveCount(0);
         await editPanel.getByRole('button', {name: 'Close', exact: true}).click();
         await expect(editPanel).toHaveCount(0, {timeout: 30_000});
 
-        // Delete: the confirmation's question; Cancel leaves the row; OK
-        // removes it and the typed-name funder alone remains (Rule 6).
-        await funding.openRowAction(nameB, 'Delete');
+        // Delete, on the registry funder: the confirmation's question;
+        // Cancel leaves the row; OK removes it and the typed-name funder
+        // alone remains (Rule 6).
+        await funding.openRowActionOn(funding.markedRows().first(), 'Delete');
         let confirm = funding.deleteConfirmDialog();
         await expect(confirm).toBeVisible({timeout: 30_000});
         await expect(confirm).toContainText(
@@ -416,9 +501,10 @@ test.describe('funding', () => {
         );
         await confirm.getByRole('button', {name: 'Cancel', exact: true}).click();
         await expect(confirm).toHaveCount(0, {timeout: 30_000});
-        await expect(funding.row(nameB)).toBeVisible();
+        await expect(funding.markedRows()).toHaveCount(1);
+        await expect(funding.rows()).toHaveCount(2);
 
-        await funding.openRowAction(nameB, 'Delete');
+        await funding.openRowActionOn(funding.markedRows().first(), 'Delete');
         confirm = funding.deleteConfirmDialog();
         await expect(confirm).toBeVisible({timeout: 30_000});
         const deleted = page.waitForResponse(
@@ -430,16 +516,91 @@ test.describe('funding', () => {
         );
         await confirm.getByRole('button', {name: 'OK', exact: true}).click();
         await deleted;
-        await expect(funding.row(nameB)).toHaveCount(0, {timeout: 30_000});
+        await expect(funding.markedRows()).toHaveCount(0, {timeout: 30_000});
         await expect(funding.row(nameA)).toBeVisible();
         await expect(funding.rows()).toHaveCount(1);
+
+        // A registry search that fails (footnote s1): for each failing
+        // state, "Natural Sciences" typed in a fresh search opens its
+        // window over the panel; "OK", then "Delete" under the chosen
+        // funder brings the search box back. What stood in the name box
+        // behind the window is A16 ❓ and is not read (Fields).
+        const dialogs = page.getByRole('dialog');
+        const dialogsBefore = await dialogs.count();
+        await funding.addFunderButton().click();
+        const searchPanel = funding.dialog('Add Funder');
+        await expect(searchPanel).toBeVisible({timeout: 30_000});
+        for (const state of /** @type {const} */ (['unreachable', 'unavailable', 'tooMany'])) {
+            registry.fail(state);
+            await funding.typeSearch(searchPanel, 'Natural Sciences');
+            const failed = funding.errorWindow(SEARCH_FAILED[state].message);
+            await expect(failed).toBeVisible({timeout: 30_000});
+            await expect(failed).toContainText(SEARCH_FAILED[state].title);
+            await expect(searchPanel).toBeVisible();
+            await funding.dismissErrorWindow(failed);
+            await funding.deleteChosenFunderButton(searchPanel).click();
+            await expect(funding.funderSearchInput(searchPanel)).toBeVisible({timeout: 30_000});
+        }
+        // With the registry answering again, the full name brings NSERC's
+        // suggestion with its country and the ROR mark (Fields).
+        registry.answer();
+        const answered = await funding.searchRegistry(searchPanel, NSERC_NAME);
+        await expect(answered.locator('sub')).toHaveText('Canada');
+        await expect(answered.locator('svg').first()).toBeVisible();
+        await expect(answered.locator(`a[href="${NSERC_ROR}"]`)).toBeVisible();
+        await expect(funding.errorWindow(/An unexpected error has occurred|ROR API Error/)).toHaveCount(0);
+
+        // An unsaved funder dropped: picked, the panel shows the name and
+        // its registry link; "Close" asks nothing: the panel goes, the
+        // page's windows are back to the count before "Add Funder", no
+        // window offers an "OK" or "Cancel" (the delete confirmation above
+        // was found by the same buttons), no browser prompt was raised, and
+        // the list still shows the typed-name funder alone (Rule 5).
+        const unsavedLookup = await funding.pickRegistrySuggestion(answered);
+        expect(unsavedLookup.status()).toBe(200);
+        await expect(funding.funderField(searchPanel)).toContainText(NSERC_NAME, {timeout: 30_000});
+        await expect(
+            funding.funderField(searchPanel).locator(`a[href="${NSERC_ROR}"]`).first()
+        ).toBeVisible();
+        await searchPanel.getByRole('button', {name: 'Close', exact: true}).click();
+        await expect(searchPanel).toHaveCount(0, {timeout: 30_000});
+        await expect(dialogs).toHaveCount(dialogsBefore);
+        await expect(
+            dialogs.getByRole('button', {name: /^(OK|Cancel)$/})
+        ).toHaveCount(0);
+        await expect(funding.rows()).toHaveCount(1);
+        await expect(funding.row(nameA)).toBeVisible();
+        await expect(funding.row(NSERC_NAME)).toHaveCount(0);
+        expect(asked).toEqual([]);
+
+        // "Add Funder" opens empty: the search box blank, no name box, no
+        // registry link, no grant row (the same reads held a value above).
+        await funding.addFunderButton().click();
+        const emptyPanel = funding.dialog('Add Funder');
+        await expect(emptyPanel).toBeVisible({timeout: 30_000});
+        await expect(funding.funderSearchInput(emptyPanel)).toHaveValue('');
+        await expect(funding.funderNameBoxes(emptyPanel)).toHaveCount(0);
+        await expect(funding.funderField(emptyPanel).locator('a[href^="https://ror.org/"]')).toHaveCount(0);
+        await expect(emptyPanel.locator('input[name="grantNumber"]')).toHaveCount(0);
+
+        // A typed name picked, the page reloaded with the panel open:
+        // nothing is asked, and after the reload the list still shows the
+        // typed-name funder alone (Rule 5).
+        await funding.pickTypedFunder(emptyPanel, nameUnsaved);
+        await expect(funding.funderNameBoxes(emptyPanel).first()).toHaveValue(nameUnsaved);
+        await page.reload();
+        await expect(funding.row(nameA)).toBeVisible({timeout: 30_000});
+        await expect(funding.rows()).toHaveCount(1);
+        await expect(funding.row(nameUnsaved)).toHaveCount(0);
+        await expect(funding.dialog('Add Funder')).toHaveCount(0);
+        expect(asked).toEqual([]);
 
         // A registry funder the install already holds: NSERC's suggestion
         // shows its country and the ROR mark with its registry link; the
         // pick is answered from the install's copy (no error window, on a
         // server that cannot reach the registry); Save closes the panel and
         // the list shows the registry name with the ROR mark beside it
-        // (Fields; Rule 4).
+        // (Fields).
         await funding.addFunderButton().click();
         const registryPanel = funding.dialog('Add Funder');
         await expect(registryPanel).toBeVisible({timeout: 30_000});
@@ -548,55 +709,86 @@ test.describe('funding', () => {
     test('S2: declare funding while submitting', {tag: '@smoke'}, async ({asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s2', testInfo);
-        const {submissionId} = await ojsApi.createSubmission({
-            tag,
-            context: JOURNAL,
-            submitter: 'author.alex',
-            title: `Submission ${tag}`,
-            submitted: false,
-        });
+        // The given: the install's copy of the registry holds NSERC
+        // (footnote s2, as s1).
+        const [{submissionId}] = await Promise.all([
+            ojsApi.createSubmission({
+                tag,
+                context: JOURNAL,
+                submitter: 'author.alex',
+                title: `Submission ${tag}`,
+                submitted: false,
+            }),
+            ojsApi.setSite({rors: [NSERC]}),
+        ]);
         const funderName = `Test Foundation ${tag}`;
 
         // The author walks the wizard to Details; the journal sits at the
-        // default "ask" level, so the step carries a Funders section.
+        // default "ask" level, so the step carries the funders list. The
+        // browser-side registry search answers with NSERC's record.
         const authorPage = await (await asUser('author.alex')).newPage();
-        await stubRegistrySearch(authorPage);
+        await stubRegistrySearch(authorPage, [NSERC]);
         const wizard = new SubmissionWizardPage(authorPage, JOURNAL);
         await wizard.goto(submissionId);
         await wizard.expectStep('Upload Files');
         await wizard.uploadFile();
         await wizard.continueTo('Details');
 
-        // The Details step: its last section is "Funders" (Rule 10) and,
-        // the control, its table reads "No funders have been added."
-        // before the add (Rules 3, 10).
+        // The Details step: its last section is headed "Funding" and holds
+        // the funders list (Rule 10) and, the control, its table reads "No
+        // funders have been added." before the add (Rules 3, 10).
         const wizardFunding = new FundingScreen(authorPage);
         await expect(wizardFunding.table()).toBeVisible({timeout: 30_000});
         await expect(wizardFunding.wizardFundersSection()).toHaveCount(1);
-        await expect(wizardFunding.wizardSections().last()).toContainText('Funders');
+        await expect(wizardFunding.wizardFundingHeading()).toBeVisible();
+        await expect(wizardFunding.wizardSections().last().getByRole('table', {name: 'Funders', exact: true})).toBeVisible();
         await expect(wizardFunding.table()).toContainText(EMPTY_LIST);
 
         // Record scenario 1's typed-name funder: on OJS the section's table
-        // updates in place after the save (the stale table is A4's, a
-        // press/preprint-server matter).
+        // shows its row at once (the stale table is A4's, a press and
+        // preprint-server matter).
         await wizardFunding.addFunder(funderName);
+        await expect(wizardFunding.row(funderName)).toBeVisible();
         await expect(wizardFunding.table()).not.toContainText(EMPTY_LIST);
 
-        // The Review step lists the funder's name under Details; complete
-        // the submission (Rule 10).
+        // A registry funder the install already holds: NSERC's suggestion
+        // with its country and the ROR mark, picked (answered from the
+        // install's copy) and saved: the section's table shows its name
+        // (Fields; Rule 10).
+        await wizardFunding.addFunderButton().click();
+        const panel = wizardFunding.dialog('Add Funder');
+        await expect(panel).toBeVisible({timeout: 30_000});
+        const suggestion = await wizardFunding.searchRegistry(panel, NSERC_NAME);
+        await expect(suggestion.locator('sub')).toHaveText('Canada');
+        await expect(suggestion.locator('svg').first()).toBeVisible();
+        await expect(suggestion.locator(`a[href="${NSERC_ROR}"]`)).toBeVisible();
+        const lookedUp = await wizardFunding.pickRegistrySuggestion(suggestion);
+        expect(lookedUp.status()).toBe(200);
+        await expect(wizardFunding.funderField(panel)).toContainText(NSERC_NAME, {timeout: 30_000});
+        await wizardFunding.savePanel(panel);
+        await expect(wizardFunding.row(NSERC_NAME)).toBeVisible({timeout: 30_000});
+        await expect(wizardFunding.rows()).toHaveCount(2);
+
+        // The Review step lists both funders' names under "Details", the
+        // submit offered (the control of S4's grayed "Submit"); complete
+        // the submission (Fields; Rule 10).
         await wizard.continueTo('Contributors');
         await wizard.continueTo('For the Editors');
         await wizard.continueToReview(submissionId);
         await expect(wizard.reviewPanel('Details')).toContainText('Funders');
         await expect(wizard.reviewPanel('Details')).toContainText(funderName);
+        await expect(wizard.reviewPanel('Details')).toContainText(NSERC_NAME);
+        await expect(wizard.submitButton()).toBeEnabled();
         await wizard.submitAndConfirm();
 
-        // The Journal Manager's list: the author's funder is on the new
-        // submission's Funding screen (Rule 1: one list per submission).
+        // The Journal Manager's list: both of the author's funders are on
+        // the new submission's Funding screen (Rule 1: one list per
+        // submission).
         const managerPage = await (await asUser('manager.maya')).newPage();
         const funding = await openFunding(managerPage, JOURNAL, submissionId);
         await expect(funding.row(funderName)).toBeVisible({timeout: 30_000});
-        await expect(funding.rows()).toHaveCount(1);
+        await expect(funding.row(NSERC_NAME)).toBeVisible();
+        await expect(funding.rows()).toHaveCount(2);
     });
 
     test('S3: read a published article\'s funding', async ({asUser, ojsApi, page}, testInfo) => {
@@ -620,6 +812,7 @@ test.describe('funding', () => {
                 decisions: ['skipExternalReview', 'sendToProduction'],
                 published: true,
             }),
+            ojsApi.setSite({rors: [NSERC]}),
         ]);
         const testFoundation = `Test Foundation ${tag}`;
         const secondFoundation = `Second Foundation ${tag}`;
@@ -629,20 +822,29 @@ test.describe('funding', () => {
 
         // The manager records the two hand-named funders on the published
         // item (publishing does not lock the list — Actors & permissions),
-        // the first with its grant, then orders "Second Foundation" first
-        // with "Order" / "Save Order" (footnote s3). Typed-name path only:
-        // the registry funder cannot be produced here (A3 🐞, the file
-        // header), so Rule 9's ROR-mark link stays uncovered.
+        // the first with its grant, and the registry funder the install's
+        // copy holds (NSERC, the browser-side search answered with its
+        // record), then orders "Second Foundation" first with "Order" /
+        // "Save Order" (footnote s3).
         const managerPage = await (await asUser('manager.maya')).newPage();
-        await stubRegistrySearch(managerPage);
+        await stubRegistrySearch(managerPage, [NSERC]);
         let funding = await openFunding(managerPage, JOURNAL, withFunder.submissionId);
         await funding.addFunder(testFoundation, {
             grants: [{grantName, grantNumber, grantDoi}],
         });
         await funding.addFunder(secondFoundation);
+        await funding.addFunderButton().click();
+        const registryPanel = funding.dialog('Add Funder');
+        await expect(registryPanel).toBeVisible({timeout: 30_000});
+        const suggestion = await funding.searchRegistry(registryPanel, NSERC_NAME);
+        const lookedUp = await funding.pickRegistrySuggestion(suggestion);
+        expect(lookedUp.status()).toBe(200);
+        await funding.savePanel(registryPanel);
+        await expect(funding.row(NSERC_NAME)).toBeVisible({timeout: 30_000});
         await orderFirst(managerPage, funding, secondFoundation);
         funding = await openFunding(managerPage, JOURNAL, withFunder.submissionId);
         await expect(funding.rows().first()).toContainText(secondFoundation, {timeout: 30_000});
+        await expect(funding.rows()).toHaveCount(3);
 
         // The "Funders" block: the anonymous reader's landing page lists
         // "Test Foundation" with its grant's name, "Grant Number" and the
@@ -659,9 +861,23 @@ test.describe('funding', () => {
 
         // The saved order: "Second Foundation" is listed before "Test
         // Foundation" (Rule 7).
-        await expect(landing.funderNames).toHaveCount(2);
+        await expect(landing.funderNames).toHaveCount(3);
         await expect(landing.funderNames.nth(0)).toContainText(secondFoundation);
         await expect(landing.funderNames.nth(1)).toContainText(testFoundation);
+
+        // The registry funder: its name shows beside its ROR mark, and the
+        // mark links to its record on the registry site (Fields; Rule 9).
+        // Control: a hand-named funder's entry carries no such link.
+        const registryEntry = landing.funderNames.filter({hasText: NSERC_NAME});
+        await expect(registryEntry).toHaveCount(1);
+        await expect(registryEntry).toContainText(NSERC_NAME);
+        const markLink = registryEntry.locator(`a[href="${NSERC_ROR}"]`);
+        await expect(markLink).toHaveCount(1);
+        await expect(markLink.locator('svg')).toHaveCount(1);
+        await expect(markLink.locator('svg')).toBeVisible();
+        await expect(
+            landing.funderNames.filter({hasText: testFoundation}).locator('a[href^="https://ror.org/"]')
+        ).toHaveCount(0);
 
         // Control: the published article with no funders shows no
         // "Funders" section at all — bounded by the page having rendered
@@ -792,16 +1008,23 @@ test.describe('funding', () => {
             .check();
         await saveMetadataSettings(managerPage);
 
-        // The Review step at "Require": the draft, with no funder declared,
-        // walked on to Review shows "Funders are required." (Rule 11). The
-        // submit's state is A1 ❓ and is not asserted.
+        // The Review step at "Require": the draft (started before the
+        // untick, its file uploaded), with no funder declared, walked on to
+        // Review shows "Funders are required." under "Details", the
+        // problems notice, and "Submit" grayed out (Rule 11; the enabled
+        // "Submit" of S2's Review step is the control).
         await reopenAtDetails(wizard, draft.submissionId);
         await wizard.continueTo('Contributors');
         await wizard.continueTo('For the Editors');
         await wizard.continueToReview(draft.submissionId);
         await expect(wizardFunding.fundersRequiredWarning()).toBeVisible({timeout: 30_000});
         await expect(wizardFunding.fundersRequiredWarning()).toContainText(FUNDERS_REQUIRED);
+        await expect(wizard.reviewPanel('Details')).toContainText(FUNDERS_REQUIRED);
         await expect(wizard.reviewPanel('Details')).toContainText('Funders');
+        await expect(wizard.errorBanner()).toBeVisible();
+        await expect(authorPage.getByText(PROBLEMS_NOTICE)).toBeVisible();
+        await expect(wizard.submitButton()).toBeVisible();
+        await expect(wizard.submitButton()).toBeDisabled();
     });
 
     test('S5: the read-only list', async ({asUser, ojsApi}, testInfo) => {
@@ -931,10 +1154,14 @@ test.describe('funding', () => {
             return publication;
         };
 
-        // The anonymous assignment: the data's funders list is empty and
-        // the funder's name appears nowhere in it (Rule 13).
+        // The anonymous assignment: the publication the window requests
+        // has no funders list, not even an empty one (no `funders` key),
+        // and the funder's name appears nowhere in it (Rule 13; footnote
+        // s6). The control is the manager's submission request above,
+        // which carries the name.
         const withheld = await fetchedPublication(anonymous);
-        expect(withheld.funders ?? []).toEqual([]);
+        expect(Object.keys(withheld).length).toBeGreaterThan(0);
+        expect('funders' in withheld).toBe(false);
         expect(JSON.stringify(withheld)).not.toContain(anonymous.funderName);
 
         // The open assignment: the same walk — the screen and the window
@@ -944,7 +1171,7 @@ test.describe('funding', () => {
         // no reviewer screen requests — T-ojs-1). The contributor reads are
         // extra evidence that the open payload is the un-anonymized one.
         const full = await fetchedPublication(open);
-        expect(full.funders ?? []).toEqual([]);
+        expect('funders' in full).toBe(false);
         expect(JSON.stringify(full)).not.toContain(open.funderName);
         expect(withheld.authors).toEqual([]);
         expect(full.authors).toHaveLength(1);

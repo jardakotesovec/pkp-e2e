@@ -16,8 +16,8 @@
  *
  * Deliberately NOT covered, by register ID (a 🐞 is never asserted as the
  * contract, a ❓ is parked; the spec's Coverage section is the record of
- * everything else left out): A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11,
- * A12, A15, OPS1.
+ * everything else left out): A2, A3, A4, A5, A6, A7, A8, A10, A11, A12,
+ * A15, A16, OPS1.
  *
  * Seeding: scenario endpoints only. S2, S3 and S5 run on the seeded press
  * with the ready accounts and only add their own tagged submissions and
@@ -30,11 +30,17 @@
  * changed (A1, A7). There is no funder seeding key — the add/edit panel IS
  * the surface under test, so funders are always recorded through it. The
  * browser-side registry query is stubbed (FundingPages.stubRegistrySearch):
- * empty, except S1's held registry funder, NSERC, whose ROR v2 record
- * (fixtures/ror-nserc-v2.json) answers its query and is seeded into the
- * install's registry copy with `setSite({rors})` (idempotent, parallel-safe;
- * scenarios.md "POST site" › `rors`). S1's scratch press carries French
- * (Canada) as a second interface language for its French leg.
+ * empty, except the registry funders' ROR v2 records answering their own
+ * queries. NSERC (fixtures/ror-nserc-v2.json), the held funder of S1, S2
+ * and S3, is seeded into the install's registry copy with
+ * `setSite({rors})` (idempotent, parallel-safe; scenarios.md "POST site" ›
+ * `rors`); NIH (fixtures/ror-nih-v2.json), S1's registry funder, is one the
+ * copy lacks, so its pick raises A3's window on the test install's blocked
+ * egress, and S1 finds its saved row by the ROR mark, never reading what
+ * the row shows beside it (A3, footnote s1). S1's failed-search leg sets
+ * the same stub to a dropped connection, a 503 and a 429. S1's scratch
+ * press carries French (Canada) as a second interface language for its
+ * French leg.
  * Every absence is a settled read paired with a positive control taken
  * the same way; S1's mailbox silence is bounded by a discussion email the
  * test itself sends to a second throwaway author (A8,
@@ -57,12 +63,15 @@ const {
     openReview,
     problemsBanner,
     confirmSubmit,
+    submitButton,
+    reviewPanel,
 } = require('../pages/SubmissionWizardPages.js');
 const {
     ReviewerAssignmentsPage,
 } = require('../../../../shared/playwright/pages/ReviewerPages.js');
 
 const NSERC_RECORD = require('../fixtures/ror-nserc-v2.json');
+const NIH_RECORD = require('../fixtures/ror-nih-v2.json');
 
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
@@ -70,6 +79,12 @@ const TEST_FOUNDATION = 'Test Foundation';
 const SECOND_FOUNDATION = 'Second Foundation';
 const NSERC_NAME = 'Natural Sciences and Engineering Research Council of Canada';
 const NSERC_ROR = 'https://ror.org/01h531d29';
+const NIH_NAME = 'National Institutes of Health';
+const NIH_ROR = 'https://ror.org/01cwqze88';
+const UNSAVED_FOUNDATION = 'Unsaved Foundation';
+const SEARCH_FAILED = 'An unexpected error has occurred. Please reload the page and try again.';
+const ROR_UNAVAILABLE = 'The ROR API service is currently unavailable. Please refresh the page or try again later.';
+const ROR_RATE_LIMITED = 'Too many requests have been sent to the ROR API. Please wait a moment before continuing to search.';
 const FR_FOUNDATION = 'Fondation Exemple';
 const LEVEL_OFF = 'Do not request funder metadata from the author during submission.';
 const LEVEL_ASK = 'Ask the author for funder metadata during submission.';
@@ -205,8 +220,8 @@ async function setFundersSetting(page, contextPath, {enabled, level = null}) {
  * step: a reloaded draft resumes at its saved step, so the walk from
  * Upload Files runs only when Details is not already current.
  */
-async function openDraftAtDetails(page, contextPath, submissionId) {
-    await page.goto(wizardUrl(contextPath, submissionId));
+async function openDraftAtDetails(page, contextPath, submissionId, {localePrefix = ''} = {}) {
+    await page.goto(wizardUrl(contextPath, submissionId, {localePrefix}));
     await expectWizardOpen(page);
     if (!(await currentRailStep(page).textContent())?.includes(STEPS.details)) {
         await expectStep(page, STEPS.files);
@@ -307,7 +322,7 @@ async function expectNoMailAfterControl(page, pkpMail, {tag, contextPath, otherS
 
 test.describe('Funding (U43)', () => {
     test('S1: record and revise funding in the workflow', {tag: '@smoke'}, async ({asUser, ompApi, pkpMail}, testInfo) => {
-        test.setTimeout(480_000);
+        test.setTimeout(600_000);
         const tag = makeTag('s1', testInfo);
         const spec = scratchPressSpec(tag, {other: true, french: true});
         const [manager, author, other] = spec.users;
@@ -332,7 +347,14 @@ test.describe('Funding (U43)', () => {
         ]);
 
         const page = await (await asUser(manager.username)).newPage();
-        await stubRegistrySearch(page, {records: [NSERC_RECORD]});
+        // Browser dialogs (a "leave the page?" prompt) are recorded, never
+        // expected: the unsaved-funder leg asserts none was asked (Rule 5).
+        const browserDialogs = [];
+        page.on('dialog', (dialog) => {
+            browserDialogs.push(`${dialog.type()}: ${dialog.message()}`);
+            dialog.accept().catch(() => {});
+        });
+        const registry = await stubRegistrySearch(page, {records: [NSERC_RECORD, NIH_RECORD]});
         let funding = await openFunding(page, tag, submissionId, {localePrefix: '/en'});
         // The Funding screen's own address, for the French leg's /fr_CA swap.
         await expect(page).toHaveURL(/[?&]workflowMenuKey=publication_\d+_funding/);
@@ -371,12 +393,16 @@ test.describe('Funding (U43)', () => {
         await expect(funding.saveButton(addPanel)).toBeDisabled();
 
         // The typed-name funder: "Test Foundation" typed and the typed
-        // text picked: the required name box arrives pre-filled with it
-        // and Save enables again; "Delete" under the chosen funder clears
-        // the field (the search box is back, no name box); typed and
+        // text picked: the name box marked "* Required" arrives pre-filled
+        // with it and Save enables again; "Delete" under the chosen funder
+        // clears the field (the search box is back, no name box); typed and
         // picked again, the pre-filled box left as it is (Fields; Rule 5).
         await funding.pickTypedFunder(addPanel, TEST_FOUNDATION);
-        await expect(funding.nameBoxes(addPanel).first()).toHaveValue(TEST_FOUNDATION);
+        const primaryBox = funding.nameBoxes(addPanel).first();
+        await expect(primaryBox).toHaveValue(TEST_FOUNDATION);
+        const required = await funding.requiredMark(addPanel, primaryBox);
+        await expect(required).toBeVisible();
+        await expect(required).toHaveText(/^\s*\*\s*Required\s*$/);
         await expect(funding.saveButton(addPanel)).toBeEnabled();
         await funding.funderDeleteButton(addPanel).click();
         await expect(funding.searchInput(addPanel)).toBeVisible();
@@ -406,24 +432,54 @@ test.describe('Funding (U43)', () => {
         await funding.savePanel(addPanel);
         await expect(funding.row(TEST_FOUNDATION)).toBeVisible({timeout: 30_000});
 
-        // A second typed-name funder stands in for the registry funder of
-        // the spec's ordering and delete legs (the registry leg has no
-        // press end on this install: A3, file header).
-        await funding.addFunder(SECOND_FOUNDATION);
+        // The registry funder: "Add Funder", "National Institutes of Health"
+        // typed, its suggestion showing the country and the ROR mark picked
+        // (the browser-side search answered with NIH's record, footnote
+        // s1): the install's copy lacks it and the server cannot reach the
+        // registry, so the pick's own POST rors answers 404 and the window
+        // of the spec's second exception opens over the panel (A3); "OK",
+        // and the panel shows the name and its registry link; Save: the row
+        // shows the ROR mark. What the row shows beside the mark is A3's and
+        // is never read: the row is found by its mark (Fields; Rule 4).
+        await funding.addFunderButton().click();
+        const nihPanel = funding.dialog('Add Funder');
+        await expect(nihPanel).toBeVisible({timeout: 30_000});
+        const nihSuggestion = await funding.searchRegistry(nihPanel, NIH_NAME, NIH_ROR);
+        await expect(nihSuggestion).toContainText(NIH_NAME);
+        await expect(nihSuggestion.locator('sub')).toHaveText('United States');
+        await expect(nihSuggestion.locator('svg').first()).toBeVisible();
+        expect(await funding.pickRegistrySuggestion(nihSuggestion), "the pick's POST rors").toBe(404);
+        const pickFailed = funding.registryErrorWindow(SEARCH_FAILED);
+        await expect(pickFailed).toBeVisible({timeout: 30_000});
+        await funding.dismissRegistryError(pickFailed);
+        await expect(funding.chosenRegistryLink(nihPanel, NIH_ROR)).toBeVisible({timeout: 30_000});
+        await expect(nihPanel.locator('.pkpFormField--funder')).toContainText(NIH_NAME);
+        await funding.savePanel(nihPanel);
+        await expect(funding.rows()).toHaveCount(2, {timeout: 30_000});
+        await expect(funding.rorRows()).toHaveCount(1);
+        await expect(funding.row(TEST_FOUNDATION)).toBeVisible();
+        await expect(funding.rowRorMark(TEST_FOUNDATION)).toHaveCount(0);
 
-        // Ordering: "Order", the second funder moved up, "Save Order";
-        // reloaded, it is still listed first (Rule 7).
+        // Ordering: "Order", the registry funder moved up with its arrow,
+        // "Save Order"; reloaded, the registry funder is still listed first
+        // (Rule 7).
         await funding.orderButton().click();
-        await funding.moveRowUp(SECOND_FOUNDATION);
+        await funding.moveRowUp(funding.rorRows());
         await funding.saveOrder();
         funding = await openFunding(page, tag, submissionId, {localePrefix: '/en'});
-        await expect(funding.rows().first()).toContainText(SECOND_FOUNDATION, {timeout: 30_000});
+        await expect(funding.rows()).toHaveCount(2, {timeout: 30_000});
+        await expect(funding.rorRows()).toHaveCount(1);
+        await expect(
+            funding.rows().first().locator('div.text-lg-normal .pkpIcon--inline')
+        ).toBeVisible();
         await expect(funding.rows().nth(1)).toContainText(TEST_FOUNDATION);
 
         // Edit: "…" → "Edit" on the typed-name funder: the panel is titled
         // "Edit Funder", prefilled with the name and the one grant row, the
         // blank second row gone; the Grant Number changed to "5678" and
-        // saved; reopened, "5678" is there; closed (Fields; Rule 5).
+        // saved; reopened, "5678" is there; closed with "Close" at the
+        // panel's top: the panel offers "Close" and "Save", no "Cancel"
+        // (Fields; Rule 5).
         let editPanel = await funding.openRowEdit(TEST_FOUNDATION);
         await expect(funding.nameBoxes(editPanel).first()).toHaveValue(TEST_FOUNDATION);
         await expect(funding.grantRows(editPanel)).toHaveCount(1);
@@ -442,12 +498,15 @@ test.describe('Funding (U43)', () => {
             timeout: 30_000,
         });
         await expect(funding.grantRows(editPanel)).toHaveCount(1);
+        await expect(editPanel.getByRole('button', {name: 'Close', exact: true})).toBeVisible();
+        await expect(funding.saveButton(editPanel)).toBeVisible();
+        await expect(editPanel.getByRole('button', {name: 'Cancel', exact: true})).toHaveCount(0);
         await funding.closePanel(editPanel);
 
-        // Delete: "…" → "Delete" on the second funder: the confirmation's
+        // Delete: "…" → "Delete" on the registry funder: the confirmation's
         // question; "Cancel" leaves it listed; "OK" removes it, and the
         // typed-name funder alone remains (Rule 6).
-        await funding.openRowAction(SECOND_FOUNDATION, 'Delete');
+        await funding.openRowAction(funding.rorRows(), 'Delete');
         let confirm = funding.deleteConfirmDialog();
         await expect(confirm).toBeVisible({timeout: 30_000});
         await expect(confirm).toContainText(
@@ -455,14 +514,102 @@ test.describe('Funding (U43)', () => {
         );
         await confirm.getByRole('button', {name: 'Cancel', exact: true}).click();
         await expect(confirm).toHaveCount(0, {timeout: 30_000});
-        await expect(funding.row(SECOND_FOUNDATION)).toBeVisible();
-        await funding.openRowAction(SECOND_FOUNDATION, 'Delete');
+        await expect(funding.rorRows()).toHaveCount(1);
+        await expect(funding.rows()).toHaveCount(2);
+        await funding.openRowAction(funding.rorRows(), 'Delete');
         confirm = funding.deleteConfirmDialog();
         await expect(confirm).toBeVisible({timeout: 30_000});
         await funding.confirmDelete(confirm);
-        await expect(funding.row(SECOND_FOUNDATION)).toHaveCount(0, {timeout: 30_000});
+        await expect(funding.rorRows()).toHaveCount(0, {timeout: 30_000});
         await expect(funding.rows()).toHaveCount(1);
         await expect(funding.row(TEST_FOUNDATION)).toBeVisible();
+
+        // A registry search that fails (footnote s1: each state made on the
+        // browser's own registry query). Unreachable (a dropped
+        // connection): "Add Funder", "Natural Sciences" typed: the window
+        // titled "Error" over the panel with its message; "OK", then
+        // "Delete" under the chosen funder: the search box is back. What
+        // stood in the name box behind the window is A16's and is not read
+        // (Fields).
+        await funding.addFunderButton().click();
+        const failPanel = funding.dialog('Add Funder');
+        await expect(failPanel).toBeVisible({timeout: 30_000});
+        const failures = [
+            {state: 'unreachable', title: 'Error', message: SEARCH_FAILED},
+            {state: 'unavailable', title: 'ROR API Error', message: ROR_UNAVAILABLE},
+            {state: 'rateLimited', title: 'ROR API Error', message: ROR_RATE_LIMITED},
+        ];
+        for (const {state, title, message} of failures) {
+            // Out of service (503), then refusing too many searches (429):
+            // typed again, each window's own title and message; "OK", then
+            // "Delete": the search box is back.
+            registry.answer(state);
+            const search = funding.searchInput(failPanel);
+            await expect(search).toBeVisible({timeout: 30_000});
+            await expect(search).toHaveValue('');
+            await search.click();
+            await search.pressSequentially('Natural Sciences', {delay: 10});
+            const window = funding.registryErrorWindow(message);
+            await expect(window, `the ${state} registry's window`).toBeVisible({timeout: 30_000});
+            await expect(window.getByText(title, {exact: true})).toBeVisible();
+            await funding.dismissRegistryError(window);
+            await expect(failPanel).toBeVisible();
+            await funding.funderDeleteButton(failPanel).click();
+            await expect(funding.searchInput(failPanel)).toBeVisible({timeout: 30_000});
+            await expect(funding.nameBoxes(failPanel)).toHaveCount(0);
+        }
+
+        // The registry answering again: the full name typed: the suggestion
+        // of that name shows, with a country and the ROR mark (Fields).
+        registry.answer('records');
+        const againSuggestion = await funding.searchRegistry(failPanel, NSERC_NAME, NSERC_ROR);
+        await expect(againSuggestion).toContainText(NSERC_NAME);
+        await expect(againSuggestion.locator('sub')).toHaveText('Canada');
+        await expect(againSuggestion.locator('svg').first()).toBeVisible();
+
+        // An unsaved funder dropped: that suggestion picked: the panel shows
+        // the name and its registry link; "Close" at the panel's top without
+        // saving: nothing is asked (no window over the page, the workflow's
+        // own dialog, counted the same way, the one left; no browser
+        // prompt), the panel
+        // closes and the list still shows "Test Foundation" alone (Rule 5).
+        expect(await funding.pickRegistrySuggestion(againSuggestion), "the pick's POST rors").toBe(200);
+        await expect(funding.chosenRegistryLink(failPanel, NSERC_ROR)).toBeVisible({timeout: 30_000});
+        await expect(failPanel.locator('.pkpFormField--funder')).toContainText(NSERC_NAME);
+        await funding.closePanel(failPanel);
+        await expect(page.getByRole('dialog')).toHaveCount(1);
+        await expect(
+            page.getByRole('dialog').getByRole('heading', {name: 'Publication: Funding'})
+        ).toBeVisible();
+        await expect(funding.rows()).toHaveCount(1);
+        await expect(funding.row(TEST_FOUNDATION)).toBeVisible();
+        expect(browserDialogs).toEqual([]);
+
+        // "Add Funder": the panel opens empty (the search box blank, no
+        // chosen funder, no grant row); "Unsaved Foundation" typed and the
+        // typed text picked; the page reloaded with the panel open: nothing
+        // is asked, and after the reload the list still shows "Test
+        // Foundation" alone (Rule 5).
+        await funding.addFunderButton().click();
+        const emptyPanel = funding.dialog('Add Funder');
+        await expect(emptyPanel).toBeVisible({timeout: 30_000});
+        await expect(funding.searchInput(emptyPanel)).toHaveValue('');
+        await expect(funding.nameBoxes(emptyPanel)).toHaveCount(0);
+        await expect(funding.funderDeleteButton(emptyPanel)).toHaveCount(0);
+        await expect(emptyPanel.locator('.pkpFormField--funder a[href^="https://ror.org/"]')).toHaveCount(0);
+        await expect(emptyPanel.locator('input[name="grantNumber"]')).toHaveCount(0);
+        await funding.pickTypedFunder(emptyPanel, UNSAVED_FOUNDATION);
+        await expect(funding.nameBoxes(emptyPanel).first()).toHaveValue(UNSAVED_FOUNDATION);
+        await page.reload();
+        funding = new FundingScreen(page);
+        await expect(
+            page.getByRole('heading', {name: 'Publication: Funding'})
+        ).toBeVisible({timeout: 30_000});
+        await expect(funding.rows()).toHaveCount(1, {timeout: 30_000});
+        await expect(funding.row(TEST_FOUNDATION)).toBeVisible();
+        await expect(funding.row(UNSAVED_FOUNDATION)).toHaveCount(0);
+        await expect(funding.dialog('Add Funder')).toHaveCount(0);
+        expect(browserDialogs).toEqual([]);
 
         // A registry funder the install already holds: "Add Funder", NSERC
         // typed, its suggestion showing the country and the ROR mark picked
@@ -478,18 +625,10 @@ test.describe('Funding (U43)', () => {
         await expect(suggestion).toContainText(NSERC_NAME);
         await expect(suggestion.locator('sub')).toHaveText('Canada');
         await expect(suggestion.locator('svg').first()).toBeVisible();
-        const rorPost = page.waitForResponse(
-            (r) => r.request().method() === 'POST' && /\/rors\/?$/.test(new URL(r.url()).pathname),
-            {timeout: 30_000}
-        );
-        await suggestion.click();
-        const rorAnswer = await rorPost;
-        expect(rorAnswer.status(), 'the pick\'s POST rors').toBe(200);
+        expect(await funding.pickRegistrySuggestion(suggestion), "the pick's POST rors").toBe(200);
         await expect(funding.chosenRegistryLink(rorPanel, NSERC_ROR)).toBeVisible({timeout: 30_000});
         await expect(rorPanel.locator('.pkpFormField--funder')).toContainText(NSERC_NAME);
-        await expect(
-            page.getByRole('dialog').filter({hasText: 'An unexpected error has occurred.'})
-        ).toHaveCount(0);
+        await expect(funding.registryErrorWindow('An unexpected error has occurred.')).toHaveCount(0);
         await funding.savePanel(rorPanel);
         await expect(funding.row(NSERC_NAME)).toBeVisible({timeout: 30_000});
         await expect(funding.rowRorMark(NSERC_NAME)).toBeVisible();
@@ -592,8 +731,12 @@ test.describe('Funding (U43)', () => {
     });
 
     test('S2: declare funding while submitting', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
-        test.slow();
+        test.setTimeout(300_000);
         const tag = makeTag('s2', testInfo);
+        // Given: the install's own registry copy holds NSERC (footnote s2,
+        // as s1: `POST site` `rors`, idempotent).
+        const seeded = await ompApi.setSite({rors: [NSERC_RECORD]});
+        expect(seeded.rors.map((r) => r.ror)).toEqual([NSERC_ROR]);
         const {submissionId} = await ompApi.createSubmission({
             tag,
             context: PK,
@@ -605,20 +748,24 @@ test.describe('Funding (U43)', () => {
         // The author walks the wizard to Details; the press sits at the
         // default "ask" level, so the step carries a Funders section.
         const authorPage = await (await asUser('author.alex')).newPage();
-        await stubRegistrySearch(authorPage);
+        await stubRegistrySearch(authorPage, {records: [NSERC_RECORD]});
         await authorPage.goto(wizardUrl(PK, submissionId, {localePrefix: PK_PREFIX}));
         await expectWizardOpen(authorPage);
         await expectStep(authorPage, STEPS.files);
         await uploadWizardFile(authorPage, `ms-${tag}.txt`);
         await continueTo(authorPage, STEPS.details);
 
-        // The Details step, press marker: the funders section, headed
-        // "Funding" (pkp-lib#13375), is not the step's last — Chapters
-        // follow it (visible section headings, in DOM order) (Rule 10). Control: before the add, the section's
-        // table reads "No funders have been added." (Rules 3, 10).
+        // The Details step, press marker: the section headed "Funding"
+        // (pkp-lib#13375) holds the funders list and is not the step's last
+        // — Chapters follow it (visible section headings, in DOM order)
+        // (Rule 10). Control: before the add, the section's table reads "No
+        // funders have been added." (Rules 3, 10).
         const wizardFunding = new FundingScreen(authorPage);
         await expect(wizardFunding.table()).toBeVisible({timeout: 30_000});
         await expect(wizardFunding.table()).toContainText('No funders have been added.');
+        await expect(
+            authorPage.getByRole('heading', {name: 'Funding', exact: true, level: 2})
+        ).toBeVisible();
         await expect(chaptersHeading(authorPage)).toBeVisible();
         const headings = (await authorPage.locator('h2:visible').allTextContents()).map(
             (t) => t.trim()
@@ -627,27 +774,39 @@ test.describe('Funding (U43)', () => {
         expect(headings.indexOf('Chapters')).toBeGreaterThan(headings.indexOf('Funding'));
 
         // Scenario 1's typed-name funder recorded through the same panel
-        // as the workflow. The section's table does not refresh on a press
-        // (A4 🐞) — nothing is asserted about it after the save; the save
-        // itself is bounded by the funders API response and the panel
-        // closing.
+        // as the workflow. On a press the section's table refreshes only
+        // after a reload (A4 🐞, never asserted either way): the save is
+        // bounded by the funders API response and the panel closing, then
+        // the page is reloaded and walked back to Details, where the table
+        // shows the row "Test Foundation" (Rule 10).
         await wizardFunding.addFunder(TEST_FOUNDATION, {expectRow: false});
-
-        // A fresh load of the resumable wizard reads the saved list from
-        // the server: the Details table now carries the funder's row —
-        // the persistence proof (Rule 10: the same list as the workflow),
-        // asserted on fresh state so the stale in-place table (A4) is
-        // never asserted either way.
-        await authorPage.goto(wizardUrl(PK, submissionId, {localePrefix: PK_PREFIX}));
-        await expectWizardOpen(authorPage);
-        if (!(await currentRailStep(authorPage).textContent())?.includes(STEPS.details)) {
-            await expectStep(authorPage, STEPS.files);
-            await continueTo(authorPage, STEPS.details);
-        }
+        await openDraftAtDetails(authorPage, PK, submissionId, {localePrefix: PK_PREFIX});
         await expect(wizardFunding.row(TEST_FOUNDATION)).toBeVisible({timeout: 30_000});
 
-        // The Review step lists "Test Foundation" under "Details"; the
-        // submission is completed (Rule 10).
+        // A registry funder the install already holds: "Add Funder", NSERC
+        // typed and its suggestion (country, ROR mark) picked, the pick's
+        // POST rors answering 200; Save; reloaded and walked back to
+        // Details again: the section's table shows NSERC's name (Fields;
+        // Rule 10).
+        await wizardFunding.addFunderButton().click();
+        const rorPanel = wizardFunding.dialog('Add Funder');
+        await expect(rorPanel).toBeVisible({timeout: 30_000});
+        const suggestion = await wizardFunding.searchRegistry(rorPanel, NSERC_NAME, NSERC_ROR);
+        await expect(suggestion.locator('sub')).toHaveText('Canada');
+        await expect(suggestion.locator('svg').first()).toBeVisible();
+        expect(await wizardFunding.pickRegistrySuggestion(suggestion), "the pick's POST rors").toBe(200);
+        await expect(wizardFunding.chosenRegistryLink(rorPanel, NSERC_ROR)).toBeVisible({
+            timeout: 30_000,
+        });
+        await wizardFunding.savePanel(rorPanel);
+        await openDraftAtDetails(authorPage, PK, submissionId, {localePrefix: PK_PREFIX});
+        await expect(wizardFunding.row(NSERC_NAME)).toBeVisible({timeout: 30_000});
+        await expect(wizardFunding.rowRorMark(NSERC_NAME)).toBeVisible();
+        await expect(wizardFunding.row(TEST_FOUNDATION)).toBeVisible();
+        await expect(wizardFunding.rows()).toHaveCount(2);
+
+        // The Review step lists "Test Foundation" and NSERC's name under
+        // "Details"; the submission is completed (Fields; Rule 10).
         await continueTo(authorPage, STEPS.contributors);
         await continueTo(authorPage, STEPS.editors);
         await openReview(authorPage);
@@ -656,21 +815,29 @@ test.describe('Funding (U43)', () => {
             .filter({has: authorPage.getByRole('heading', {name: 'Details', exact: true})});
         await expect(detailsPanel).toContainText('Funders');
         await expect(detailsPanel).toContainText(TEST_FOUNDATION);
+        await expect(detailsPanel).toContainText(NSERC_NAME);
         await expect(problemsBanner(authorPage)).toHaveCount(0);
         await confirmSubmit(authorPage);
 
         // The Press Manager's list: the new submission's workflow, its
-        // Publication area, "Funding": the author's funder is there
-        // (Rule 1).
+        // Publication area, "Funding": both of the author's funders are
+        // there (Rule 1).
         const managerPage = await (await asUser('manager.maya')).newPage();
         const funding = await openFunding(managerPage, PK, submissionId);
         await expect(funding.row(TEST_FOUNDATION)).toBeVisible({timeout: 30_000});
+        await expect(funding.row(NSERC_NAME)).toBeVisible();
+        await expect(funding.rowRorMark(NSERC_NAME)).toBeVisible();
+        await expect(funding.rows()).toHaveCount(2);
     });
 
     test("S3: read a published book's funding", async ({asUser, ompApi, page}, testInfo) => {
         test.slow();
         const tag = makeTag('s3', testInfo);
         const controlTag = `${tag}c`;
+        // Given: the install's own registry copy holds NSERC (footnote s3,
+        // as s1: `POST site` `rors`, idempotent).
+        const seeded = await ompApi.setSite({rors: [NSERC_RECORD]});
+        expect(seeded.rors.map((r) => r.ror)).toEqual([NSERC_ROR]);
         const [withFunder, noFunder] = await Promise.all([
             ompApi.createSubmission({
                 tag,
@@ -691,26 +858,29 @@ test.describe('Funding (U43)', () => {
         ]);
         const grantDoi = '10.1234/example';
 
-        // The manager records the two hand-named funders on the published
-        // monograph (publishing does not lock the list — Actors &
-        // permissions; footnote s3), "Test Foundation" with its one fully
-        // filled grant, then "Second Foundation", and orders the second
-        // first with "Order" / "Save Order" (every funder added before the
-        // ordering, so A7 never applies). Typed-name path only: on this
-        // install a registry-backed funder cannot be produced (file
-        // header), so the ROR-mark link of Rule 9 stays uncovered.
+        // The manager records the funders on the published monograph
+        // (publishing does not lock the list — Actors & permissions;
+        // footnote s3): "Test Foundation" with its one fully filled grant,
+        // "Second Foundation", and the registry funder NSERC, which the
+        // install's copy holds, picked through the panel with the
+        // browser-side search stubbed (as in s1); then "Second Foundation"
+        // is moved first with "Order" / "Save Order" (every funder added
+        // before the ordering, so A7 never applies).
         const managerPage = await (await asUser('manager.maya')).newPage();
-        await stubRegistrySearch(managerPage);
+        await stubRegistrySearch(managerPage, {records: [NSERC_RECORD]});
         let funding = await openFunding(managerPage, PK, withFunder.submissionId);
         await funding.addFunder(TEST_FOUNDATION, {
             grants: [{grantName: 'Field Study', grantNumber: '1234', grantDoi}],
         });
         await funding.addFunder(SECOND_FOUNDATION);
+        await funding.addRegistryFunder(NSERC_NAME, NSERC_ROR);
+        await expect(funding.rows()).toHaveCount(3);
         await funding.orderButton().click();
         await funding.moveRowUp(SECOND_FOUNDATION);
         await funding.saveOrder();
         funding = await openFunding(managerPage, PK, withFunder.submissionId);
-        await expect(funding.rows().first()).toContainText(SECOND_FOUNDATION, {timeout: 30_000});
+        await expect(funding.rows()).toHaveCount(3, {timeout: 30_000});
+        await expect(funding.rows().first()).toContainText(SECOND_FOUNDATION);
         await expect(funding.rows().nth(1)).toContainText(TEST_FOUNDATION);
 
         // The "Funders" block: on a press the landing page is the catalog's
@@ -732,9 +902,22 @@ test.describe('Funding (U43)', () => {
 
         // The saved order: "Second Foundation" is listed before "Test
         // Foundation", the order saved in the workflow (Rule 7).
-        await expect(fundingBlockNames(page)).toHaveCount(2);
+        await expect(fundingBlockNames(page)).toHaveCount(3);
         await expect(fundingBlockNames(page).first()).toContainText(SECOND_FOUNDATION);
         await expect(fundingBlockNames(page).nth(1)).toContainText(TEST_FOUNDATION);
+
+        // The registry funder: NSERC's name shows beside its ROR mark, and
+        // the mark links to its record on the registry site (the copy holds
+        // the funder, so a nameless mark would fail here; Fields; Rule 9).
+        // Control: the hand-named funders carry no mark.
+        const nserc = fundingBlockNames(page).filter({has: page.locator(`a[href="${NSERC_ROR}"]`)});
+        await expect(nserc).toHaveCount(1);
+        await expect(nserc).toContainText(NSERC_NAME);
+        await expect(nserc.locator(`a[href="${NSERC_ROR}"]`)).toHaveAttribute('href', NSERC_ROR);
+        await expect(nserc.locator(`a[href="${NSERC_ROR}"]`).locator('svg, img').first()).toBeVisible();
+        await expect(
+            fundingBlockNames(page).filter({hasText: TEST_FOUNDATION}).locator('a')
+        ).toHaveCount(0);
 
         // Control: a published book with no funders shows no Funders block
         // at all — bounded by the page having rendered (its title), the
@@ -851,14 +1034,22 @@ test.describe('Funding (U43)', () => {
 
         // "Require", then the Review step at "Require": the Author, with no
         // funder declared, goes on to the draft's Review step: it shows
-        // "Funders are required." (Rule 11). The submit's state is A1's
-        // open question and is not asserted.
+        // "Funders are required." under "Details" and the problems notice,
+        // and "Submit" is grayed out (Rule 11). The draft's file was
+        // uploaded with its genre before the untick, so the funders problem
+        // is the only one the step shows (footnote s4).
         await setFundersSetting(managerPage, tag, {enabled: true, level: LEVEL_REQUIRE});
         await openDraftAtDetails(authorPage, tag, draft.submissionId);
         await continueTo(authorPage, STEPS.contributors);
         await continueTo(authorPage, STEPS.editors);
         await openReview(authorPage);
-        await expect(authorPage.getByText('Funders are required.')).toBeVisible({timeout: 30_000});
+        const details = reviewPanel(authorPage, 'Details');
+        await expect(details.getByText('Funders are required.')).toBeVisible({timeout: 30_000});
+        await expect(problemsBanner(authorPage)).toContainText(
+            'There are one or more problems that need to be fixed before you can submit. Please review the information below and make the requested changes.'
+        );
+        await expect(submitButton(authorPage)).toBeVisible();
+        await expect(submitButton(authorPage)).toBeDisabled();
     });
 
     test("S5: the author's workflow funding list is read-only", async ({asUser, ompApi}, testInfo) => {
@@ -1025,25 +1216,27 @@ test.describe('Funding (U43)', () => {
         }
 
         // The anonymous assignment: the funders list is withheld — the
-        // publication the screen fetched carries no funder and "Test
+        // publication the window fetched has no funders list and "Test
         // Foundation" appears nowhere in it, nor in any other response the
         // reviewer's browser received (Rule 13).
         const withheld = await reviewerRead(anonTag, anon.submissionId);
-        expect(withheld.payload.funders ?? []).toEqual([]);
+        // No funders list at all, not even an empty one: the read fails on
+        // any `funders` key (footnote s6); the payload's own `id` the
+        // positive control that the publication was read.
+        expect(withheld.payload.id).toBeGreaterThan(0);
+        expect(Object.keys(withheld.payload)).not.toContain('funders');
         expect(JSON.stringify(withheld.payload)).not.toContain(TEST_FOUNDATION);
         expect(withheld.carryingName).toEqual([]);
 
-        // The open assignment: the review screen likewise shows no funders
-        // list (asserted inside the read). The spec's control, the same
-        // request carrying "Test Foundation", is not what the app does
-        // at these tips: the publication payload carries no funders list
-        // on the open assignment either, and the name reaches the
-        // reviewer's browser in no response (T-omp-1, the run's finding;
-        // the funders list moved to the submission schema, which the
-        // reviewer's screens never fetch). What the screen showed is
-        // asserted; the manager's fetch above is the positive control.
+        // The open assignment: the same walk — the review screen and the
+        // window show no funders list (asserted inside the read), and the
+        // same request likewise has none, empty or not, nor does any other
+        // response carry the name (Rule 13; footnote s6: the funders list
+        // sits on the submission, which no reviewer screen fetches). The
+        // manager's fetch above is the positive control.
         const full = await reviewerRead(openTag, open.submissionId);
-        expect(full.payload.funders ?? []).toEqual([]);
+        expect(full.payload.id).toBeGreaterThan(0);
+        expect(Object.keys(full.payload)).not.toContain('funders');
         expect(JSON.stringify(full.payload)).not.toContain(TEST_FOUNDATION);
         expect(full.carryingName).toEqual([]);
     });

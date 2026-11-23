@@ -16,7 +16,9 @@
  * - stubRegistrySearch — routes the browser-side ROR registry query
  *   (api.ror.org, fired straight from the Funder field) to an empty result
  *   set, or to the given registry records whose names match the query, so
- *   no test depends on the public registry being reachable. The typed-text
+ *   no test depends on the public registry being reachable; its switch
+ *   makes the registry unreachable, out of service or refusing too many
+ *   searches (footnote s1) and answering again. The typed-text
  *   option the tests pick renders independently of the suggestions
  *   payload (Autosuggest `allowCustom`), so the manual-name path under
  *   test is unchanged by the stub.
@@ -30,7 +32,8 @@
  * (2026-09-16: the panel's refusals, the Funder field's two states, the
  * grant rows, the row menu, the wizard's sections and its require warning;
  * 2026-11-12: the held registry record's pick, the ROR mark, the French
- * list).
+ * list; 2026-11-23: the failed-search windows, the nameless registry row
+ * found by its mark, the wizard's "Funding" heading).
  */
 const {expect} = require('@playwright/test');
 const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
@@ -38,17 +41,38 @@ const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 /**
  * Answer the Funder field's browser-side registry query — hermetic
  * replacement for the live api.ror.org call. With no records, every query
- * gets an empty result set (no suggestions, no error dialog). With
+ * gets an empty result set (no suggestions, no error window). With
  * records (ROR API v2 organization objects, the shape `POST site` `rors`
  * seeds, scenarios.md), a query is answered with the records one of whose
  * names contains the typed text, as `{items: [...]}` — the registry's own
  * search shape. Call once per page before opening the panel.
  *
+ * Returns a switch for the registry's state (spec footnote s1; the kept
+ * check shared/playwright/checks/U43/SW23/sw23.js makes the same three):
+ * `fail('unreachable')` drops the connection, `fail('unavailable')`
+ * answers 503 (out of service), `fail('tooMany')` answers 429 (too many
+ * searches), and `answer()` puts the records back.
+ *
  * @param {import('@playwright/test').Page} page
  * @param {Array<{names: Array<{value: string}>}>} [records]
+ * @returns {Promise<{fail: (state: 'unreachable'|'unavailable'|'tooMany') => void, answer: () => void}>}
  */
 exports.stubRegistrySearch = async function stubRegistrySearch(page, records = []) {
+    /** @type {'records'|'unreachable'|'unavailable'|'tooMany'} */
+    let state = 'records';
+    const failing = {unavailable: 503, tooMany: 429};
     await page.route('https://api.ror.org/**', (route) => {
+        if (state === 'unreachable') {
+            return route.abort('failed');
+        }
+        if (state in failing) {
+            return route.fulfill({
+                status: failing[state],
+                contentType: 'application/json',
+                headers: {'Access-Control-Allow-Origin': '*'},
+                body: '{}',
+            });
+        }
         const query = (new URL(route.request().url()).searchParams.get('query') || '').toLowerCase();
         const items = query
             ? records.filter((r) => r.names.some((n) => n.value.toLowerCase().includes(query)))
@@ -60,6 +84,17 @@ exports.stubRegistrySearch = async function stubRegistrySearch(page, records = [
             body: JSON.stringify({number_of_results: items.length, items}),
         });
     });
+    return {
+        fail(kind) {
+            if (!['unreachable', 'unavailable', 'tooMany'].includes(kind)) {
+                throw new Error(`stubRegistrySearch: unknown registry state ${kind}`);
+            }
+            state = kind;
+        },
+        answer() {
+            state = 'records';
+        },
+    };
 };
 
 exports.FundingScreen = class FundingScreen {
@@ -420,6 +455,64 @@ exports.FundingScreen = class FundingScreen {
         return this.row(name).getByRole('img');
     }
 
+    /**
+     * The rows carrying a ROR mark, in display order. A registry funder the
+     * install's copy lacks saves nameless on the test installs (A3 🐞), so
+     * its row is found by its mark, never by a name.
+     */
+    markedRows() {
+        return this.rows().filter({has: this.page.getByRole('img')});
+    }
+
+    /**
+     * Open a row action ("Edit" / "Delete") on a row given as a locator
+     * (a nameless registry row, `markedRows()`).
+     *
+     * @param {import('@playwright/test').Locator} row
+     * @param {string} action
+     */
+    async openRowActionOn(row, action) {
+        await row.getByRole('button', {name: 'More Actions'}).click();
+        await this.page.getByRole('menuitem', {name: action, exact: true}).click();
+    }
+
+    /**
+     * Clear the search box and type into it (the registry is queried from
+     * four characters on). Picks nothing.
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {string} text
+     */
+    async typeSearch(panel, text) {
+        const search = this.funderSearchInput(panel);
+        await search.click();
+        await search.fill('');
+        await search.pressSequentially(text, {delay: 15});
+    }
+
+    /**
+     * The window a failed registry query opens over the panel ("Error" /
+     * "ROR API Error", Fields), found by its message; it is not the panel.
+     *
+     * @param {string|RegExp} message
+     */
+    errorWindow(message) {
+        return this.page
+            .getByRole('dialog')
+            .filter({hasText: message})
+            .filter({hasNot: this.page.locator('.pkpFormField--funder')});
+    }
+
+    /**
+     * Press a shown error window's "OK" and wait for it to go.
+     *
+     * @param {import('@playwright/test').Locator} window from errorWindow()
+     */
+    async dismissErrorWindow(window) {
+        await window.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(window).toHaveCount(0, {timeout: 30_000});
+    }
+
     // --- Locale-neutral reads (Rule 14). In another interface language
     // the table's own name, the "Add Funder" button and the panel's title
     // are not the English strings, so these find the list's pieces by
@@ -477,6 +570,11 @@ exports.FundingScreen = class FundingScreen {
     /** The Details step's "Funders" section (the one holding the funders table). */
     wizardFundersSection() {
         return this.wizardSections().filter({has: this.page.getByRole('table', {name: 'Funders', exact: true})});
+    }
+
+    /** The Details step's section heading "Funding" (Rule 10: the section holding the list). */
+    wizardFundingHeading() {
+        return this.wizardSections().last().getByRole('heading', {name: 'Funding', exact: true});
     }
 
     /** The Review step's "Funders are required." warning (Rule 11). */

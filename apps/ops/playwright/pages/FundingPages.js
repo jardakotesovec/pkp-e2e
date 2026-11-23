@@ -30,6 +30,14 @@
  * bounded by the funders API response and the panel closing; nothing is
  * asserted about the (stale) table either way.
  *
+ * Added 2026-11-23 (the drift sweep's revision): stubRegistrySearch
+ * answers a record only to a query its names match, and takes `fail`
+ * (the failed-search registry states of footnote s1); `typeSearch`,
+ * `funderField`, `registryWindow`, `pressWindowOk`, `rorMarkedRows`,
+ * `rorMarkIn`. The registry funder the install's copy lacks (NIH,
+ * `fixtures/ror-nih-v2.json`) is found by its ROR mark, never its name
+ * (A3).
+ *
  * Added 2026-11-12 (S1's registry-copy and French legs): stubRegistrySearch
  * takes `records`; `registryOption`, `searchRegistry`,
  * `pickRegistryOption`, `rorMark`, and the locale-neutral `anyLocaleRow`,
@@ -56,27 +64,47 @@
 const {expect} = require('@playwright/test');
 
 /**
- * Answer the Funder field's browser-side registry query with a fixed
- * result set — hermetic replacement for the live api.ror.org call. Empty
- * by default (no suggestions, no error dialog); `records` are ROR API v2
- * organization records answered as `{items: records}` (the record the
- * scenario API's `POST site` `rors` key seeds into the install's copy —
- * scenarios.md "`rors`"). Call once per page before opening the panel; a
- * later call replaces the earlier answer.
+ * Answer the Funder field's browser-side registry query
+ * (`https://api.ror.org/v2/organizations?query=…`, fn d) — the hermetic
+ * replacement for the live api.ror.org call. `records` are ROR API v2
+ * organization records; a query that one of a record's names contains
+ * (case-insensitive) is answered `{items: [those records]}`, every other
+ * query an empty set (no suggestions, no error window). `fail` answers
+ * every query with one of the registry states footnote s1 names instead:
+ * `'unreachable'` (a dropped connection), `503` (out of service) or `429`
+ * (refusing too many searches); the three windows fn d records. Call once
+ * per page before typing; a later call replaces the earlier answer.
  *
  * @param {import('@playwright/test').Page} page
- * @param {{records?: Array<object>}} options
+ * @param {{records?: Array<object>, fail?: 'unreachable'|503|429}} options
  */
-exports.stubRegistrySearch = async function stubRegistrySearch(page, {records = []} = {}) {
+exports.stubRegistrySearch = async function stubRegistrySearch(page, {records = [], fail} = {}) {
     await page.unroute('https://api.ror.org/**');
-    await page.route('https://api.ror.org/**', (route) =>
-        route.fulfill({
+    await page.route('https://api.ror.org/**', (route) => {
+        if (fail === 'unreachable') {
+            return route.abort('failed');
+        }
+        if (typeof fail === 'number') {
+            return route.fulfill({
+                status: fail,
+                contentType: 'application/json',
+                headers: {'Access-Control-Allow-Origin': '*'},
+                body: '{}',
+            });
+        }
+        const query = (new URL(route.request().url()).searchParams.get('query') || '').toLowerCase();
+        const items = query
+            ? records.filter((r) =>
+                  (r.names || []).some((n) => String(n.value).toLowerCase().includes(query))
+              )
+            : [];
+        return route.fulfill({
             status: 200,
             contentType: 'application/json',
             headers: {'Access-Control-Allow-Origin': '*'},
-            body: JSON.stringify({items: records}),
-        })
-    );
+            body: JSON.stringify({number_of_results: items.length, items}),
+        });
+    });
 };
 
 exports.FundingScreen = class FundingScreen {
@@ -476,9 +504,7 @@ exports.FundingScreen = class FundingScreen {
      * @param {string} name
      */
     async searchRegistry(panel, name) {
-        const search = this.searchInput(panel);
-        await search.click();
-        await search.pressSequentially(name, {delay: 15});
+        await this.typeSearch(panel, name);
         const option = this.registryOption(panel, name);
         await expect(option).toBeVisible({timeout: 30_000});
         return option;
@@ -533,6 +559,56 @@ exports.FundingScreen = class FundingScreen {
             .getByRole('dialog')
             .filter({has: this.page.locator('.pkpFormField--funder')})
             .filter({hasNot: this.page.getByRole('dialog')});
+    }
+
+    /**
+     * Type in the panel's search box, emptied first (the box may still
+     * hold an earlier search's text after a failed one), sending the
+     * browser-side registry query (debounced, from four characters).
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {string} text
+     */
+    async typeSearch(panel, text) {
+        const search = this.searchInput(panel);
+        await search.click();
+        await search.fill('');
+        await search.pressSequentially(text, {delay: 15});
+    }
+
+    /** The panel's Funder field (search box, chosen funder, its "Delete"). */
+    funderField(panel) {
+        return panel.locator('.pkpFormField--funder');
+    }
+
+    /**
+     * The window a failed registry search or pick opens over the panel,
+     * named by its title: "Error" (a dropped connection; a pick the
+     * server cannot answer) or "ROR API Error" (a 5xx or 429 answer).
+     *
+     * @param {'Error'|'ROR API Error'} title
+     */
+    registryWindow(title) {
+        return this.page.getByRole('dialog', {name: title, exact: true});
+    }
+
+    /** Press a registry window's "OK" and wait for it to leave (it blocks
+     * the panel until then, A3). */
+    async pressWindowOk(window) {
+        await window.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(window).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /** The list rows whose name cell carries the ROR mark: how a registry
+     * funder the install's copy lacks is found (its name cell may be
+     * empty, A3, and is never read). */
+    rorMarkedRows() {
+        return this.rows().filter({has: this.page.locator('td:first-child').getByRole('img')});
+    }
+
+    /** The ROR mark in a given row's name cell. */
+    rorMarkIn(row) {
+        return row.locator('td:first-child').getByRole('img');
     }
 
     /** The delete confirmation dialog (Rule 6). */
