@@ -2581,7 +2581,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A31](#a31) | A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref and a journal's DataCite | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered" | 🐞 | low | issues (claude), 2026-11-23 — re-verified |
-| [OJS5](#ojs5) | DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI | 🐞 | medium · crash: server | issues (claude), 2026-10-15 — re-verified |
+| [OJS5](#ojs5) | DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI | 🐞 | medium · crash: server | issues (claude), 2026-11-23 — re-verified |
 | [OJS8](#ojs8) | With DataCite and "DOI Versioning" "Yes", a deposit is given only the current version, yet "Deposit All" and "Deposit DOIs" mark every published major version's DOIs "Submitted" | 🐞 | user-visible | @bozana 2026-10-08 · tracked upstream |
 | [OJS9](#ojs9) | With "Author Response" DOIs turned on, every DOI assignment gives each author response a new DOI | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [OJS10](#ojs10) | A cancelled reviewer's review stays on the DOIs page and is still deposited with Crossref | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
@@ -3082,8 +3082,7 @@ starts no deposit unless the article's own DOI goes out with it. So it
 also leaves galley DOIs unsent when the article's DOI is already
 "Registered" (galley DOIs turned on after the articles were registered)
 and when "Articles" is unticked.
-Basis: probe, 2026-10-15. <sup>f-ojs5</sup>
-Report: refresh owed — A18 retired 2026-11-20 (pkp/crossref-ojs#117 and pkp/ojs#5977, for pkp/pkp-lib#13591): a deposit that cannot connect now reads "Error", so the report's Expected sentence and link on the unreachable agency (the deleted A18 report) no longer hold; the fix catches only connection failures in `DataciteExportPlugin::depositXML()`, so this fault's server failure still leaves the row "Submitted" by the code, to be walked (2026-11-23)
+Basis: probe + walk, 2026-11-23. <sup>f-ojs5</sup>
 
 <a id="ojs7"></a>
 **OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ✅ · minor.

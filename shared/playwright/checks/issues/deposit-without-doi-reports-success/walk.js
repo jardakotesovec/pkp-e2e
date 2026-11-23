@@ -59,8 +59,15 @@
 //        fix-datacite-ojs.diff in and out).
 //   WAYROUND=1 (WALK=galleyall, galley): after the Steps, "Assign DOIs" on the
 //        work, then "Deposit DOIs" on it: the report's way round.
+// RUNNER=pageloads (default: `[queues] job_runner = On`, as the dataset ships
+//   it; the deposit runs at the end of the page loads that follow) or
+//   RUNNER=jobtool (lib.js holdQueue writes `job_runner = Off` into the fleet's
+//   config, and after the press the walk runs `php lib/pkp/tools/jobs.php run`,
+//   as an administrator's cron job does, until nothing is queued, waiting out
+//   the 5 s between a failed job's tries).
 // The test installs cannot reach an agency, so a deposit that gets that far
-// fails at the connection (U45 A18). Which object it was posting shows in the
+// fails at the connection; since pkp/pkp-lib#13591 (pkp/ojs#5977, #5978) the
+// object being posted then reads "Error". Which object it was posting shows in the
 // export file it leaves in files_dir/temp (lib.js leftExportFiles(), read only).
 // OMP has no registration agency plugin: no surface, skipped.
 // Reset first, then run:
@@ -69,7 +76,7 @@
 // On 3.5: PKP_E2E_LINE=stable-3_5_0 in front of both, feature issues-ir1-3_5,
 // and PROBE_RUN=r35 in front of the run.
 const {forEachApp, launch, signIn, screen, shot, record, idle, sql} = require('../../../probe');
-const {depositAll, leftExportFiles, exportFileNames, newExportRecords, validateDatacite} = require('./lib');
+const {depositAll, leftExportFiles, exportFileNames, newExportRecords, validateDatacite, holdQueue, runJobTool} = require('./lib');
 
 const T = 30_000;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -77,6 +84,8 @@ const flat = (s, n = 400) => (s == null ? s : String(s).replace(/\s+/g, ' ').tri
 const WALK = process.env.WALK || 'nodoi';
 const NEIGHBOUR = !!process.env.NEIGHBOUR;
 const WAYROUND = !!process.env.WAYROUND;
+const RUNNER = process.env.RUNNER || 'pageloads';
+if (!['pageloads', 'jobtool'].includes(RUNNER)) throw new Error(`RUNNER=${RUNNER}: pageloads or jobtool`);
 
 const ITEM = {ojs: 17, ops: 2};
 const GALLEY = WALK.startsWith('galley');
@@ -96,8 +105,8 @@ forEachApp(async (app) => {
     const {expect} = require('@playwright/test');
     const ctx = app.contextPath;
     const id = ITEM[app.name];
-    const pre = `${WALK}${NEIGHBOUR ? '-nb' : ''}`;
-    const facts = {app: app.name, line: app.line || 'main', walk: WALK, neighbour: NEIGHBOUR, run: process.env.PROBE_RUN || null};
+    const pre = `${WALK}${NEIGHBOUR ? '-nb' : ''}${RUNNER === 'jobtool' ? '-jobtool' : ''}`;
+    const facts = {app: app.name, line: app.line || 'main', walk: WALK, neighbour: NEIGHBOUR, runner: RUNNER, run: process.env.PROBE_RUN || null};
     const fact = (k, v) => {
         facts[k] = v;
         console.log(`[fact] ${app.name} ${k}: ${flat(JSON.stringify(v), 1200)}`);
@@ -110,7 +119,24 @@ forEachApp(async (app) => {
         return seen;
     });
 
+    if (RUNNER === 'jobtool') fact('0 job_runner', holdQueue(app));
+    // the error message each DOI keeps for "View Error" (read only; null where the table differs)
+    const doiMessages = () => {
+        try {
+            return sql(app, "select doi_id || ' ' || setting_name || ': ' || left(coalesce(setting_value, ''), 200) from doi_settings where setting_name like '%ailedMsg%' order by doi_id")
+                .split('\n').filter(Boolean);
+        } catch (e) {
+            return null;
+        }
+    };
+    const pageErrors = [];
+    const failedRequests = [];
+
     const {page, close} = await launch(app);
+    page.on('pageerror', (e) => pageErrors.push(flat(String(e), 300)));
+    page.on('response', (r) => {
+        if (r.status() >= 500) failedRequests.push(`${r.status()} ${r.request().method()} ${r.url()}`);
+    });
     try {
         await recordNotices(page);
         // 1
@@ -264,13 +290,24 @@ forEachApp(async (app) => {
                 queued: sql(app, `select substring(payload from 'displayName":"([^"]+)') from jobs order by id`).split('\n').filter(Boolean),
                 dois: doiRows()});
 
-            // reload until nothing is queued (each web request runs the queue, job_runner On)
+            // pageloads: reload until nothing is queued (each web request runs the queue, job_runner On);
+            // jobtool: run the job tool until nothing is queued, as a cron job would
             let loads = 0;
+            const tool = [];
             const started = Date.now();
-            for (; loads < 30; loads++) {
-                await sleep(4000);
-                await dois.reload();
-                if (loads >= 4 && Number(sql(app, "select count(*) from jobs where payload like '%Deposit%'") || 0) === 0) break;
+            const depositsQueued = () => Number(sql(app, "select count(*) from jobs where payload like '%Deposit%'") || 0);
+            if (RUNNER === 'pageloads') {
+                for (; loads < 30; loads++) {
+                    await sleep(4000);
+                    await dois.reload();
+                    if (loads >= 4 && depositsQueued() === 0) break;
+                }
+            } else {
+                fact('queued before the job tool, after a reload', (await dois.reload(), depositsQueued()));
+                for (let n = 0; n < 6 && depositsQueued() > 0; n++) {
+                    if (n) await sleep(6000);
+                    tool.push(runJobTool(app));
+                }
             }
             await sleep(2000);
             await dois.reload();
@@ -279,7 +316,7 @@ forEachApp(async (app) => {
             record(`${pre}-after-expanded`, sAfter);
             await shot(page, `${pre}-after-expanded`).catch(() => {});
             fact('after the background job', {
-                seconds: Math.round((Date.now() - started) / 1000), reloads: loads + 1,
+                runner: RUNNER, seconds: Math.round((Date.now() - started) / 1000), reloads: loads + 1, tool,
                 badge: flat(await dois.rowBadge(row).innerText()),
                 table: flat(await dois.expanded(row).locator('table').innerText()),
                 panel: flat(await dois.agencyPanel(row).innerText().catch(() => null)),
@@ -289,6 +326,7 @@ forEachApp(async (app) => {
                 exportFilesLeft: leftExportFiles(app),
                 jobsLeft: sql(app, 'select count(*) from jobs'),
                 dois: doiRows(),
+                messages: doiMessages(),
             });
 
             await signIn(page, 'admin');
@@ -364,6 +402,8 @@ forEachApp(async (app) => {
             record(`${pre}-export`, await screen(page));
             fact('export', {status: res && res.status(), body: flat(res && (await res.text().catch(() => null)), 300), notices: await notices(page), threw});
         }
+        fact('page errors', pageErrors);
+        fact('server errors', failedRequests);
     } finally {
         record(`${pre}-facts`, facts);
         await close();
