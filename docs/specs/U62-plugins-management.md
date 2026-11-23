@@ -271,17 +271,22 @@ None of these is shown for a plugin with no compatible version.
 18. **"Upgrade".** A row's "Upgrade" opens the "Upgrade Plugin" window.
     "Save" with a newer version of the same plugin replaces it: the
     notice "Successfully upgraded to version {version}" shows and the row
-    keeps its box as it was. <sup>m</sup> <sup>td16</sup>
+    keeps its box as it was. Right after "Save" the row still shows the
+    replaced version's description; a reload a few seconds later shows
+    the new version's ⚠ [A15](#a15). <sup>m</sup> <sup>td16</sup>
 
     The new version's upgrade file lists the steps the upgrade runs,
     such as changes to the database, and may limit a step to a range of
     versions. "Save" runs every step that has no range; a step with a
     range runs only when the application's version falls in it, whatever
-    the plugin version being replaced ⚠ [A11](#a11). No screen shows
+    the plugin version being replaced ⚠ [A11](#a11). "Save" also runs
+    the plugin's own installation step (Rule 16), but as the version
+    being replaced wrote it: a database change the new release adds to
+    that step is not made ⚠ [A14](#a14). No screen shows
     which steps ran, and the notice reads the same either way: a tester
-    checks what a step leaves behind on the server, read in the
-    database or the server's files, such as a table its database change
-    adds or a line it writes to a file. <sup>m</sup> The application's
+    checks what a step leaves behind on the server, such as a table its
+    database change adds (listed by a database client) or a line it
+    writes to a file in the plugin's folder. <sup>m</sup> The application's
     own version stays as it was, whatever version the upgrade file
     names. <sup>v</sup>
 19. **Upgrade refused.** Each of these shows its notice and leaves the
@@ -365,12 +370,14 @@ None of these is shown for a plugin with no compatible version.
   adds a Tasks entry or writes a submission's activity log. <sup>r</sup>
 - Uploading, upgrading, installing from the gallery and deleting change
   the whole installation: every journal's list and the site's show the
-  result at their next load (Rules 5, 16, 18, 21). <sup>k</sup>
-  <sup>n</sup>
+  result at their next load, except that a load in the first two
+  seconds or so after an upgrade can still show the replaced version's
+  description (Rules 5, 16, 18, 21). <sup>k</sup> <sup>n</sup>
 - When the installation's audit logging is on ("log_audit" under "logs"
-  in the configuration file; off by default and on the test installs),
-  each switch, install, upgrade and deletion is written to the server's
-  own log, which no screen shows. <sup>u</sup>
+  in the configuration file; off by default, and off on the test
+  installs), each switch, install, upgrade and deletion is written to
+  the server's log (where PHP writes its errors), which no screen shows.
+  <sup>u</sup>
 
 ## Settings that modify behavior
 
@@ -683,6 +690,7 @@ Left out of the scenarios above, by reason:
     `docs/issues/U62-A1-plugin-gallery-offline-stays-loading.md`): "Plugin Gallery" on an installation that cannot reach PKP's site shows an empty list, with no server error [report 2026-10-02]
   - the guard for A5 (issue report
     `docs/issues/U62-A5-failed-upgrade-removes-plugin.md`): an upgrade through a row's "Upgrade" whose own upgrade step fails leaves the old version listed, ticked and working [report 2026-10-02]
+  - the guard for A14: an upgrade through a row's "Upgrade" whose new release makes its own installation step create one more table (Rule 18) leaves that table in the database [incidental 2026-11-23]
 - **Nothing new to test**:
   - a tick made in the Settings Wizard's "Plugins" tab showing on the
     journal's own list, and the reverse (Rule 3)
@@ -719,6 +727,10 @@ Left out of the scenarios above, by reason:
     installed; the other plugins' steps run again; Rule 16)
   - A13 (a theme's failed installation: the notice's raw markup and
     database details, and the same package refused again; Rule 16)
+  - A14 (an upgrade that runs the replaced version's installation step,
+    so the new release's database change is not made; Rule 18)
+  - A15 (the replaced version's description on the row right after an
+    upgrade; Rule 18; Side effects bullet 2)
 - **No seed**:
   - browsing the Plugin Gallery, searching it and opening a plugin's
     details, since the test installs never reach PKP's site (Actors
@@ -773,9 +785,11 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success | 🐞 | low | issues (claude), 2026-10-27 — re-verified |
 | [A12](#a12) | Plugins: a plugin whose own database step fails is reported "Successfully installed" and kept as installed | 🐞 | medium | issues (claude), 2026-11-05 — re-verified |
 | [A13](#a13) | Plugins: a failed plugin installation's notice shows raw markup and database details, and the same package then fails with "already exists" | 🐞 | low | issues (claude), 2026-11-05 — re-verified |
+| [A14](#a14) | Plugins: "Upgrade" runs the replaced version's installation step, so a database change the new release adds is not made, and the notice still reads "Successfully upgraded" | 🐞 | medium | — |
 | [A4](#a4) | "Delete" is offered on plugins nobody can switch off, and on the theme in use | ❓ | minor | — |
 | [A6](#a6) | A Site Administrator with no manager role in a journal cannot switch its plugins | ❓ | minor | — |
 | [A8](#a8) | The theme a journal uses can be switched off | ❓ | user-visible | — |
+| [A15](#a15) | Plugins: right after "Successfully upgraded", the row still shows the replaced version's description | ❓ | minor | — |
 | [OMP1](#omp1) | A press's list shows site-wide plugins to the Site Administrator only on a one-press installation | ✅ | invisible | — |
 | [OMP2](#omp2) | A press lists the category headings in another order | ✅ | invisible | — |
 
@@ -1016,6 +1030,41 @@ installation on all three apps meets this notice and this dead end.
 The fix proposed here clears the notice's markup and connection
 details, and removes the leftover tables on PostgreSQL, not on MySQL.
 Basis: probe, 2026-11-05. <sup>f-a13</sup>
+
+<a id="a14"></a>
+**A14 — Plugins: "Upgrade" runs the replaced version's installation step, so a database change the new release adds is not made, and the notice still reads "Successfully upgraded"** · 🐞 · medium.
+A plugin can carry an installation step of its own that sets up its
+tables in the database (Rule 16). A Site Administrator upgrades such a
+plugin with its row's "Upgrade" (or the Plugin Gallery's "Upgrade"),
+and the new release adds a database change to that step, such as one
+more table. The upgrade runs the step as the version being replaced
+wrote it, so the change is not made, and the notice still reads
+"Successfully upgraded to version 1.0.1.0". Nothing on screen shows it;
+the new release then runs on a database without its change. The change
+is made later, as a side effect, the next time another plugin is
+installed with "Upload A New Plugin" ([A12](#a12)), or when someone
+with access to the server runs the command-line tool
+"installPluginVersion.php" for the plugin.
+Since: 2020-05-12 (pkp/pkp-lib#2493) · Basis: probe, 2026-11-23. <sup>f-a14</sup>
+
+<a id="a15"></a>
+**A15 — Plugins: right after "Successfully upgraded", the row still shows the replaced version's description** · ❓ · minor.
+After "Save" in "Upgrade Plugin", the notice reads "Successfully
+upgraded to version {version}", but the plugin's row in the list still
+shows the description of the version replaced. A reload a few seconds
+later shows the new version's; a reload within about two seconds can
+still show the old one. On the test installs, PHP keeps compiled copies
+of the application's code and checks them for changes at most every
+two seconds, and the application does not clear those copies when it
+replaces a plugin's files. On a server set never to check, the replaced
+version's code would keep running until PHP restarts; that is read from
+the configuration and the code, not seen.
+Question: should an upgrade clear PHP's compiled copies of the files it
+replaces? Lean: no; it is an effect of the server's setup, not a rule
+of the application: on the test installs the delay is the two-second
+check, and it would matter only on a server that never checks, which
+has not been driven.
+Basis: probe, 2026-11-23. <sup>f-a15</sup>
 
 ### OMP
 
@@ -1350,7 +1399,11 @@ when unset, from `VersionDAO::getCurrentVersion()` with no arguments
 `setCurrentVersion()` with the plugin's version before `execute()`,
 `upgradePlugin()` does not, so an upgrade's ranges meet the
 application's version (A11). Live-probed 2026-10-27 (Rule 18; OJS, OMP,
-OPS `main` and OJS stable-3_5_0): f-a11.
+OPS `main` and OJS stable-3_5_0): f-a11. The plugin's own install
+migration runs on the upgrade request as the replaced version's class,
+from the `upgrade.xml` `<migration>` node and from the
+`Installer::postInstall` hook's `Plugin::updateSchema()` (A14): f-a14.
+The row's text right after the upgrade: f-a15.
 
 <a id="fn-n"></a>
 **n** — Delete. `PluginGridRow` adds `delete` as a
@@ -1769,7 +1822,10 @@ steps saw the plugin's own 1.0.0.0. A fix would call
 `$installer->setCurrentVersion()` with the installed plugin's version
 before `execute()` in `upgradePlugin()`. pkp/pln's `upgrade.xml` on
 its default branch has no `<upgrade>` block (read 2026-10-27); the
-other gallery plugins were not read.
+other gallery plugins were not read. Live-probed 2026-11-23 through the
+screens as `admin` on OJS, OMP and OPS `main`, two runs each
+(`shared/playwright/checks/U62/I62/i62.js`, part `web`): the same three
+steps ran and the two plugin ranges did not, each step seeing `3.6.0.0`.
 Issue report: [pkp-e2e#1075](https://github.com/jardakotesovec/pkp-e2e/issues/1075) ([docs/issues/U62-A11-plugin-upgrade-skips-own-version-steps.md](../issues/U62-A11-plugin-upgrade-skips-own-version-steps.md)).
 
 <a id="fn-f-a12"></a>
@@ -1824,6 +1880,53 @@ failed. DB: … SQLSTATE[42P07]: Duplicate table: 7 ERROR: relation
 (read from the code; a theme's failure does not reach the notice there,
 f-a12).
 Issue report: [pkp-e2e#1085](https://github.com/jardakotesovec/pkp-e2e/issues/1085) ([docs/issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md](../issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md)).
+
+<a id="fn-f-a14"></a>
+**f-a14** — fn-m, fn-w. `Plugin::register()` calls
+`getInstallMigration()` on every request, so the plugin's migration
+class is loaded before `PluginHelper::upgradePlugin()` replaces the
+plugin's folder, and PHP keeps the class it loaded first. Both the
+`upgrade.xml` `<migration>` node (`Installer::executeAction()`) and the
+`Installer::postInstall` hook's `Plugin::updateSchema()` then run the
+replaced version's class. The same `register()` on stable-3_5_0 and
+stable-3_4_0 (`Plugin.php`) and stable-3_3_0 (`Plugin.inc.php`), read
+from the code; the gallery's "Upgrade"
+(`PluginGalleryGridHandler::upgradePlugin()`) calls the same
+`PluginHelper::upgradePlugin()`, read from the code (the gallery never
+loads on the test installs, A1). It dates from the migrations-based
+plugin schema (lib/pkp `c7e640593a`, 2020-05-12, pkp/pkp-lib#2493,
+3.3.0); before it the install schema was an XML file read from disk at
+the time of the upgrade. Live-probed 2026-11-23 (Rule 18; OJS, OMP,
+OPS `main`, lib/pkp `3ea73a1a7e`, two runs each), as `admin` on a
+scratch journal, press or server: a scratch generic plugin installed
+at 1.0.0.0 with an install migration, then its row's "Upgrade" with a
+1.0.1.0 whose migration's `up()` also creates the table `<product>_n`
+and whose `upgrade.xml` holds f-a11's five marker steps plus a
+`<migration>` naming that class. The notice read "Successfully upgraded
+to version 1.0.1.0"; on the upgrade request `up()` ran twice, from the
+`<migration>` node and from `postInstall`, both times with the class's
+version constant at 1.0.0.0 while the file on disk read 1.0.1.0; the
+new step did not run and `<product>_n` was absent. The next "Upload A
+New Plugin" of another plugin ran 1.0.1.0's `up()` from its own
+`postInstall` (f-a12's re-runs) and the table appeared. Control:
+1.0.1.0's files put in place by hand and
+`php lib/pkp/tools/installPluginVersion.php` ran the 1.0.1.0 class and
+made the table, and ran none of `upgrade.xml`'s steps. Kept script
+`shared/playwright/checks/U62/I62/i62.js` (parts `web`, `cli`). No
+pkp/pkp-lib issue found by search (2026-11-23).
+
+<a id="fn-f-a15"></a>
+**f-a15** — Live-probed 2026-11-23 (Rule 18; Side effects bullet 2;
+OJS, OMP, OPS `main`, two runs each; f-a14's runs and a run of
+scenario 5): the list's own `fetch-grid` after the upgrade's "Save"
+held the replaced version's description ("version 1.0.0.0", not
+"version 1.0.1.0") in 12 of 12 reads; a reload read the new one in 11
+of 12 (OPS, one run, read the old one; the site's list read just after
+held the new). The test servers are PHP's `cli-server` with
+`opcache.enable` on and `opcache.revalidate_freq=2`; lib/pkp calls no
+`opcache_invalidate()` after it replaces a plugin's files. With
+`opcache.validate_timestamps=0` the old code would run until PHP
+restarts: read from the configuration and the code, not driven.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-i. Live-probed 2026-09-27 (OJS, two runs): with
