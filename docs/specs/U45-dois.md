@@ -2564,7 +2564,7 @@ an entry notes otherwise; the team settles them on spec review.
 |----|-----------------------------|------|--------|--------|
 | [A2](#a2) | "None" (and every peer review) gets a DOI that is the prefix and a bare "/" | 🐞 | high | issues (claude), 2026-10-12 — re-verified |
 | [A3](#a3) | A DOI refused on the DOIs page gets only "Some DOI(s) could not be updated", never the reason | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A4](#a4) | After "Deposit DOIs", the item's agency box says it "has been manually registered", though nobody marked it | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A4](#a4) | After "Deposit DOIs", the item's agency box says it "has been manually registered", though nobody marked it | 🐞 | low | issues (claude), 2026-11-23 — re-verified |
 | [A8](#a8) | On the DOIs page, a screen reader announces the "DOI Statuses" button and every row's tick box without a name | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A9](#a9) | A pattern symbol with nothing to fill it stays in the DOI | 🐞 | high | issues (claude), 2026-10-12 — re-verified |
 | [A11](#a11) | Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -2658,18 +2658,21 @@ On the DOIs page, an item whose DOI was sent for deposit reads
 "Submitted", and the agency box in its expanded view says "This item has
 been manually registered with a registration agency." Expected: "The
 metadata for this item has been submitted to {agency}.", since nobody
-marked it registered. Nothing is lost: the badge, the deposit and the
-stored status are right, and the box picks the wrong one of two
-sentences. The sentence is wrong for as long as the item reads
-"Submitted". That is seconds where queued jobs run on web requests (the
-default), and until the worker's or cron's next run otherwise; a
-deposit that cannot connect to the agency is no exception, since the
-item then reads "Error". It needs Crossref or DataCite configured,
-which a press cannot have. It shows on an item whose DOI no agency has
-registered before; an item deposited again after an agency registered
-it reads the right sentence.
-Basis: probe, 2026-10-01. <sup>f-a4</sup>
-Report: refresh owed — pkp/crossref-ojs#117, pkp/crossref-ops#74 and pkp/ojs#5977 (for pkp/pkp-lib#13591, on both apps' `main` by 2026-11-20) record a deposit that cannot connect as "Error", so the report's Summary sentence "the item stays "Submitted" … and the sentence stays with it" no longer holds, and its step 8 (waiting for "Failed Jobs" to list `PKP\jobs\doi\DepositSubmission`) now ends at "Error" with no failed job (`CrossrefExportPlugin.php`, `DataciteExportPlugin.php`, `updateDepositStatus()`) (2026-11-20)
+marked it registered.
+
+On a default install, where queued jobs run at the end of page loads,
+managers never see the wrong sentence: the deposit has run before the
+list is drawn again. It shows only where a worker or a cron job runs the
+queue with the command-line job tool, and lasts until that tool's next
+run: a minute or a night, as the administrator scheduled it. The badge,
+the deposit and the stored status are right; the box picks the wrong one
+of two sentences.
+
+It needs Crossref or DataCite configured, which a press cannot have. It
+hits every deposit of an item until an agency has registered its DOI
+once: the first, and any made again after an "Error". An item deposited
+again after an agency registered it reads the right sentence.
+Basis: probe + walk, 2026-11-23. <sup>f-a4</sup>
 
 <a id="a5"></a>
 **A5 — The Registration tab keeps a new agency even when its fields are refused** · ❓ · minor.

@@ -8,11 +8,19 @@
   - 3.5: OJS, OPS
   - 3.4: OJS, OPS (code)
   - 3.3: none (code; no DOIs page)
-- **Introduced** `pkp/ui-library#240` for `pkp/pkp-lib#7521` · [c475c5cf76](https://github.com/pkp/ui-library/commit/c475c5cf7627a48cb9279299767f9a6842d858f3) · 2022-12-13 · Erik Hanson (ewhanson)
-- **Upstream** none found (2026-10-01)
+- **Introduced** `pkp/ui-library#240` for `pkp/pkp-lib#7521` · [c475c5cf76](https://github.com/pkp/ui-library/commit/c475c5cf7627a48cb9279299767f9a6842d858f3) · 2023-02-02 · Erik Hanson (ewhanson)
+- **Upstream** none found (2026-11-23)
 - **Tracked in** spec U45 [A4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U45-dois.md#a4)
-- **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-23, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-11-23: `pkp/crossref-ojs#117`, `pkp/crossref-ops#74` and
+`pkp/ojs#5977` (for `pkp/pkp-lib#13591`, on `main` and `stable-3_5_0`)
+record a deposit that cannot connect to the agency as "Error". Such an
+item no longer stays "Submitted" with the wrong sentence, so the
+Summary, Impact and Steps now follow the item until the deposit job has
+run, with the queue run both ways: at the end of page loads and by the
+job tool. The fault itself, its cause and the fix are unchanged.
 
 ## Summary
 
@@ -22,49 +30,54 @@ been manually registered with a registration agency." Expected: "The
 metadata for this item has been submitted to {agency}.", since nobody
 marked it registered.
 
-Nothing is lost: the badge, the deposit and the stored status are right,
-and the box picks the wrong one of two sentences. The sentence is wrong
-for as long as the item reads "Submitted". That is seconds where queued
-jobs run on web requests (the default), and until the worker's or cron's
-next run otherwise. When the deposit cannot connect to the agency, the
-item stays "Submitted" (a separate fault, pkp-e2e#210) and the sentence
-stays with it.
+On a default install, where queued jobs run at the end of page loads,
+managers never see the wrong sentence: the deposit has run before the
+list is drawn again. It shows only where a worker or a cron job runs the
+queue with the command-line job tool, and lasts until that tool's next
+run: a minute or a night, as the administrator scheduled it. The badge,
+the deposit and the stored status are right; the box picks the wrong one
+of two sentences.
 
 It needs Crossref or DataCite configured, which a press cannot have. It
-shows on an item whose DOI no agency has registered before; an item
-deposited again after an agency registered it reads the right sentence.
+hits every deposit of an item until an agency has registered its DOI
+once: the first, and any made again after an "Error". An item deposited
+again after an agency registered it reads the right sentence.
 
 ## Impact
 
-- **Lost.** Nothing. The box says the DOI was registered by hand while it
-  is waiting for its deposit.
-- **Who.** A journal or preprint server manager who expands an item on
-  the DOIs page while it reads "Submitted".
+- **Lost.** No data. While the deposit waits in the queue, the box tells
+  the manager the DOI is already registered, by hand.
+- **Who.** A journal or preprint server manager on an install that runs
+  its queue with the job tool, who expands an item on the DOIs page
+  before the tool's next run, after any deposit of an item no agency has
+  registered yet.
 - **Way round.** The badge is right, and the box offers no button in this
   state, so the sentence leads to no wrong action on screen. It turns
-  into the right one once the agency has answered.
+  into the right one once the deposit job has run.
 
 Low: a wrong sentence, and the deposit goes through. A manager who
-believed it and so never looked at a stuck deposit again would make it
-medium.
+believed it and so never looked again at a deposit the queue never runs
+would make it medium.
 
 ## Steps to reproduce
 
 Preconditions:
 
-- PKP's default test dataset, `main` (OJS; OPS where the steps say so),
-  with `[queues] job_runner = On` in `config.inc.php` as the dataset
-  ships it, so queued jobs run on web requests.
-- The agency must be unreachable, or steps 7 and 8 show "Error" instead:
-  step 4 gives no credentials, so an agency that answers refuses the
-  deposit within seconds. Point the proxy in `config.inc.php` at a port
-  where nothing listens:
+- PKP's default test dataset, `main` (OJS; OPS where the steps say so).
+- In `config.inc.php`, `[queues]`: `job_runner = Off`, so queued jobs run
+  only when the job tool runs, as on an install with a worker or a cron
+  job. (The dataset ships `job_runner = On`; see "Jobs at page loads"
+  below.)
+- The install does not reach the agency, so no test deposit leaves it.
+  In `config.inc.php`, `[proxy]`:
 
   ```ini
-  [proxy]
   http_proxy = "http://127.0.0.1:9"
   https_proxy = "http://127.0.0.1:9"
   ```
+
+  (a closed port). Step 4 gives no credentials, so an agency that answers
+  refuses the deposit; either way the deposit ends in "Error".
 
 Steps:
 
@@ -80,39 +93,55 @@ Steps:
    infections in a hospital in Isfahan, Iran" [OPS: submission 2, "The
    Facets Of Job Satisfaction: A Nine-Nation Comparative Study Of Construct
    Equivalence"]; "Bulk Actions" › "Assign DOIs" › "Assign DOIs". Expand
-   the item ("Show more details about 17") and read the "Crossref" box
-   under the DOI table.
+   the item ("Show more details about 17" [OPS: "Show more details about
+   2"]) and read the "Crossref" box under the DOI table.
 6. Tick the item; "Bulk Actions" › "Deposit DOIs" › "Deposit DOIs". Read
    the box.
 7. Reload the DOIs page, expand the item, read the box.
-8. Reload the DOIs page every few seconds, for about 20 s, until the
-   deposit has been given up: as `admin`, Administration › "Failed Jobs"
-   then lists `PKP\jobs\doi\DepositSubmission`. Expand the item, read
-   the box.
-9. As `dbarnes`, tick the item; "Bulk Actions" › "Mark DOIs Registered" ›
-   "Mark DOIs Registered". Expand the item, read the box.
+8. In the app's directory, run the job tool once:
+   `php lib/pkp/tools/jobs.php run`. Reload the DOIs page, expand the
+   item, read the box.
+9. Tick the item; "Bulk Actions" › "Mark DOIs Registered" › "Mark DOIs
+   Registered". Expand the item, read the box.
 
-With DataCite (OJS): the same, with "DataCite Manager Plugin" in step 2
-and "Registration Agency" "DataCite" in step 4 (the reproduction also
-typed "Username (symbol)" `u45ir12`; the form does not require it).
+With DataCite (OJS): the same, with "DataCite Manager Plugin" in step 2,
+and in step 4 "Registration Agency" "DataCite" and "Username (symbol)"
+`u45n23d` in place of the two Crossref fields (the form does not require
+the username; "Password" left empty), and "DataCite" for "Crossref" in
+the box.
 
 **Expected.** Step 5: badge "Unregistered", "The metadata for this item
-has not been submitted to Crossref." with "Deposit DOI(s)". Steps 6 to 8:
-badge "Submitted", "The metadata for this item has been submitted to
-Crossref." Step 9: badge "Registered", "This item has been manually
-registered with a registration agency."
+has not been submitted to Crossref." with "Deposit DOI(s)". Steps 6 and
+7: badge "Submitted", "The metadata for this item has been submitted to
+Crossref." Step 8: badge "Error", "The metadata for this item has not
+been submitted to Crossref." with "Deposit DOI(s)" and "View Error".
+Step 9: badge
+"Registered", "This item has been manually registered with a
+registration agency."
 
-**Observed.** Step 5 as expected. Steps 6, 7 and 8: badge "Submitted",
-and the box reads
+**Observed.** Step 5 as expected. Steps 6 and 7: badge "Submitted", and
+the box reads
 
 ```
 Crossref
 This item has been manually registered with a registration agency.
 ```
 
-with no button. Step 9: badge "Registered" and the same sentence, which
-is right there. With DataCite the box is headed "DataCite" and reads the
-same in steps 6 to 9.
+with no button. Step 8: badge "Error" and the "has not been submitted"
+sentence, as expected. On OJS with Crossref the box offers "Deposit
+DOI(s)" and "View Error"; on OPS with Crossref and on OJS with DataCite
+it offers "Deposit DOI(s)" alone, because the job tool's run keeps no
+error message there, a separate fault
+([U45 A31 report](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U45-A31-job-tool-deposit-error-no-message.md)).
+Step 9 as expected. With DataCite the box is headed "DataCite" and
+reads the same in steps 5 to 7 and 9.
+
+**Jobs at page loads.** With `job_runner = On`, as the dataset ships it,
+and step 8 left out: in steps 6 and 7 the item already reads "Error",
+with "The metadata for this item has not been submitted to Crossref.",
+"Deposit DOI(s)" and "View Error". The deposit ran at the end of the
+"Deposit DOIs" request, before the list was drawn again, so the wrong
+sentence never showed. Step 9 reads as expected.
 
 ## Cause
 
@@ -125,13 +154,13 @@ two statuses, "Submitted" and "Registered".
 
 A DOI's `registrationAgency` is written only when it becomes
 "Registered". The agency plugins set it in `updateDepositStatus()` when
-the agency accepted the deposit: `CrossrefExportPlugin.php` line 442 on
-OJS and line 486 on OPS, and OJS `DataciteExportPlugin.php` line 358.
+the agency accepted the deposit: `CrossrefExportPlugin.php` line 457 on
+OJS and line 501 on OPS, and OJS `DataciteExportPlugin.php` line 358.
 `Repo::doi()->markRegistered()` sets it to null for "Mark DOIs
-Registered" (lib/pkp `classes/doi/Repository.php` line 265).
+Registered" (lib/pkp `classes/doi/Repository.php` line 267).
 
 Queuing a deposit changes the status alone (`DAO::markSubmitted()`,
-lib/pkp `classes/doi/DAO.php` line 159). A DOI deposited for the first
+lib/pkp `classes/doi/DAO.php` line 161). A DOI deposited for the first
 time is therefore "Submitted" with no agency, and the component takes
 the missing agency for a registration by hand without testing that the
 DOI is registered.
@@ -146,7 +175,16 @@ Reach:
 
 - Every "Submitted" item whose DOI no agency registered before, with
   Crossref (journal, preprint server) and DataCite (journal): seen on
-  screen.
+  screen, with the job tool.
+- How long an item stays "Submitted" depends on the queue and on the
+  agency plugin, not on this component. Since `pkp/pkp-lib#13591` a
+  deposit that cannot connect ends in "Error" on `main` and
+  `stable-3_5_0`. On `stable-3_4_0` the plugins still catch only
+  `RequestException` (Crossref `CrossrefExportPlugin.php` line 324 on
+  OJS and line 388 on OPS,
+  DataCite `DataciteExportPlugin.php` line 301), so a deposit that
+  cannot connect fails its job and the item stays "Submitted", with the
+  wrong sentence, for good: code read, not walked.
 - An item registered through the agency, marked "Needs Sync" and
   deposited again keeps its stored agency while "Submitted". Today it
   reads "submitted to {agency}" with the agency that registered it
@@ -160,7 +198,7 @@ Reach:
 - The DOIs page's "Issues" tab on a journal renders its items with the
   same component: code read, not walked.
 - The component is the field's only reader. In ui-library the one other
-  mention is the mapper that passes it on (`DoiListPanel.vue` line 1042);
+  mention is the mapper that passes it on (`DoiListPanel.vue` line 1050);
   in PHP only the writers above and the 3.4 upgrade migration
   `I7014_DoiMigration.php` touch it.
 
@@ -197,25 +235,34 @@ the team may prefer the "Registered" and "Submitted" tests as two
 helpers there; the diff keeps them in the component, next to the agency
 they are paired with, and behaves the same.
 
-Tried on `main`, OJS and OPS with Crossref: with the fix in, steps 6 to 8
-read "The metadata for this item has been submitted to Crossref.", and
-steps 5 and 9 read as before.
+Tried on `main`, OJS and OPS with Crossref and the job tool: with the
+fix in, steps 6 and 7 read "The metadata for this item has been
+submitted to Crossref.", and steps 5, 8 and 9 read as before. An item
+marked registered without a deposit reads the "not submitted" sentence,
+then the "manually registered" one, with the fix in and out.
 
 Also recommended, not tried and not in the diff: read the agency from the
 same DOI as the status, `currentVersionDoiObjects[0]` in place of
 `item.doiObjects[0]` in `itemRegistrationAgency`. Without it the fixed
 test can still pick the wrong sentence on a work with several versions.
-It was left out because seeing it needs an earlier version's DOI
-registered through an agency, which no walk here could produce.
+It belongs in the same PR: it is one line in the same component, and the
+new `isManuallyRegistered` pairs the current version's status with
+`itemRegistrationAgency`, so the two must read the same DOI for the test
+to mean what it says. It is out of the diff only because seeing it needs
+an earlier version's DOI registered through an agency, which no walk
+here could produce.
 
 **Alternatives:**
 
-- Storing the agency when the deposit is queued (`markSubmitted()`): the
-  field would then mean "registered with" and "sent to", four callers
+- Storing the agency when the deposit is queued
+  (`Repo::doi()->markSubmitted()`): the field would then mean
+  "registered with" and "sent to", its callers (four in OJS, two in OPS)
   would have to pass the agency, and a deposit that ends in "Error" would
   keep an agency that never registered the DOI.
-- Dropping "Submitted" from `isDeposited()`: it also drives the greyed
-  "Edit" button and the "Deposit DOI(s)" button, which must stay as they
+- Dropping "Submitted" from `isDeposited()`: it also drives the item's
+  badge, each DOI row's status badge, the greyed "Edit" button, the
+  "View record" and "Deposit DOI(s)" buttons, and the same badges and
+  "Edit" in `DoiItemVersionModal.vue`, all of which must stay as they
   are for a "Submitted" item.
 
 **What goes with it:**
@@ -226,72 +273,100 @@ registered through an agency, which no walk here could produce.
   by hand; the two computed properties apply as written, and status
   comparisons in the component are the pattern there. Not tried on
   either.
-- Test: ui-library has no component tests for the DOI list; the pkp-e2e
-  U45 spec takes a check of the box's sentence after "Deposit DOIs".
+- Test: ui-library has no component tests for the DOI list; one for
+  `DoiListItem.vue` would set a "Submitted" DOI without an agency and
+  read the box's sentence.
 
-Small: a few lines in one component.
+Small: one component, no data repair, no API change.
 
 ## Evidence
 
 - Kept script, which takes the Steps through the screens:
-  [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/deposited-item-reads-manually-registered/walk.js).
-  Run it on an install loaded from the default dataset with
-  `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/deposited-item-reads-manually-registered/walk.js`
-  (Crossref; `WALK=datacite` for DataCite on OJS;
-  `PKP_E2E_LINE=stable-3_5_0` in front for 3.5). Where the walk differs
-  from the Steps: in step 8 it does not open "Failed Jobs" but reads the
-  `jobs` and `failed_jobs` tables (the queue was empty and the failed
-  job stored after 8 to 13 s), and it reads each DOI's stored status and
-  `registrationAgency` from the database (read only).
+  [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/deposited-item-reads-manually-registered/walk.js)
+  with its helpers in `lib.js` beside it. Run it on an install loaded
+  from the default dataset with
+  `RUNNER=jobtool PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/deposited-item-reads-manually-registered/walk.js`
+  (`RUNNER=pageloads`, the default, for "Jobs at page loads";
+  `WALK=datacite` for DataCite on OJS; `NEIGHBOUR=1` for the fix's
+  neighbour check; `PKP_E2E_LINE=stable-3_5_0` in front for 3.5). Where
+  the walk differs from the Steps: `RUNNER=jobtool` writes
+  `job_runner = Off` into the install's config before step 1 and runs
+  the job tool itself in step 8; `RUNNER=pageloads` reloads every 4 s
+  until no DOI reads "Submitted" (none was by step 7). It reads each
+  DOI's stored status and `registrationAgency`, and the `jobs` and
+  `failed_jobs` tables, from the database (read only). With the job
+  tool, the `DepositSubmission` job was queued in steps 6 and 7, and no
+  run left a failed job.
 - The fix was tried with
   `node bin/try-fix.js apply shared/playwright/checks/issues/deposited-item-reads-manually-registered/fix.diff ojs ops`
-  (which rebuilds the JavaScript), walk.js on OJS and OPS, then
-  `node bin/try-fix.js revert` with the same arguments. DataCite was not
-  walked with the fix in; the component does not distinguish the
-  agencies.
+  (which rebuilds the JavaScript), walk.js with `RUNNER=jobtool` on OJS
+  and OPS, and `NEIGHBOUR=1` on both, then
+  `node bin/try-fix.js revert` with the same arguments and `NEIGHBOUR=1`
+  again on the reverted code. The neighbour gives a second published
+  item (OJS submission 1, OPS submission 5) a DOI and marks it
+  registered without a deposit. DataCite was not walked with the fix
+  in; the component does not distinguish the agencies.
 - Walked on PostgreSQL, each install freshly loaded from pkp/datasets
-  [38ab955](https://github.com/pkp/datasets/commit/38ab95511dd060c2ea185cb11eb5eedfb2a99e40)
-  (2026-09-30):
-  - main: OJS [bade233f73](https://github.com/pkp/ojs/commit/bade233f73f5a1ccfb7f29c48b8becdb278f1287)
-    (lib/pkp 2e377d27fc), OPS
-    [c8af945bb7](https://github.com/pkp/ops/commit/c8af945bb747336cd2669dea9cc0ab8a0dbf70a2)
-    (lib/pkp 3dc90c81a6), ui-library
-    [280f98c570](https://github.com/pkp/ui-library/commit/280f98c5703024a8de7694642dfa860eaa293e1a):
-    as Observed, Crossref on both and DataCite on OJS. The stored DOI was
-    status 2 ("Submitted") without a `registrationAgency` in steps 6 to
-    8, and status 3 without one after step 9.
-  - stable-3_5_0: OJS [92b9a16b48](https://github.com/pkp/ojs/commit/92b9a16b48df164b60c2311175b659dec5bddf17),
-    OPS [cf4fce69bd](https://github.com/pkp/ops/commit/cf4fce69bd1b020b73ff061dbde9cea586207994),
-    lib/pkp a9c76aed62, ui-library
-    [1a7a47504c](https://github.com/pkp/ui-library/commit/1a7a47504c4f8b78f423cdfd16c55c0fcf01caca):
-    as Observed, Crossref on both; DataCite not walked. The code has the
-    same test (`DoiListItem.vue` line 151, `isDeposited` a computed over
-    "Submitted" and "Registered", line 379) and the same
-    `markSubmitted()`.
-- Code reads, not walked:
-  - 3.4: ui-library `stable-3_4_0`
+  [abdb5d17](https://github.com/pkp/datasets/commit/abdb5d172e547779ee2b350a8ef5aa76509956bd)
+  (2026-11-22), each way the queue runs:
+  - main: OJS [1e1d3fc49b](https://github.com/pkp/ojs/commit/1e1d3fc49b69290f0931e81982e4be8a35232cb3)
+    (crossref-ojs 08da83b18960, lib/pkp 3ea73a1a7e), OPS
+    [69d3cf6bad](https://github.com/pkp/ops/commit/69d3cf6badeb6fd9947aeb54ef5c7be4eb64d133)
+    (crossref-ops 0bcf460c288e, lib/pkp 3ea73a1a7e), ui-library
+    [836c01b500](https://github.com/pkp/ui-library/commit/836c01b500360d4e3bd6d17f7cb57ef50e110ca5):
+    as Observed, Crossref on both with the job tool and at page loads,
+    DataCite on OJS with the job tool. The stored DOI was status 2
+    ("Submitted") without a `registrationAgency` in steps 6 and 7, status
+    4 ("Error") after the job, and status 3 without one after step 9.
+  - stable-3_5_0: OJS [7f23f05a93](https://github.com/pkp/ojs/commit/7f23f05a9347ec72a51b6af638aa580550c5c92c)
+    (crossref-ojs 622a14df8d0c), OPS
+    [5a7aec98df](https://github.com/pkp/ops/commit/5a7aec98dfe69febe20006b711b854627bd9b5fb)
+    (crossref-ops e72c479a645c), lib/pkp 9295edd4f0, ui-library
+    [fd00e45f6e](https://github.com/pkp/ui-library/commit/fd00e45f6e1b45b2ae5879f7080d50b967f0e055):
+    as Observed, Crossref on both, with the job tool and at page loads;
+    DataCite not walked. The code has the same test (`DoiListItem.vue`
+    line 151, `isDeposited` a computed over "Submitted" and "Registered",
+    line 379), the same `markSubmitted()` (`DAO.php` line 176), and the
+    `pkp/pkp-lib#13591` backport (`pkp/crossref-ojs#118`,
+    `pkp/crossref-ops#75`, `pkp/ojs#5978`).
+- Code reads, not walked, each at its `stable-*` tip:
+  - 3.4: ui-library
     [ee684b341b](https://github.com/pkp/ui-library/commit/ee684b341bacfcdd330b95073394a1fbf34a1f4f)
-    (the commit OJS
-    [9571d8fde7](https://github.com/pkp/ojs/commit/9571d8fde7093214dd24929ea6e17546483cf833)
-    and OPS
-    [acd8ae704b](https://github.com/pkp/ops/commit/acd8ae704b26a97e5a32147e151ca339699cf96a)
-    pin) contains c475c5cf76: `DoiListItem.vue` line 139 has the null
-    test under `isDeposited` (line 431, both statuses). lib/pkp
-    `stable-3_4_0` df13621c2d `classes/doi/DAO.php` line 175
-    `markSubmitted()` updates the status alone.
-  - 3.3: ui-library `stable-3_3_0` 96959f9ed4 has no DOI list component,
-    and OJS
-    [9fdb9bcf9a](https://github.com/pkp/ojs/commit/9fdb9bcf9aa6b821ebc5226616fc083ad4738144)
+    contains c475c5cf76: `DoiListItem.vue` line 139 has the null test
+    under `isDeposited` (line 431, both statuses). pkp-lib
+    [1310f00fed](https://github.com/pkp/pkp-lib/commit/1310f00fed01d4dd7adc4f43032acca204c66783)
+    `classes/doi/DAO.php` line 175 `markSubmitted()` updates the status
+    alone. OJS
+    [4b437fd4c3](https://github.com/pkp/ojs/commit/4b437fd4c3ebe685fd8d555d5539e95a29a92607)
+    (its DataCite plugin) and crossref-ojs
+    [eb026ac182](https://github.com/pkp/crossref-ojs/commit/eb026ac1821395804da3d21332bb110c29d62bb7)
+    and crossref-ops
+    [459daf7eae](https://github.com/pkp/crossref-ops/commit/459daf7eae2272c97de45a0ee513529082c727c4)
+    have no `pkp/pkp-lib#13591` change: the three plugins catch
+    `RequestException` only, and Guzzle 7.9.2 (pkp-lib's
+    `composer.lock`) raises `ConnectException`, a `TransferException`,
+    for a refused connection.
+  - 3.3: ui-library
+    [96959f9ed4](https://github.com/pkp/ui-library/commit/96959f9ed4e7357c0eede0179add0e9728e1f708)
+    has no DOI list component, and OJS
+    [de6f4ead8e](https://github.com/pkp/ojs/commit/de6f4ead8edad1543654c3275dc75a8b909133d6)
     has no DOIs page.
 - Introduced: `git blame` on `DoiListItem.vue` line 188 gives c475c5cf76,
-  merged 2023-02-02. Its parent showed the "submitted to" sentence with
+  authored 2022-12-13. `pkp/ui-library#240` was merged into `main` on
+  2023-02-02 by rebase: the PR's merge commit is c475c5cf76 itself, which
+  sits on `main`'s first-parent line after b046a797 (2023-02-02), with no
+  merge commit of its own. Its parent showed the "submitted to" sentence with
   the configured agency's name for both statuses, but was never
   released, hence Kind defect.
-- Upstream search: pkp/pkp-lib, pkp/ojs, pkp/ops and pkp/ui-library, by
-  the symptom's words and by `manuallyMarkedRegistered`,
-  `itemRegistrationAgency` and `DoiListItem`; only `pkp/pkp-lib#7521`
-  and its PRs came up.
+- Upstream search (2026-11-23): pkp/pkp-lib, pkp/ojs, pkp/ops and
+  pkp/ui-library, by the symptom's words and by
+  `manuallyMarkedRegistered`, `itemRegistrationAgency` and
+  `DoiListItem`; only `pkp/pkp-lib#7521` and its PRs came up, and the
+  open `pkp/pkp-lib#13462`, which asks to tell a deposited DOI from one
+  marked registered by hand on the same page: a wording and status
+  proposal, not this fault.
 - Unverified: the "Issues" tab, an item deposited again after an
-  agency's registration, a work with several versions, and how the
-  box reads after an agency refuses a deposit ("Error" is taken from the
-  code and from pkp-e2e#210's report) were not walked.
+  agency's registration, a work with several versions, how long an item
+  reads "Submitted" at page loads when the agency does answer (the walks
+  could not reach one), and 3.4's stuck "Submitted" after a refused
+  connection, were not walked.
