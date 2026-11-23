@@ -778,7 +778,10 @@ validation-variant server (harness.md) covers the config-file settings.
   Reviewers row reads "Review Submitted" with "Read Review". It is not an
   editor-confirmed one: "Minimum Confirmed Reviews Required" ignores it until
   the editor's "Mark as Complete" or "Thank Reviewer", so a scenario that
-  needs the minimum met confirms the seeded reviews on screen.
+  needs the minimum met confirms the seeded reviews on screen. On a review
+  form it stores no form answers at all, where a blank submit through the
+  reviewer's wizard stores an empty answer per text question and the first
+  option of each drop-down.
 - `decisions: [..., 'newExternalReviewRound']` together with N
   `reviewRounds[]` entries yields N+1 rounds (the decision's round gets no
   reviewers); two reviewed rounds are seeded with

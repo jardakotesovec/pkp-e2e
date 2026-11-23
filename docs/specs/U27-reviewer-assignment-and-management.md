@@ -395,8 +395,9 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     policy and without an answer the group is absent. Next come the
     "Reviewer Comments": the review form answers, or "For author and editor" and,
     separately, the editor-only comments, headed "For editor" {OJS} /
-    "For editor only" {OMP}. It shows the
-    "Reviewer Files" the reviewer attached, read-only. {OJS} It also shows a
+    "For editor only" {OMP}. A "Drop-down box" question the reviewer left
+    blank reads there as the question's first option ⚠ [A57](#a57). It
+    shows the "Reviewer Files" the reviewer attached, read-only. {OJS} It also shows a
     display-only "Reviewer Recommendation" group, so the recommendation
     appears twice, under two labels ⚠ [A23](#a23). Last comes a "Reviewer
     rating" star row ("No rating" or 1–5, under "Rate the quality of the
@@ -608,9 +609,29 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     Form" menu offers four exports: "Author-Only Sections Displayed" and
     "Editor Form Shows All Review Sections", each as PDF or XML. The
     author-only variants omit the editor-only comments and show the
-    reviewer anonymized. The file downloads through the browser. On an
-    install where nobody has yet downloaded a review PDF or uploaded a
-    library file, an email attachment, a plugin or import file, or an
+    reviewer anonymized. On a review made with a review form, they also
+    leave out every question not marked "Included in message to author"
+    ([→ form items](U29-review-setup-and-review-forms.md#items)). A
+    free-form review's four files download through the browser, and so
+    do the XML files of a review made with a review form, except on a
+    fresh install (below). <sup>i</sup>
+
+    On a review the reviewer submitted through their own wizard on a
+    form with a text or drop-down question, answered or left blank, both
+    PDF entries fail: an "Error" window opens over Review Details with an
+    "OK" button, and no file arrives ⚠ [A55](#a55). "OK" returns to
+    Review Details, where the XML entries still download, even on a fresh
+    install (read in the code). On a form whose every question has
+    "Included in message to author" unticked, only "Editor Form Shows All
+    Review Sections (PDF)" fails; the author-only PDF downloads, with no
+    question in it. A review seeded as completed on a form, with no answer
+    saved, downloads both PDFs laid out as a free-form review's, "None"
+    under each comment block; a blank wizard submit of only checkboxes and
+    radio buttons may too ⚠ [A56](#a56).
+    <sup>[f-a55](#fn-a55)</sup> <sup>[f-a56](#fn-a56)</sup>
+
+    On an install where nobody has yet downloaded a review PDF or
+    uploaded a library file, an email attachment, a plugin or import file, or an
     image (a logo or image on Settings › Website; a category, highlight,
     announcement or OJS issue cover image), both XML entries fail every
     time (a fresh install, or PKP's default test dataset as loaded): the
@@ -1197,7 +1218,7 @@ are in the footnote. <sup>s</sup>
 10. **Download the review**
 
     Given: Editor, in the "Review Details" window of a submitted review
-    with both comment blocks.
+    made without a review form, with both comment blocks.
 
     - **"Download Review Form"**: open it and fetch "Author-Only Sections
       Displayed (PDF)" and "Editor Form Shows All Review Sections (PDF)":
@@ -1541,8 +1562,9 @@ Left out of the scenarios above, by reason:
     message, and no row is added and no email is sent [report 2026-10-03]
   - the guard for A22 (issue report
     `docs/issues/U27-A22-review-details-guidance-promises-upload.md`): the
-    Review Details window on a submitted review: each control its guidance
-    names ("Modify Review", "Mark as Complete") is a button of that window [report 2026-10-03]
+    Review Details window on a submitted review: every control its guidance
+    names (today "Mark as Complete" and "upload the file below") is in
+    that window [report 2026-10-03]
   - the guard for OMP6 (issue report
     `docs/issues/U27-OMP6-press-review-form-line-says-this-journal.md`): on
     a press, the Review Details window with a review form reads the form
@@ -1577,10 +1599,21 @@ Left out of the scenarios above, by reason:
     waits for the fix [incidental 2026-11-16]
   - the guard for A54 (issue report
     `docs/issues/U27-A54-later-date-window-calendar-hidden-screen-reader.md`):
-    two date windows opened one after another on one page ("Edit" twice, the
-    first closed without its calendar opened; then "Add Reviewer"), and the
-    calendar's days, "Prev", "Next" and the month and year lists are in each
-    window's accessibility tree: waits for the fix [report 2026-11-19]
+    three date windows opened in turn on one page (a row's "Edit", closed
+    without its calendar opened; another row's "Edit"; "Add Reviewer"), and
+    the calendar's days, "Prev", "Next" and the month and year lists are in
+    the last two windows' accessibility trees: waits for the fix [report 2026-11-19]
+  - the guard for A55: on a review the reviewer submitted on a review
+    form, "Editor Form Shows All Review Sections (PDF)" and "Author-Only
+    Sections Displayed (PDF)" each download a file with the form's
+    questions and answers (Rule 15): waits for the fix [incidental 2026-11-23]
+  - the guard for A57: a "Drop-down box" question left blank on the
+    reviewer's submit reads unanswered in the Review Details window and in
+    the XML exports (Rules 14a, 15): waits for the fix [incidental 2026-11-23]
+  - on a review made with a review form, "Author-Only Sections Displayed
+    (XML)" leaves out a question not marked "Included in message to
+    author", which "Editor Form Shows All Review Sections (XML)" lists with
+    its answer (Rule 15) [incidental 2026-11-23]
 - **Rarely met**:
   - submitting a review for the reviewer on a "Request Resent" row, on an accepted row holding no draft, or with a comment entered, and the row's menu, the reviewer's side and the missing acceptance email after any such save (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a reminded, an accepted or a declined request with no review: "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", and the empty blocks (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -1645,6 +1678,9 @@ Left out of the scenarios above, by reason:
   - A52 (a press's save recording only the competing-interests answer submitting an empty review; Rule 14d)
   - A53 (a review submitted for the reviewer with nothing changed leaving no activity-log row; Side effects)
   - A54 (the due-date calendar hidden from screen readers from the second date window opened on one page; Fields)
+  - A55 (both PDF entries failing with an "Error" window on a review made with a review form; Rule 15)
+  - A56 (a review on a form with no answer saved exporting its PDFs as a free-form review's; Rule 15)
+  - A57 (a drop-down question left blank reading as its first option; Rule 14a)
 - **No seed**:
   - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reviewer Reminded" and log stamps (Rule 13, Side effects, Settings)
   - a section's default "Review Form" preselected in the Add Reviewer window (Rule 10, Settings): the seed sets no default review form on a section
@@ -1705,6 +1741,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A50](#a50) | An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A51](#a51) | A Funding coordinator's search, filters and "Next" in the Add Reviewer window are refused | 🐞 | medium | issues (claude), 2026-11-16 — re-verified |
 | [A54](#a54) | From the second date window opened on a page, screen readers cannot reach the date calendar | 🐞 | medium | issues (claude), 2026-11-19 — re-verified |
+| [A55](#a55) | On a review made with a review form, both PDF entries of "Download Review Form" fail with an "Error" window and no file | 🐞 | user-visible · crash: server | — |
+| [A57](#a57) | A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports | 🐞 | user-visible | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -1716,6 +1754,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A48](#a48) | A review-form answer written as markup may run as script when "View changes" opens the review-form change | ❓ | user-visible | — |
 | [A52](#a52) | {OMP} On a press, recording only a reviewer's competing-interests answer in "Modify Review" submits an empty review in their name | ❓ | user-visible | — |
 | [A53](#a53) | A review submitted for the reviewer with nothing changed leaves no row in the activity log | ❓ | user-visible | — |
+| [A56](#a56) | A review on a form with no answer saved exports its PDFs as a free-form review's, reading "None" for both comment blocks | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
 
 ### All apps
@@ -2326,6 +2365,52 @@ the arrow keys moves the day, Enter picks it) work from the date box in
 every window.
 The silently dropped date is [A16](#a16).
 Since: 2025-07 (`main`, and 3.5 from 3.5.0-2; not 3.4 or 3.3) · Basis: probe, 2026-11-19. <sup>[f-a54](#fn-a54)</sup>
+
+<a id="a55"></a>
+**A55 — On a review made with a review form, both PDF entries of "Download Review Form" fail with an "Error" window and no file** · 🐞 · user-visible · crash: server.
+An Editor or an assigned Section Editor opens the Review Details window
+of a review the reviewer submitted through their own wizard on a review
+form with a text or drop-down question, presses "Download Review Form"
+and picks "Editor Form Shows All Review Sections (PDF)" or
+"Author-Only Sections Displayed (PDF)". The app fails instead of
+exporting: an "Error" window opens over Review Details with an "OK"
+button, and no file arrives, every time, whether the reviewer answered
+the questions or left them blank. "OK" returns to Review Details, where
+the XML entries still download. Only on a form whose every question has
+"Included in message to author" unticked does the author-only PDF
+download; the full PDF fails there too. A free-form review's PDFs
+download.
+It reads as decay: the PDFs broke on `main` alone, in a July 2025 code
+clean-up, and 3.5's code still exports them.
+Since: 2025-07-07 (`main`; 3.5 read in the code, not walked) · Basis: probe, 2026-11-23. <sup>[f-a55](#fn-a55)</sup>
+
+<a id="a56"></a>
+**A56 — A review on a form with no answer saved exports its PDFs as a free-form review's** · ❓ · minor.
+A review seeded as completed on a review form, with no answer saved,
+downloads both PDF entries, but they read as a free-form review's:
+"Reviewer Comments", "For author and editor" "None" and, in the full
+PDF, "For editor" {OJS} / "For editor only" {OMP} "None". Its XML files
+and its Review Details window list the form's questions, unanswered. A
+reader of the PDF cannot tell that a form was used. A reviewer's own
+submit on a form with a text or drop-down question saves answers even
+when they are left blank, and meets [A55](#a55) instead.
+Question: should the PDF of a review on a form with nothing answered
+list the form's questions unanswered, as the XML files and the window
+do? Lean: yes, at low weight: a reviewer's own submit looks able to
+reach the state, on a form of only checkboxes and radio buttons all
+left blank, which is not yet driven.
+Basis: probe, 2026-11-23. <sup>[f-a56](#fn-a56)</sup>
+
+<a id="a57"></a>
+**A57 — A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports** · 🐞 · user-visible.
+A reviewer leaves an optional "Drop-down box" question of the review
+form blank and submits the review. The question's first option is
+recorded as their answer: the editor's Review Details window shows it
+under the question, and so do both XML exports, so the editor reads an
+answer the reviewer never gave. A blank radio-button or checkbox
+question stays blank. The answer is recorded at the reviewer's submit
+([→ the reviewer's step 3](U28-reviewers-review.md#step-3)).
+Basis: probe, 2026-11-23. <sup>[f-a57](#fn-a57)</sup>
 
 ### OMP
 
@@ -2976,7 +3061,27 @@ Review Sections (PDF)", "Editor Form Shows All Review Sections (XML)";
 the PDF saves as `submission_review_{submission}-{review}.pdf`, the XML
 as `….xml`; the XML entries' failure before the first temporary file is
 finding A49, and what ends it (a review PDF or a library upload, not a
-submission-file upload) was re-driven 2026-10-19 (note f-a49). Live
+submission-file upload) was re-driven 2026-10-19 (note f-a49).
+Live-probed 2026-11-23 (Rule 15; OJS and OMP `main`, a scratch journal
+and press, two runs each, the Journal editor or Press editor): the same
+four entries on every review; on a free-form review the full PDF read
+both comment blocks and the reviewer's name, the author-only one
+"Reviewer: {letter}" (the reviewer's place among the submission's
+assignments) and no editor block, and the author-only XML carried
+`<anonymous/>`. On a review made with a review form the XML files list
+each question with its answer; on a form whose only item is not
+included in the message to author, the author-only XML has no
+`custom-meta` for it and the author-only PDF no question, while the
+full XML lists it with the answer (`generateXML()` and the template
+skip `getIncluded()`-false elements when author-friendly). An XML
+export of a review with an unanswered checkbox, radio or text item
+writes PHP warnings to the server log ("Undefined array key …",
+"foreach() argument must be of type array|object, null given", in
+`PKPReviewController::generateXML()` at the checkbox and
+radio/drop-down branches): 3 per press on a wizard submit left blank, 7
+on a review with nothing saved; the file still downloads, and nothing
+answered 500 or more. The form review PDFs are A55 and A56. Kept script
+`shared/playwright/checks/U27/I27/i27.js`. Live
 probe 2026-08-29 (OJS
 scratch journal + OMP publicknowledge press, manager role; apps ojs
 0471e029b9 / omp d34542e83, lib/pkp 13b621e42): window contents, dialog
@@ -4416,6 +4521,75 @@ happens only once the first window is open. Each side window
 the second window on, the calendar is one of those children. The
 "Resend Review Request" window's pickers were not driven.
 Issue report: [pkp-e2e#1106](https://github.com/jardakotesovec/pkp-e2e/issues/1106) ([docs/issues/U27-A54-later-date-window-calendar-hidden-screen-reader.md](../issues/U27-A54-later-date-window-calendar-hidden-screen-reader.md)).
+
+<a id="fn-a55"></a>
+**f-a55** — Live-probed 2026-11-23 (Rule 15; OJS and OMP `main`, ojs
+`1e1d3fc49b` / omp `bdfae3fe7`, lib/pkp `3ea73a1a7e` in both; a scratch
+journal and a scratch press, two runs each; the Journal editor or Press
+editor, and for the full PDF also the assigned Section editor or Series
+editor). Five reviews in round 1 of one submission: on a form "I27 All"
+with one item of each of the six types the form editor offers, all
+included in the message to author, one answered in full through the
+reviewer's wizard and one submitted there with every item left blank;
+on a form "I27 Hidden" with one "Single word text box" item not
+included, one answered; one seeded `completed` on "I27 All" (f-a56);
+one free-form. Both PDF entries failed on the answered and the blank
+reviews, the full PDF on the "I27 Hidden" one, whose author-only PDF
+downloaded reading only the title, "Reviewer: {letter}", "Completed",
+{OJS} the recommendation and "Review Files". Each failed press sent
+`GET …/api/v1/reviews/{submission}/{review}/export-pdf?authorFriendly=0|1`,
+which answered 500, twice about 50 ms apart (the client retries a failed
+GET once); an "Error" dialog opened over Review Details with "OK"; no
+download, no page notice, no browser dialog. After "OK" the window was
+back with "Download Review Form", and its "Editor Form Shows All Review
+Sections (XML)" downloaded right after. The free-form review's four
+entries all downloaded. Mechanism: `PKPReviewController::generatePDF()`
+renders `reviewDownload.tpl`, which, when `$reviewFormResponses` is not
+empty, compares each element's type with
+`ReviewFormElement::REVIEW_FORM_ELEMENT_TYPE_*` under the class's bare
+name; lib/pkp `1810f38f34` (pkp/pkp-lib#11601, 2025-07-07, "Remove
+class and constant aliases") removed the global `ReviewFormElement`
+alias on `main`, and `stable-3_5_0` keeps its `class_alias` in
+`ReviewFormElement.php` (read in the code, not walked). An author-only
+export skips a non-included element (`{continue}`) before that
+comparison, which is why the "I27 Hidden" author-only PDF renders.
+`generatePDF()` builds mPDF, whose cache makes `temp/mpdf` and its
+parents, before rendering, so a failed press creates the temporary
+files folder (A49); not driven, the fleet had it. Kept script
+`shared/playwright/checks/U27/I27/i27.js` (`PHASES=err` for the dialog
+and its "OK").
+
+<a id="fn-a56"></a>
+**f-a56** — Live-probed 2026-11-23 (Rule 15; the runs of f-a55, two per
+app): the review seeded `completed` on "I27 All" through the scenario
+API, with no `review_form_responses` rows. Both PDFs downloaded and
+read "Reviewer Comments For author and editor None For editor None"
+({OMP} "… For editor only None"), the author-only one with no editor
+block and "Reviewer: C"; its XML files and its Review Details window
+listed the six questions unanswered. The wizard's submit with every
+item left blank stored a row for each of the three text items and the
+drop-down (f-a57) and failed as A55. Mechanism: `reviewDownload.tpl`
+takes its free-form branch (`editor.review.reviewerComments`,
+`common.none`) whenever `$reviewFormResponses` is empty, whatever form
+the assignment carries. Would settle it: a reviewer's wizard submit on a
+form whose only items are checkboxes and radio buttons, all left blank
+(they post nothing), then the PDF read. Kept script as f-a55.
+
+<a id="fn-a57"></a>
+**f-a57** — Live-probed 2026-11-23 (Rule 14a; the runs of f-a55, two
+per app): on "I27 All", whose drop-down item lists "I27 Drop Low" first,
+the reviewer's wizard submitted with every item left blank ({OJS} with
+"Accept Submission"). Review Details then read "I27 Q drop-down I27 Drop
+Low" and the full XML `<meta-value>I27 Drop Low</meta-value>`; the
+stored response has `response_type` `int` and value `0`. The checkbox
+and radio items left blank stored nothing and read unanswered.
+Mechanism: the select posts its empty default, and
+`Repo::reviewAssignment()->saveReviewFormResponse()`
+(`classes/submission/reviewAssignment/Repository.php`) stores a
+drop-down answer as `int`, so `""` becomes `0`, the first option;
+`stable-3_5_0` makes the same cast in
+`PKPReviewerReviewStep3Form::execute()` (read in the code, not walked).
+Kept script as f-a55.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
