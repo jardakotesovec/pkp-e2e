@@ -1,0 +1,12 @@
+diff --git a/classes/author/Repository.php b/classes/author/Repository.php
+index 2b1435e366..5c811441a5 100644
+--- a/classes/author/Repository.php
++++ b/classes/author/Repository.php
+@@ -160,6 +160,7 @@ class Repository
+ 
+             // An ORCID has to be removed before the contributor type is changed to one that can't have an ORCID
+             if ($author?->getOrcid()
++                && in_array($author->getData('contributorType'), ContributorType::getTypesWithOrcid())
+                 && isset($props['contributorType'])
+                 && !in_array($props['contributorType'], ContributorType::getTypesWithOrcid())
+                 && !$validator->errors()->get('contributorType')) {
