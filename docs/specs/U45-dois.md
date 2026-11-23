@@ -5883,7 +5883,7 @@ DataCite's test address, `mds.test.datacite.org`
 (`DataciteExportPlugin::depositXML()` posts to `DATACITE_API_URL_TEST`
 when `isTestMode()`), code-read, not seen.
 
-Issue report: docs/issues/U45-A31-job-tool-deposit-error-no-message.md.
+Issue report: [pkp-e2e#1107](https://github.com/jardakotesovec/pkp-e2e/issues/1107) ([docs/issues/U45-A31-job-tool-deposit-error-no-message.md](../issues/U45-A31-job-tool-deposit-error-no-message.md)).
 
 <a id="fn-f-a25"></a>
 **f-a25** — At the PR heads of `pkp/pkp-lib#13460` (`246e5387f6`, with
