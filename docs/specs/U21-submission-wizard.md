@@ -3036,7 +3036,7 @@ offered "Start A New Submission", which landed on the same page, its
 links "Contact" and the contact's mail address. The Preprint Server
 manager got the form at both ends. No response of 500 or more and no
 page error in any run.
-Issue report: docs/issues/U21-A25-manager-turned-away-from-make-submission.md.
+Issue report: [pkp-e2e#1109](https://github.com/jardakotesovec/pkp-e2e/issues/1109) ([docs/issues/U21-A25-manager-turned-away-from-make-submission.md](../issues/U21-A25-manager-turned-away-from-make-submission.md)).
 
 <a id="fn-a26"></a>
 **fn-a26** — A26. Mechanism: note e (`Repo::submission()->add()`'s
