@@ -1,0 +1,15 @@
+--- a/lib/pkp/classes/plugins/Plugin.php
++++ b/lib/pkp/classes/plugins/Plugin.php
+@@ -117,9 +117,9 @@
+     {
+         $this->pluginPath = $path;
+         $this->pluginCategory = $category;
+-        if ($this->getInstallMigration()) {
+-            Hook::add('Installer::postInstall', $this->updateSchema(...));
+-        }
++        // updateSchema() asks for the migration when the installer runs, not here: a plugin upgrade replaces
++        // the plugin's files after register(), and a migration class loaded now would run as the replaced copy
++        Hook::add('Installer::postInstall', $this->updateSchema(...));
+         if ($this->getInstallSitePluginSettingsFile()) {
+             Hook::add('Installer::postInstall', $this->installSiteSettings(...));
+         }

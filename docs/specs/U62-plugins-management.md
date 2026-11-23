@@ -785,7 +785,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success | 🐞 | low | issues (claude), 2026-10-27 — re-verified |
 | [A12](#a12) | Plugins: a plugin whose own database step fails is reported "Successfully installed" and kept as installed | 🐞 | medium | issues (claude), 2026-11-05 — re-verified |
 | [A13](#a13) | Plugins: a failed plugin installation's notice shows raw markup and database details, and the same package then fails with "already exists" | 🐞 | low | issues (claude), 2026-11-05 — re-verified |
-| [A14](#a14) | Plugins: "Upgrade" runs the replaced version's installation step, so a database change the new release adds is not made, and the notice still reads "Successfully upgraded" | 🐞 | medium | — |
+| [A14](#a14) | Plugins: "Upgrade" runs the replaced version's installation step, so the database change a new release adds is not made | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
 | [A4](#a4) | "Delete" is offered on plugins nobody can switch off, and on the theme in use | ❓ | minor | — |
 | [A6](#a6) | A Site Administrator with no manager role in a journal cannot switch its plugins | ❓ | minor | — |
 | [A8](#a8) | The theme a journal uses can be switched off | ❓ | user-visible | — |
@@ -1032,20 +1032,24 @@ details, and removes the leftover tables on PostgreSQL, not on MySQL.
 Basis: probe, 2026-11-05. <sup>f-a13</sup>
 
 <a id="a14"></a>
-**A14 — Plugins: "Upgrade" runs the replaced version's installation step, so a database change the new release adds is not made, and the notice still reads "Successfully upgraded"** · 🐞 · medium.
+**A14 — Plugins: "Upgrade" runs the replaced version's installation step, so the database change a new release adds is not made** · 🐞 · medium.
 A plugin can carry an installation step of its own that sets up its
-tables in the database (Rule 16). A Site Administrator upgrades such a
-plugin with its row's "Upgrade" (or the Plugin Gallery's "Upgrade"),
-and the new release adds a database change to that step, such as one
-more table. The upgrade runs the step as the version being replaced
-wrote it, so the change is not made, and the notice still reads
-"Successfully upgraded to version 1.0.1.0". Nothing on screen shows it;
-the new release then runs on a database without its change. The change
-is made later, as a side effect, the next time another plugin is
-installed with "Upload A New Plugin" ([A12](#a12)), or when someone
-with access to the server runs the command-line tool
-"installPluginVersion.php" for the plugin.
-Since: 2020-05-12 (pkp/pkp-lib#2493) · Basis: probe, 2026-11-23. <sup>f-a14</sup>
+tables in the database. A Site Administrator upgrades such a plugin
+with its row's "Upgrade" (or the Plugin Gallery's "Upgrade"), and the
+new release adds a database change to that step, such as one more
+table. The upgrade runs the step as the version being replaced wrote
+it, so the change is not made, and the notice still reads
+"Successfully upgraded to version 1.0.1.0".
+
+Nothing on screen shows it, and the new release then runs on a
+database without its change until another plugin is installed.
+
+It happens when the new release changes that step and ships an
+upgrade file (`upgrade.xml`), which is how a plugin asks "Upgrade" to
+run its database steps. PKP's own PN plugin works this way, with its
+data repairs inside its installation step. The next PN release that
+adds a repair would be the first PN upgrade to skip one.
+Since: 2020-05-12 (pkp/pkp-lib#2493) · Basis: probe + walk, 2026-11-23. <sup>f-a14</sup>
 
 <a id="a15"></a>
 **A15 — Plugins: right after "Successfully upgraded", the row still shows the replaced version's description** · ❓ · minor.
@@ -1914,6 +1918,7 @@ New Plugin" of another plugin ran 1.0.1.0's `up()` from its own
 made the table, and ran none of `upgrade.xml`'s steps. Kept script
 `shared/playwright/checks/U62/I62/i62.js` (parts `web`, `cli`). No
 pkp/pkp-lib issue found by search (2026-11-23).
+Issue report: docs/issues/U62-A14-plugin-upgrade-runs-replaced-install-step.md.
 
 <a id="fn-f-a15"></a>
 **f-a15** — Live-probed 2026-11-23 (Rule 18; Side effects bullet 2;
