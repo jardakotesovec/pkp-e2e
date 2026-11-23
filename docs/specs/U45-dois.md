@@ -2586,7 +2586,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS9](#ojs9) | With "Author Response" DOIs turned on, every DOI assignment gives each author response a new DOI | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [OJS10](#ojs10) | A cancelled reviewer's review stays on the DOIs page and is still deposited with Crossref | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OJS11](#ojs11) | A journal's Crossref deposit names a DOI twice, older version first, after "DOI Versioning" is switched on | 🐞 | medium | issues (claude), 2026-10-20 — re-verified |
-| [OJS13](#ojs13) | On a DataCite journal, a work whose supplementary galley file has a "Subject" can be neither exported nor deposited | 🐞 | medium · crash: server | issues (claude), 2026-11-05 — re-verified |
+| [OJS13](#ojs13) | On a DataCite journal, a work whose supplementary galley file has a "Subject" can be neither exported nor deposited | 🐞 | high · crash: server | issues (claude), 2026-11-23 — re-verified |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -3218,7 +3218,7 @@ it, and deposits then fail over a box on another tab.
 Basis: probe, 2026-10-19. <sup>f-ojs12</sup>
 
 <a id="ojs13"></a>
-**OJS13 — On a DataCite journal, a work whose supplementary galley file has a "Subject" can be neither exported nor deposited** · 🐞 · medium · crash: server.
+**OJS13 — On a DataCite journal, a work whose supplementary galley file has a "Subject" can be neither exported nor deposited** · 🐞 · high · crash: server.
 A journal registers article and galley DOIs with DataCite. One of a
 published work's galleys is a file uploaded with a supplementary article
 component, such as "Data Set", and given a "Subject" on the upload
@@ -3229,9 +3229,10 @@ DOIs" to take the work as any other; instead both fail on the server.
 "Export DOIs" downloads nothing and shows an "Error" window reading only
 "Cannot access offset of type string on string" (on 3.5 no window opens,
 so nothing seems to happen). "Deposit DOIs" shows "Items successfully
-submitted for deposit" and the work's DOIs read "Submitted", but the
-supplementary galley's DOI and those of the galleys listed after it are
-never sent. Administration › "Failed Jobs" lists one failed job with the
+submitted for deposit", but the supplementary galley's DOI, and those of
+any galleys listed after it, are never sent and read "Submitted" for
+good. The work's own DOI and the galleys listed before it are sent.
+Administration › "Failed Jobs" lists one failed job with the
 same message, and nothing on the DOIs page says so. Other works deposited
 in the same action are not affected.
 
@@ -3239,8 +3240,7 @@ The way round is to empty the file's "Subject" (unpublish, the galley's
 "Change File", publish again), then tick the work and "Deposit DOIs" by
 hand, since "Deposit All" skips "Submitted" rows. The record then leaves
 the subject out.
-Since: 2026-01-12 (pkp/pkp-lib#11557) · Basis: probe, 2026-11-05. <sup>f-ojs13</sup>
-Report: refresh owed — A18 retired 2026-11-20 (pkp/crossref-ojs#117 and pkp/ojs#5977, for pkp/pkp-lib#13591): the report's Cause bullet links the deleted A18 report for why the DOIs stay "Submitted"; the fix catches only connection failures in `DataciteExportPlugin::depositXML()`, so `DepositSubmission` still has no failure handler and this fault's failure still leaves the rows "Submitted" by the code, to be walked (2026-11-23)
+Since: 2026-01-12 (pkp/pkp-lib#11557) · Basis: probe + walk, 2026-11-23. <sup>f-ojs13</sup>
 
 
 ### OMP
