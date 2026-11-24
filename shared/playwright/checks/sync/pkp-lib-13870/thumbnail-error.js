@@ -8,6 +8,12 @@
 // (Chrome cannot draw TIFF). Surfaces:
 //   image   an announcement's "Image" box (FieldUploadImage) in a scratch journal, manager
 //   wizard  the submission wizard's "Upload Files" step (FileUploader), author.alex
+//   drop    the same step, files dropped on the panel (a synthetic drop event, the path whose
+//           `addedfiles` dropzone 6.2.0 made asynchronous): a 3 MB file (over the install's 2 MB
+//           limit) and a small text file; SURFACES=drop runs this one alone
+//   media   the workflow's Publication › Media › "Add Media File" window (FileMediaUploader),
+//           manager.maya on a submission in Review: each card's text, then with the media type and
+//           resolution chosen, whether "Upload Files" is enabled
 // THROTTLE=<bytes/s> holds each upload's body (CDP upload throttle) so the thumbnail step ends before the
 // upload does, as on a slow connection with a larger figure; LABEL names the run (head, base, head-slow …).
 // Each read: the box's text, the .dz-error previews, the field's error text, at 0.3 s, 1.5 s and 5 s
@@ -44,6 +50,7 @@ function tiff(file) {
 }
 
 const THROTTLE = Number(process.env.THROTTLE || 0);
+const SURFACES = (process.env.SURFACES || 'image,wizard,drop,media').split(',');
 
 let cdp = null;
 
@@ -101,7 +108,7 @@ forEachApp(async (app) => {
         tag: t, enableAnnouncements: true,
         users: [{username: manager, givenName: 'Mira', familyName: 'Manager', email: `${manager}@mail.test`, roles: ['manager']}],
     });
-    for (const [name, file] of Object.entries(files)) {
+    for (const [name, file] of SURFACES.includes('image') ? Object.entries(files) : []) {
         const {page, close} = await launch(app);
         try {
             await signIn(page, manager, {contextPath: t});
@@ -132,7 +139,7 @@ forEachApp(async (app) => {
     }
 
     // The submission wizard's "Upload Files" step, author.alex's draft.
-    for (const [name, file] of Object.entries(files)) {
+    for (const [name, file] of SURFACES.includes('wizard') ? Object.entries(files) : []) {
         const {submissionId} = await app.api.createSubmission({
             tag: `${t}${name}`, context: app.contextPath, submitter: 'author.alex', title: `Probe ${name}`, submitted: false,
         });
@@ -149,6 +156,83 @@ forEachApp(async (app) => {
             await finish(page, panel, `wizard-${name}`, uploaded);
         } finally {
             await close();
+        }
+    }
+
+    // Files dropped on the wizard's panel: what each row says once dropzone has answered.
+    if (SURFACES.includes('drop')) {
+        const big = path.join(dir, 'big.pdf');
+        fs.writeFileSync(big, Buffer.alloc(3 * 1024 * 1024, 0x41));
+        const small = path.join(dir, 'small.txt');
+        fs.writeFileSync(small, 'a small text file\n');
+        for (const [name, file] of Object.entries({big, small})) {
+            const {submissionId} = await app.api.createSubmission({
+                tag: `${t}drop${name}`, context: app.contextPath, submitter: 'author.alex', title: `Probe drop ${name}`, submitted: false,
+            });
+            const {page, close} = await launch(app);
+            try {
+                await signIn(page, 'author.alex');
+                await page.goto(app.url(`/index.php/${app.contextPath}/en/submission?id=${submissionId}`));
+                const panel = page.locator('.submissionFilesListPanel').first();
+                await panel.getByRole('button', {name: 'Add File', exact: true}).waitFor({timeout: 30_000});
+                const target = panel.locator('.dropzone').first();
+                const data = fs.readFileSync(file).toString('base64');
+                const dt = await page.evaluateHandle(([b64, fname, type]) => {
+                    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+                    const d = new DataTransfer();
+                    d.items.add(new File([bytes], fname, {type}));
+                    return d;
+                }, [data, path.basename(file), name === 'big' ? 'application/pdf' : 'text/plain']);
+                record(`${LABEL}-drop-${name}-target`, {dropzones: await panel.locator('.dropzone').count()});
+                await target.dispatchEvent('dragenter', {dataTransfer: dt});
+                await target.dispatchEvent('dragover', {dataTransfer: dt});
+                await target.dispatchEvent('drop', {dataTransfer: dt});
+                await readBox(page, panel, `drop-${name}`);
+            } finally {
+                await close();
+            }
+        }
+    }
+
+    // The "Add Media File" window, one file per window.
+    if (SURFACES.includes('media')) {
+        const {WorkflowPage} = require(path.resolve(__dirname, '../../../pages/WorkflowPage.js'));
+        const {MediaFileManager} = require(path.resolve(__dirname, '../../../pages/MediaFilesPages.js'));
+        for (const [name, file] of Object.entries(files)) {
+            const sub = await app.api.createSubmission({
+                tag: `${t}media${name}`, context: app.contextPath, submitter: 'author.alex', title: `Probe media ${name}`,
+                decisions: ['sendExternalReview'],
+            });
+            const {page, close} = await launch(app);
+            try {
+                await signIn(page, 'manager.maya');
+                const frame = new WorkflowPage(page, app.contextPath);
+                const media = new MediaFileManager(page, frame);
+                await frame.gotoEditorial(sub.submissionId);
+                await media.openFromMenu();
+                const win = await media.openUpload();
+                await throttle(page);
+                const uploaded = page.waitForResponse((r) => r.request().method() === 'POST' && /media|temporaryFiles|files/.test(r.url()), {timeout: 60_000}).catch(() => null);
+                await win.chooseFiles([file]);
+                await readBox(page, win.dialog(), `media-${name}`);
+                await finish(page, win.dialog(), `media-${name}`, uploaded);
+                const base = path.basename(file);
+                let state = {};
+                try {
+                    await win.expectUploaded(base);
+                    await win.chooseMediaType(base, 'Image');
+                    const res = win.resolutionSelect(base);
+                    if (await res.count()) await res.selectOption({index: 1});
+                    state = {uploadFilesEnabled: await win.uploadFilesButton().isEnabled()};
+                } catch (e) {
+                    state = {error: String(e).split('\n')[0]};
+                }
+                state.text = (await win.dialog().innerText()).replace(/\s+/g, ' ').trim().slice(0, 400);
+                record(`${LABEL}-media-${name}-ready`, state);
+                await shot(page, `${LABEL}-media-${name}-ready`);
+            } finally {
+                await close();
+            }
         }
     }
 });
