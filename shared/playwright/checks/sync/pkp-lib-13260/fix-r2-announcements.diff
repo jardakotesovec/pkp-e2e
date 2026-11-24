@@ -1,0 +1,26 @@
+diff --git a/templates/frontend/objects/announcements_list.tpl b/templates/frontend/objects/announcements_list.tpl
+index 0b1d5f7b15..7ac96d3fae 100644
+--- a/templates/frontend/objects/announcements_list.tpl
++++ b/templates/frontend/objects/announcements_list.tpl
+@@ -11,7 +11,7 @@
+  * @uses $announcements Announcement[] The list of announcements
+  *}
+ 
+-{if $numAnnouncements && !empty($announcements)}
++{if $numAnnouncements && $announcements && $announcements|@count}
+     <section class="cmp_announcements highlight_first">
+         <a id="homepageAnnouncements"></a>
+         <h2>
+diff --git a/templates/frontend/components/skipLinks.tpl b/templates/frontend/components/skipLinks.tpl
+index b93fd8e348..80ab5c902c 100644
+--- a/templates/frontend/components/skipLinks.tpl
++++ b/templates/frontend/components/skipLinks.tpl
+@@ -15,7 +15,7 @@
+ 		{if $activeTheme && $activeTheme->getOption('showDescriptionInJournalIndex')}
+ 			<a href="#homepageAbout">{translate key="navigation.skip.about"}</a>
+ 		{/if}
+-		{if $numAnnouncementsHomepage && !empty($announcements)}
++		{if $numAnnouncementsHomepage && $announcements && $announcements|@count}
+ 			<a href="#homepageAnnouncements">{translate key="navigation.skip.announcements"}</a>
+ 		{/if}
+ 		{if $issue}
