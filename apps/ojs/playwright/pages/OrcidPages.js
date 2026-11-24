@@ -27,7 +27,8 @@
  * the City box, the tab switch, the refused save, the icon kind, the
  * Delete window, the resend helper and the footer on the 2026-10-26
  * revision (tojs probe, `.reports/U04/screen-notes.md`); the field-silent
- * request and the Delete helper on the 2026-11-06 revision (scenario 12).
+ * request and the Delete helper on the 2026-11-06 revision (scenario 12);
+ * the tab's "Saved" status on the 2026-11-24 revision (scenario 7).
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
@@ -51,6 +52,9 @@ exports.OrcidSettingsTab = class OrcidSettingsTab extends BasePage {
         this.clientSecretInput = this.panel.locator('input[name="orcidClientSecret"]');
         this.cityInput = this.panel.locator('input[name="orcidCity"]');
         this.saveButton = this.panel.getByRole('button', {name: 'Save', exact: true});
+        // The form's status line beside "Save" ("Saved" after a save;
+        // read live 2026-11-24, tojs04 probe).
+        this.savedStatus = this.panel.getByRole('status');
         // The form's own refusal: the summary under the fields and the line
         // under each empty required box.
         this.errorSummary = this.panel.getByText(/Please correct \d+ errors?\./);

@@ -149,11 +149,36 @@ test.describe('ORCID integration (queued email)', () => {
         await memberModal.getByRole('button', {name: 'Close', exact: true}).first().click();
         await expect(memberModal).toHaveCount(0);
 
-        // A contributor being added, back on the first server: Given Name
-        // Nova, a throwaway address of its own, Country Canada; the dialog
-        // adds that the email waits for the save (Rule 8).
+        // The field per contributor type, back on the first server's "Add
+        // Contributor" (Fields, contributor's ORCID iD field): no ORCID iD
+        // field for "Organization or group" nor "Anonymous", each absence
+        // read once the form has redrawn for that type (its own fields in,
+        // the person's out); "Person" brings the field back with "Request
+        // verification", the positive control taken on the same form.
         const contributors = new ContributorsScreen(managerPage);
         const addDialog = await contributors.openAddPanel();
+        await expect(contributors.typeRadio(addDialog, 'Person')).toBeChecked();
+        await contributors.typeRadio(addDialog, 'Organization or group').check();
+        await expect(contributors.typeRadio(addDialog, 'Organization or group')).toBeChecked();
+        await expect(contributors.input('organizationName', 'en')).toBeVisible();
+        await expect(contributors.input('givenName', 'en')).toHaveCount(0);
+        await expect(orcidField(addDialog)).toHaveCount(0);
+        await expect(addDialog.getByRole('button', {name: 'Request verification'})).toHaveCount(0);
+        await contributors.typeRadio(addDialog, 'Anonymous').check();
+        await expect(contributors.typeRadio(addDialog, 'Anonymous')).toBeChecked();
+        await expect(contributors.input('email')).toBeVisible();
+        await expect(contributors.input('organizationName', 'en')).toHaveCount(0);
+        await expect(contributors.input('givenName', 'en')).toHaveCount(0);
+        await expect(orcidField(addDialog)).toHaveCount(0);
+        await expect(addDialog.getByRole('button', {name: 'Request verification'})).toHaveCount(0);
+        await contributors.typeRadio(addDialog, 'Person').check();
+        await expect(contributors.input('givenName', 'en')).toBeVisible();
+        await expect(orcidField(addDialog)).toHaveCount(1);
+        await expect(orcidField(addDialog).getByRole('button', {name: 'Request verification'})).toBeVisible();
+
+        // A contributor being added, on the same form with "Person" chosen:
+        // Given Name Nova, a throwaway address of its own, Country Canada;
+        // the dialog adds that the email waits for the save (Rule 8).
         await contributors.input('givenName', 'en').fill('Nova');
         await contributors.input('email').fill(novaRecipient);
         await contributors.input('country').selectOption({label: 'Canada'});

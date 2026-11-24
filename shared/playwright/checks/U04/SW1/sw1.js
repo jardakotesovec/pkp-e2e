@@ -1110,8 +1110,12 @@ forEachApp(async (app) => {
             const pc = aid(s2.publicationId, `${t}a2@mail.test`);
             q(`insert into author_settings (author_id, locale, setting_name, setting_value) values (${pc}, '', 'orcidWorkPutCode', '424242')`);
             D.authors = {live, exp, pub, una, putcode: pc};
-            const jobs = () => q("select id || ' ' || substring(payload from 'orcid[\\\\]+([A-Za-z]+)') from jobs where payload like '%orcid%' order by id").split('\n').filter(Boolean);
+            // Kept to this scratch context (its path is in every queued job's serialized context): the fleet is
+            // shared, and another checker's drain may run these jobs between the publish and the read, so the
+            // failed jobs are read from a mark taken before the publish (U04 sync 2026-11-24).
+            const jobs = () => q(`select id || ' ' || substring(payload from 'orcid[\\\\]+([A-Za-z]+)') from jobs where payload like '%orcid%' and payload like '%${t}%' order by id`).split('\n').filter(Boolean);
             D.jobsBefore = jobs();
+            const failedBefore = q('select coalesce(max(id),0) from failed_jobs');
             await signIn(page, `${t}mg`, {contextPath: t});
             const pubOnScreen = async (sub, name) => {
                 const out = {};
@@ -1148,9 +1152,8 @@ forEachApp(async (app) => {
             D.publish2 = await pubOnScreen(s2, 'dep-published-2');
             D.jobsAfterPublish = jobs();
             const since = new Date(Date.now() - 120_000);
-            const failedBefore = q('select coalesce(max(id),0) from failed_jobs');
             D.drain = (await drainJobs(app)).counts;
-            D.failed = q(`select id || ' ' || substring(payload from 'orcid[\\\\]+([A-Za-z]+)') || ' :: ' || coalesce(substring(exception from 'for (https?:[^ ]+)'), substring(exception from 1 for 200)) from failed_jobs where id > ${failedBefore} and payload like '%orcid%' order by id`).split('\n').filter(Boolean).map((x) => flat(x, 400));
+            D.failed = q(`select id || ' ' || substring(payload from 'orcid[\\\\]+([A-Za-z]+)') || ' :: ' || coalesce(substring(exception from 'for (https?:[^ ]+)'), substring(exception from 1 for 200)) from failed_jobs where id > ${failedBefore} and payload like '%orcid%' and payload like '%${t}%' order by id`).split('\n').filter(Boolean).map((x) => flat(x, 400));
             D.settingsAfter = {};
             for (const [k, id] of Object.entries(D.authors)) D.settingsAfter[k] = q(`select setting_name || '=' || case when setting_name like '%Token' then '(set)' else coalesce(setting_value,'') end from author_settings where author_id=${id} and setting_name like 'orcid%' order by 1`).split('\n');
             D.mail = {public: await mailsTo(`public-${t}@mail.test`, since), live: await mailsTo(`${t}a1@mail.test`, since), expired: await mailsTo(`expired-${t}@mail.test`, since), unauth: await mailsTo(`unauth-${t}@mail.test`, since)};

@@ -17,7 +17,8 @@
  * Mailpit is shared across fleets and workers: every assertion is scoped by
  * a unique throwaway recipient (the seeded contributor's address carries
  * app + scenario + run), and every silence claim (S4's contributor still
- * being added, S8's verified submitter and toggle-off journal) rides on a
+ * being added, S8's Organization and Anonymous contributors, verified
+ * submitter and toggle-off journal) rides on a
  * positive control delivered by the same queue drain (S11's unpublished
  * submission included).
  */
@@ -208,6 +209,24 @@ test.describe('ORCID integration (queued email)', () => {
         // confirming is remembered and nothing is posted until the save.
         const panel = new ContributorsPanel(managerPage);
         const addDialog = await panel.openAdd();
+
+        // The field per contributor type: "Organization or group" brings the
+        // organization's name box and no ORCID iD field; "Anonymous" none
+        // either (its form keeps the Email box); "Person" brings the field
+        // back with "Request verification" (Fields, contributor's ORCID iD
+        // field).
+        const addField = orcidField(addDialog);
+        await panel.chooseType(addDialog, 'Organization or group');
+        await expect(panel.organizationNameInput(addDialog)).toBeVisible();
+        await expect(addField).toHaveCount(0);
+        await panel.chooseType(addDialog, 'Anonymous');
+        await expect(panel.typeRadio(addDialog, 'Anonymous')).toBeChecked();
+        await expect(panel.organizationNameInput(addDialog)).toHaveCount(0);
+        await expect(panel.control(addDialog, 'email')).toBeVisible();
+        await expect(addField).toHaveCount(0);
+        await panel.chooseType(addDialog, 'Person');
+        await expect(addField.getByRole('button', {name: 'Request verification'})).toBeVisible();
+
         await panel.fillPerson(addDialog, {given: 'Nova', email: novaRecipient, country: 'Canada'});
         await panel.tickRole(addDialog, 'Author');
         const novaField = orcidField(addDialog);
@@ -321,6 +340,36 @@ test.describe('ORCID integration (queued email)', () => {
             author: {orcid: TEST_ORCID, orcidIsVerified: true},
         });
 
+        // The first submission also lists an "Organization or group" and an
+        // "Anonymous" contributor, each with an email {OJS}. No seed key
+        // sets a contributor's type, so the Journal Manager adds them on
+        // the submission's Contributors list (the form's own fields are
+        // U41's; "Author" is its required role box, Canada its country).
+        const orgRecipient = `org-${tagOn}@mail.test`;
+        const anonRecipient = `anon-${tagOn}@mail.test`;
+        {
+            const managerPage = await (await asUser(`mgr${tagOn}`)).newPage();
+            await new WorkflowPage(managerPage, tagOn).gotoEditorial(subOn);
+            await openContributors(managerPage);
+            const panel = new ContributorsPanel(managerPage);
+            const orgDialog = await panel.openAdd();
+            await panel.chooseType(orgDialog, 'Organization or group');
+            await panel.organizationNameInput(orgDialog).fill(`Org ${tagOn}`);
+            await panel.control(orgDialog, 'email').fill(orgRecipient);
+            await panel.control(orgDialog, 'country').selectOption({label: 'Canada'});
+            await panel.tickRole(orgDialog, 'Author');
+            await panel.savePanel(orgDialog);
+            await expect(panel.row(`Org ${tagOn}`)).toHaveCount(1);
+            const anonDialog = await panel.openAdd();
+            await panel.chooseType(anonDialog, 'Anonymous');
+            await panel.control(anonDialog, 'email').fill(anonRecipient);
+            await panel.control(anonDialog, 'country').selectOption({label: 'Canada'});
+            await panel.tickRole(anonDialog, 'Author');
+            await panel.savePanel(anonDialog);
+            await expect(panel.row('Anonymous')).toHaveCount(1);
+            await expect(panel.rows()).toHaveCount(3);
+        }
+
         // Record Accept on the three submissions in review (Rule 13's trigger).
         const accept = async (tag, submissionId) => {
             const managerPage = await (await asUser(`mgr${tag}`)).newPage();
@@ -338,8 +387,8 @@ test.describe('ORCID integration (queued email)', () => {
         // One queue drain delivers everything the three accepts enqueued.
         runJobs();
 
-        // Toggle on: the contributor without a verified iD receives the
-        // Rule 14 request email ("Submission ORCID" under the public API),
+        // Toggle on: the person contributor without a verified iD receives
+        // the Rule 14 request email ("Submission ORCID" under the public API),
         // carrying the personal authorization link.
         const onRecipient = `aut${tagOn}@mail.test`;
         const summary = await pkpMail.find({to: onRecipient, subject: PUBLIC_SUBJECT});
@@ -347,6 +396,21 @@ test.describe('ORCID integration (queued email)', () => {
         expect(pkpMail.extractLink(full.HTML, AUTH_LINK)).toContain(
             'sandbox.orcid.org'
         );
+
+        // An Organization and an Anonymous contributor {OJS}: neither
+        // receives a request email, though each has an email (Rule 13); the
+        // person contributor's request email from the SAME drain is the
+        // positive control, and the decision's own notify-authors mail,
+        // which reaches every contributor's address, the same-recipient one.
+        for (const silent of [orgRecipient, anonRecipient]) {
+            await pkpMail.find({to: silent, contains: 'accepted'});
+            await pkpMail.expectNone({
+                to: silent,
+                subject: PUBLIC_SUBJECT,
+                afterControl: {to: onRecipient, subject: PUBLIC_SUBJECT},
+            });
+            expect(await pkpMail.count({to: silent, contains: 'ORCID'})).toBe(0);
+        }
 
         // A contributor already verified: nothing arrives for the verified
         // submitter's address (Rule 13) — the first submission's email from

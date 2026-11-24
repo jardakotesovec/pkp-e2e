@@ -66,8 +66,9 @@ forEachApp(async (app) => {
     const ctxId = (t) => q(`select ${ctxT.id} from ${ctxT.table} where path='${t}'`);
     const maxJob = () => Number(q('select coalesce(max(id),0) from jobs') || 0);
     const maxFailed = () => Number(q('select coalesce(max(id),0) from failed_jobs') || 0);
-    const jobsSince = (id) => q(`select id || ' ' || substring(payload from 'orcid[\\\\]+([A-Za-z]+)') from jobs where id > ${id} and payload like '%orcid%' order by id`).split('\n').filter(Boolean);
-    const failedSince = (id) => q(`select id || ' ' || substring(payload from 'orcid[\\\\]+([A-Za-z]+)') || ' :: ' || coalesce(substring(exception from 'for (https?:[^ ]+)'), substring(exception from 1 for 160)) from failed_jobs where id > ${id} and payload like '%orcid%' order by id`).split('\n').filter(Boolean).map((x) => flat(x, 300));
+    // ctx keeps a read to one scratch context (its path is in the serialized job): the fleet is shared (U04 sync 2026-11-24).
+    const jobsSince = (id, ctx) => q(`select id || ' ' || substring(payload from 'orcid[\\\\]+([A-Za-z]+)') from jobs where id > ${id} and payload like '%orcid%'${ctx ? ` and payload like '%${ctx}%'` : ''} order by id`).split('\n').filter(Boolean);
+    const failedSince = (id, ctx) => q(`select id || ' ' || substring(payload from 'orcid[\\\\]+([A-Za-z]+)') || ' :: ' || coalesce(substring(exception from 'for (https?:[^ ]+)'), substring(exception from 1 for 160)) from failed_jobs where id > ${id} and payload like '%orcid%'${ctx ? ` and payload like '%${ctx}%'` : ''} order by id`).split('\n').filter(Boolean).map((x) => flat(x, 300));
     const authorRows = (pub) => q(`select a.author_id || ' ' || coalesce(a.email,'') || ' ' || coalesce(string_agg(s.setting_name || '=' || case when s.setting_name like '%Token' then '(set)' else left(coalesce(s.setting_value,''),60) end, ',' order by s.setting_name),'') from authors a left join author_settings s on s.author_id=a.author_id and s.setting_name like 'orcid%' where a.publication_id=${pub} group by a.author_id, a.email order by a.author_id`).split('\n').filter(Boolean);
     const mailsTo = async (to, since) => {
         const r = await app.mail._search({to, since}).catch(() => null);
@@ -297,7 +298,7 @@ forEachApp(async (app) => {
                 await page.reload(); await idle(page);
                 const again = await contributorForm(page, t, s1, 'Cleo', 'c-unauth-reload');
                 await closeForm(page, again.dlg);
-                return {before: f.field, del, afterReload: again.field, jobs: jobsSince(jb), rows: authorRows(s1.publicationId)};
+                return {before: f.field, del, afterReload: again.field, jobs: jobsSince(jb, t), rows: authorRows(s1.publicationId)};
             });
             // Coverage: the verified iD's "Delete" (Rule 8a), the revoke job (Side effects), under "Errors"
             await S('deleteVerified', async () => {
@@ -305,11 +306,11 @@ forEachApp(async (app) => {
                 const f = await contributorForm(page, t, s2, 'Cleo', 'c-verified');
                 const del = await press(page, f.dlg, 'Delete', 'Yes', 'c-verified-delete');
                 await closeForm(page, f.dlg);
-                const queued = jobsSince(jb);
+                const queued = jobsSince(jb, t);
                 const d = await drainJobs(app);
                 const again = await contributorForm(page, t, s2, 'Cleo', 'c-verified-reload');
                 await closeForm(page, again.dlg);
-                return {before: f.field, del, queued, drain: d.counts, failed: failedSince(fb), appLog: L.since(m).filter((l) => /orcid/i.test(l)).slice(0, 8), afterReload: again.field, rows: authorRows(s2.publicationId)};
+                return {before: f.field, del, queued, drain: d.counts, failed: failedSince(fb, t), appLog: L.since(m).filter((l) => /orcid/i.test(l)).slice(0, 8), afterReload: again.field, rows: authorRows(s2.publicationId)};
             });
             // the request log, the other end: "All" saved; a verified iD deleted and a request sent; drained
             await S('logAll', async () => {
@@ -324,9 +325,9 @@ forEachApp(async (app) => {
                 const v = await second('visitor-log');
                 await v.page.goto(app.url(`/index.php/${t}/orcid/verify?token=sw3nosuchtoken&state=1&author_id=1`)).catch(() => {});
                 await sleep(800); await v.close();
-                const queued = jobsSince(jb);
+                const queued = jobsSince(jb, t);
                 const d = await drainJobs(app);
-                const out = {set, del: del.answers, req: req.answers, queued, drain: d.counts, failed: failedSince(fb), appLog: L.since(m).filter((l) => /orcid|Orcid/.test(l)).slice(0, 12)};
+                const out = {set, del: del.answers, req: req.answers, queued, drain: d.counts, failed: failedSince(fb, t), appLog: L.since(m).filter((l) => /orcid|Orcid/.test(l)).slice(0, 12)};
                 out.reset = await setLogLevel(page, t, 'Errors', 'c-log-reset');
                 // the "Errors" end of the same typed address
                 const m2 = L.mark();
@@ -627,7 +628,7 @@ forEachApp(async (app) => {
                 await page.reload().catch(() => {}); await idle(page).catch(() => {}); await sleep(1000);
                 const rl = await snap(`${name}-reload`);
                 out.reloadText = flat(rl.text && (rl.text.dialog || rl.text.main), 300);
-                out.queued = jobsSince(jb);
+                out.queued = jobsSince(jb, ctx);
                 return out;
             };
             await signIn(page, `${t}mg`, {contextPath: t});
@@ -639,7 +640,7 @@ forEachApp(async (app) => {
             }
             P.appLogPublish = L.since(lm).filter((l) => /orcid|Orcid|ORICD|Request body|Submitting reviews/.test(l)).slice(0, 12);
             const lm2 = L.mark();
-            await S('drain', async () => { const fb = maxFailed(); const d = await drainJobs(app); return {drain: d.counts, failed: failedSince(fb)}; });
+            await S('drain', async () => { const fb = maxFailed(); const d = await drainJobs(app); return {drain: d.counts, failed: failedSince(fb, t)}; });
             P.appLogDrain = L.since(lm2).map((l) => l.slice(0, 220)).slice(0, 12);
             if (app.name === 'ojs') {
                 // a journal with no issues: DOIs on (a new context's default) and off
@@ -652,7 +653,7 @@ forEachApp(async (app) => {
                         const fb = maxFailed();
                         const x = await publishOnScreen(tn, s, `pub-${k}`);
                         const d = await drainJobs(app);
-                        return {...x, drain: d.counts, failed: failedSince(fb), dois: q(`select coalesce(setting_value,'') from journal_settings where setting_name='enableDois' and journal_id=${ctxId(tn)}`)};
+                        return {...x, drain: d.counts, failed: failedSince(fb, tn), dois: q(`select coalesce(setting_value,'') from journal_settings where setting_name='enableDois' and journal_id=${ctxId(tn)}`)};
                     });
                 }
             }
