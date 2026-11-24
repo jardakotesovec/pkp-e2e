@@ -662,6 +662,34 @@ test.describe('DOIs', () => {
         expect(gained).toBeGreaterThanOrEqual(1);
         expect(byManager(logPosted) - byManager(logBefore)).toBe(gained);
 
+        // Search by the galley's DOI: the preprint alone; "10.1234/" lists
+        // it and not the preprint without a DOI (Rule 21;
+        // pkp/pkp-lib#13744).
+        const axName = new RegExp(`— ${AXOLOTL}$`);
+        const expectOnly = async (pattern) => {
+            await expect(dois.rowLink(dois.rows())).toHaveCount(1);
+            expect((await dois.rowNames()).filter((n) => pattern.test(n))).toHaveLength(1);
+        };
+        await dois.goto();
+        await dois.search(galleyDoi);
+        await expectOnly(axName);
+        await dois.search(`${PREFIX}/`);
+        await expectOnly(axName);
+        await expect(taRow).toHaveCount(0);
+
+        // The galley kind unticked: its DOI finds nothing, the preprint's
+        // still finds it (Rule 21).
+        const settings = new DoiSettings(page, tag);
+        await settings.goto('Setup');
+        await settings.kindBox(GALLEYS).uncheck();
+        await settings.save(settings.setup);
+        await dois.goto();
+        await dois.search(galleyDoi);
+        await expect(dois.emptyLine()).toContainText('No items found.');
+        await expect(axRow).toHaveCount(0);
+        await dois.search(preprintDoi);
+        await expectOnly(axName);
+
         // Control: the unposted preprint still reads "Needs DOI" (Rule 5).
         await dois.goto();
         await dois.expand(taRow, tardigrade.submissionId);

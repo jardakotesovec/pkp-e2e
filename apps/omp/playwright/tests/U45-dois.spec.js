@@ -951,6 +951,39 @@ test.describe('DOIs', () => {
         expect(harboursDoi).not.toBe(tidesDoi);
         expect((await activityLines(page, tag, axolotl.submissionId, null)).length, 'no line from the second "Assign DOIs"').toBe(logTicked);
 
+        // Search by a chapter's and a format's DOI: the book alone;
+        // "10.1234/" lists it and not the book without a DOI (Rule 21;
+        // pkp/pkp-lib#13744).
+        const axName = new RegExp(`— ${AXOLOTL}$`);
+        const expectOnly = async (pattern) => {
+            await expect(dois.rowLink(dois.rows())).toHaveCount(1);
+            expect((await dois.rowNames()).filter((n) => pattern.test(n))).toHaveLength(1);
+        };
+        await dois.goto();
+        for (const doi of [tidesDoi, pdfDoi]) {
+            await dois.search(doi);
+            await expectOnly(axName);
+        }
+        await dois.search(`${PREFIX}/`);
+        await expectOnly(axName);
+        await expect(taRow).toHaveCount(0);
+
+        // "Chapters" and "Publication Formats" unticked: their DOIs find
+        // nothing, the monograph's still finds the book (Rule 21).
+        const settings = new DoiSettings(page, tag);
+        await settings.goto('Setup');
+        await settings.kindBox('Chapters').uncheck();
+        await settings.kindBox('Publication Formats').uncheck();
+        await settings.save(settings.setup);
+        await dois.goto();
+        for (const doi of [tidesDoi, pdfDoi]) {
+            await dois.search(doi);
+            await expect(dois.emptyLine()).toContainText('No items found.');
+            await expect(axRow).toHaveCount(0);
+        }
+        await dois.search(bookDoi);
+        await expectOnly(axName);
+
         // Control: the unpublished work still reads "Needs DOI" (Rule 5).
         await dois.goto();
         await dois.expand(taRow, tardigrade.submissionId);

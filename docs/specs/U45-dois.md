@@ -1570,6 +1570,16 @@ throwaway accounts, scenario 13 also with the Site Administrator.
      DOI, and "Needs DOI" now lists "Axolotl limb memory" (Rules 48, 51).
      Run "Assign DOIs" on the book again: "Harbours" holds a DOI, and
      the Activity Log gains no line (Rule 48; Side effects).
+   - **Search by the second kind's DOI**: on "DOIs" type the DOI the
+     "PDF" row holds (on a press "Tides"' DOI, then "Format / PDF"'s)
+     into "Search" and press Enter: only "Axolotl limb memory" is
+     listed. Search "10.1234/": "Axolotl limb memory" is listed and
+     "Tardigrade desiccation", which has no DOI, is not (Rule 21).
+   - **The kind unticked**: on Settings › Distribution › "DOIs" ›
+     "Setup" untick the galley box (on a press "Chapters" and
+     "Publication Formats") and save. Search the same DOI again: "No
+     items found." Search the "Article" ("Monograph", "Preprint") row's
+     DOI: "Axolotl limb memory" is listed (Rule 21).
    - **Control**: "Tardigrade desiccation", not published, still reads
      "Needs DOI" in its "Article" row (Rule 5). <sup>sc</sup>
 
@@ -2439,7 +2449,6 @@ throwaway accounts, scenario 13 also with the Site Administrator.
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - searching by a galley's DOI (journal, preprint server) or a chapter's, format's or file's DOI {OMP} while its kind is ticked, by "10.1234/" with both kinds assigned, and the same DOI finding nothing once its kind is unticked (Rule 21; A11, retired)
   - the guard for A19 (Rule 35; issue report
     `docs/issues/U45-A19-agency-choice-unticks-every-doi-kind.md`): a
     journal and a preprint server with the galley kind ticked before a
@@ -3392,7 +3401,7 @@ Basis: probe + walk, 2026-11-23. <sup>f-ops8</sup>
 ### Retired
 
 <a id="a11"></a>
-**A11 — Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server** · ✅ · retired. Fixed by `pkp/ojs#6050`, `pkp/omp#2566` and `pkp/ops#1497` (`main`; `pkp/ojs#6049`, `pkp/omp#2565` and `pkp/ops#1496` on 3.5, `pkp/ojs#6051` on `ore`) for `pkp/pkp-lib#13744`, the team's copy of the issue report; verified 2026-11-06 at the PR heads before their merge on OJS, OMP and OPS, `main` and 3.5, and on OJS `ore`; merged MERGE-DATE; this page describes the fixed behavior: a DOI or its start lists the works carrying a DOI of a ticked kind that begins with it, the work's own included, on every app, and a preprint server's search no longer fails (Rule 21). <sup>f-a11</sup>
+**A11 — Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server** · ✅ · retired. Fixed upstream (pkp/ojs#6050, pkp/omp#2566, pkp/ops#1497, for pkp/pkp-lib#13744).
 
 <a id="a13"></a>
 **A13 — A bulk action the server refuses on the DOIs page closes its window and shows no message** · ✅ · retired. Fixed upstream (pkp/ui-library#1016, for pkp/pkp-lib#13507).
@@ -4670,7 +4679,7 @@ DOI or a published version, and showed "Clear filter: In Copyediting,
 Production, Published or with DOIs", which brought the list back.
 
 <a id="fn-q18"></a>
-**q18** — Live-probed 2026-09-26 (Rule 21; A11), all three apps, two runs
+**q18** — Live-probed 2026-09-26 (Rule 21; A11, before its fix: f-a11 has the fixed search), all three apps, two runs
 each, read on the list and in the page's own list request: on a journal
 the article's DOI start ("10.1234/sj") finds the work and a galley's DOI
 start finds nothing; on a press the monograph's own DOI finds nothing,
@@ -5279,7 +5288,7 @@ unions the chapter, format and file DOIs, the publication branch sitting
 on the `1 = 0` query (note q18).
 
 <a id="fn-q33"></a>
-**q33** — Live-probed 2026-09-29 (Rules 21, 22, 51; A11), OMP, two
+**q33** — Live-probed 2026-09-29 (Rules 21, 22, 51; A11, whose fix changed the Search part: f-a11), OMP, two
 runs, OJS and OPS as controls. Six published books, each with "Tides"
 (page), "Harbours" (no page) and "PDF" with a file: A every DOI; B its
 own and "PDF"'s; C its own and "Tides"'; D its own, "Tides"' and
@@ -5630,23 +5639,20 @@ press and a preprint server the minor versions were made after "Assign
 DOIs" and shared the DOI (note q50); this order was not driven there.
 
 <a id="fn-f-a11"></a>
-**f-a11** — Live-probed 2026-09-26 (q18, which gives the cause), all
-three apps, two runs each. Live-probed again 2026-09-29 (q33) on a press
-with chapter and format DOIs, and on a journal and a preprint server:
-the same.
-Walked 2026-11-06 at the PR heads of `pkp/pkp-lib#13744`, before
-their merge (each line's tip with the PR merged in: OJS `ad4ab4412a`,
-OMP `c3f984180e`, OPS `c870670cae` on `main`; `91d40ba078`,
-`38e68f66d7`, `8bf08b2acc` on 3.5; OJS `264d1e1505` on `ore`), with
-the issue report's kept walk and `NEIGHBOUR=1` on fresh dataset fleets: at
-the tips each app as the report's Observed (the OPS 500 on 3.5 too), at
-the heads the Expected on every app and line (A by its own DOI, B by
-its galley's or format's DOI, "10.1234/" both, the dashboard's search
-A, on 3.5 through its `_submissions` request), the controls unchanged
-(a title word finds B, "10.9999/" nothing, B's second DOI nothing once
-its kind is unticked). U45 S3's own-DOI search: red at the OMP and OPS
-tips, green at the three `main` heads.
-Issue report: [pkp-e2e#217](https://github.com/jardakotesovec/pkp-e2e/issues/217) ([docs/issues/U45-A11-doi-search-finds-different-sets.md](../issues/U45-A11-doi-search-finds-different-sets.md)). The team's copy is `pkp/pkp-lib#13744` (2026-11-06).
+**f-a11** — Rule 21's search after `pkp/pkp-lib#13744`'s fix
+(pkp/ojs#6050, pkp/omp#2566, pkp/ops#1497 on `main`; pkp/ojs#6049,
+pkp/omp#2565, pkp/ops#1496 on 3.5; pkp/ojs#6051 on `ore`). Before it
+(q18, q33), each app's `Collector::addFilterByAssociatedDoiIdsToQuery()`
+built the first ticked kind's branch on a `1 = 0` query, so a journal
+missed galley DOIs, a press its books' own DOIs, and a preprint server
+every DOI (a 500 while only "Preprints" was ticked). Walked 2026-11-06
+at the PR heads and again WALKDATE at the merged tips (MERGEDTIPS), on
+fresh dataset fleets with `NEIGHBOUR=1`: A by its own DOI, B by its
+galley's or format's DOI, "10.1234/" both, the editorial dashboard's
+"Search submissions" A (on 3.5 through its `_submissions` request); a
+title word finds B, "10.9999/" nothing, and B's second DOI nothing once
+its kind is unticked. U45 S3's own-DOI search: red before the fix on a
+press and a preprint server, green after it.
 
 <a id="fn-f-a12"></a>
 **f-a12** — `addFilter()` sets the published status with `unregistered`

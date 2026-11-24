@@ -462,15 +462,15 @@ links under the list. <sup>g</sup>
     "Save" stores them. <sup>m</sup> <sup>q16</sup>
 21. **Search.** The phrase applies once Enter is pressed. Words match
     the works' titles and contributors' names. A phrase beginning with
-    digits and a dot ("10.1234/a7k") is read as the start of a DOI, and
-    what it finds differs by app ⚠ [A11](#a11): on a journal, the
-    articles whose own DOI begins with it (a galley's DOI finds nothing);
-    on a press, the books with a chapter, format or file DOI beginning
-    with it, counting only the kinds ticked under "Items with DOIs"
-    <sup>q33</sup> (the monograph's own DOI finds nothing); on a
-    preprint server nothing,
-    "10.1234/" included. A suffix without its prefix finds nothing.
-    <sup>o</sup> <sup>q18</sup>
+    digits and a dot ("10.1234/a7k") is read as the start of a DOI: it
+    lists the works that carry a DOI beginning with it, counting only
+    the kinds ticked under "Items with DOIs": the work's own, its
+    galleys' on a journal and a preprint server, its chapters', formats'
+    and files' on a press <sup>q33</sup>. "10.1234/" lists every work
+    with such a DOI, and a DOI of a kind left unticked finds nothing. A
+    suffix without its prefix finds nothing. The editorial dashboard's
+    "Search submissions" finds the same. <sup>o</sup> <sup>q18</sup>
+    <sup>f-a11</sup>
 22. **Filters.** Choosing a filter narrows the list and marks it chosen;
     choosing it again, or its "Clear filter: {name}", lifts it. Within
     "Status" and within "Registration" one filter at a time applies.
@@ -1300,7 +1300,9 @@ throwaway accounts. <sup>sc</sup>
      search phrase" button shows. Press it: the box empties and the other
      works are back. Type "Anning" and press Enter: "Tardigrade
      desiccation" and "Coral spawning" are listed, and "Axolotl limb
-     memory" is not (Fields, "Search"; Rule 21).
+     memory" is not. Clear it, type the DOI its "Article" ("Monograph",
+     "Preprint") row shows and press Enter: only "Axolotl limb memory"
+     is listed (Fields, "Search"; Rule 21).
    - **"Status" filters**: press "Needs DOI": "Axolotl limb memory" leaves
      the list and the filter is marked chosen; press "DOI Assigned": it
      takes the place of "Needs DOI", and only "Axolotl limb memory" is
@@ -1442,6 +1444,16 @@ throwaway accounts. <sup>sc</sup>
      DOI, and "Needs DOI" now lists "Axolotl limb memory" (Rules 48, 51).
      Run "Assign DOIs" on the book again: "Harbours" holds a DOI, and
      the Activity Log gains no line (Rule 48; Side effects).
+   - **Search by the second kind's DOI**: on "DOIs" type the DOI the
+     "PDF" row holds (on a press "Tides"' DOI, then "Format / PDF"'s)
+     into "Search" and press Enter: only "Axolotl limb memory" is
+     listed. Search "10.1234/": "Axolotl limb memory" is listed and
+     "Tardigrade desiccation", which has no DOI, is not (Rule 21).
+   - **The kind unticked**: on Settings › Distribution › "DOIs" ›
+     "Setup" untick the galley box (on a press "Chapters" and
+     "Publication Formats") and save. Search the same DOI again: "No
+     items found." Search the "Article" ("Monograph", "Preprint") row's
+     DOI: "Axolotl limb memory" is listed (Rule 21).
    - **Control**: "Tardigrade desiccation", not published, still reads
      "Needs DOI" in its "Article" row (Rule 5). <sup>sc</sup>
 
@@ -2040,7 +2052,6 @@ Left out of the scenarios above, by reason:
   - A10 ("Assign DOIs" under "No" while a newer version is unpublished; Rules 11, 17)
   - A17 (a new major version leaving the earlier DOI's status; Rule 32)
   - OPS5 (a preprint server listing unfinished drafts; Rule 15)
-  - A11 (searching by a DOI's start, on a press by a chapter's, format's or file's DOI while its kind is ticked; Rule 21)
   - A12 (clearing a "Registration" filter after "Unregistered"; Rule 22)
   - A8 (the unnamed "DOI Statuses" button and row tick boxes; Fields, the DOIs page)
   - A22 (the "Bulk Actions" menu left open over the list after "Assign DOIs"; Rule 24)
@@ -2086,7 +2097,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A4](#a4) | After "Deposit DOIs", the item's agency box says it "has been manually registered", though nobody marked it | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A8](#a8) | On the DOIs page, a screen reader announces the "DOI Statuses" button and every row's tick box without a name | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A9](#a9) | A pattern symbol with nothing to fill it stays in the DOI | 🐞 | high | issues (claude), 2026-10-12 — re-verified |
-| [A11](#a11) | Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A12](#a12) | On the DOIs page, clearing a "Registration" filter chosen after "Unregistered" leaves only published works listed | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A14](#a14) | The "Mark DOIs Needs Sync" window on the DOIs page asks to mark the records "as stale" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A15](#a15) | "Deposit DOIs" on a published work with no DOI reports success, and nothing is deposited | 🐞 | medium · crash: server | issues (claude), 2026-10-12 — re-verified |
@@ -2253,25 +2263,6 @@ unpublished reach that version too?
 Lean: yes; "No, all versions of an article should have the same DOI."
 is what the manager chose.
 Basis: probe, 2026-09-26. <sup>f-a10</sup>
-
-<a id="a11"></a>
-**A11 — Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server** · 🐞 · medium · crash: server.
-A manager types a DOI, or its start, into the search box of the DOIs
-page and presses Enter, expecting the items that carry it. What the
-search finds depends on the app and on the kinds ticked under "Items
-with DOIs" (Settings › Distribution › "DOIs"). Each app starts with only
-the works' own kind ticked. A journal ("Articles") finds an article by
-its DOI. Once "Article galleys" is ticked, a galley's DOI is never
-found. A press ("Monographs") finds nothing for any DOI. The book's own
-DOI is the one kind it never finds. Once chapters, formats or files are
-ticked, their DOIs are found. A preprint server ("Preprints") fails on
-the server at every DOI search. An "Error" window opens and the list
-stays unfiltered. Once "Preprint galleys" is ticked, the error stops,
-but no DOI is ever found. Where the search misses, the list reads "No
-items found.", so the manager is led to believe that no item carries the
-DOI. The editorial dashboard's "Search submissions" gives the same
-results, the error included.
-Basis: probe, 2026-10-01. <sup>f-a11</sup>
 
 <a id="a12"></a>
 **A12 — On the DOIs page, clearing a "Registration" filter chosen after "Unregistered" leaves only published works listed** · 🐞 · low.
@@ -2758,6 +2749,9 @@ leave drafts out.
 Basis: probe, 2026-09-26. <sup>f-ops5</sup>
 
 ### Retired
+
+<a id="a11"></a>
+**A11 — Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server** · ✅ · retired. Fixed upstream (pkp/ojs#6051, for pkp/pkp-lib#13744).
 
 <a id="a13"></a>
 **A13 — A bulk action the server refuses on the DOIs page closes its window and shows no message** · ✅ · retired. Fixed upstream (pkp/ui-library#1016, for pkp/pkp-lib#13507).
@@ -3810,7 +3804,7 @@ DOI or a published version, and showed "Clear filter: In Copyediting,
 Production, Published or with DOIs", which brought the list back.
 
 <a id="fn-q18"></a>
-**q18** — Live-probed 2026-09-26 (Rule 21; A11), all three apps, two runs
+**q18** — Live-probed 2026-09-26 (Rule 21; A11, before its fix: f-a11 has the fixed search), all three apps, two runs
 each, read on the list and in the page's own list request: on a journal
 the article's DOI start ("10.1234/sj") finds the work and a galley's DOI
 start finds nothing; on a press the monograph's own DOI finds nothing,
@@ -4352,7 +4346,7 @@ unions the chapter, format and file DOIs, the publication branch sitting
 on the `1 = 0` query (note q18).
 
 <a id="fn-q33"></a>
-**q33** — Live-probed 2026-09-29 (Rules 21, 22, 51; A11), OMP, two
+**q33** — Live-probed 2026-09-29 (Rules 21, 22, 51; A11, whose fix changed the Search part: f-a11), OMP, two
 runs, OJS and OPS as controls. Six published books, each with "Tides"
 (page), "Harbours" (no page) and "PDF" with a file: A every DOI; B its
 own and "PDF"'s; C its own and "Tides"'; D its own, "Tides"' and
@@ -4656,11 +4650,20 @@ Rule 17's half (the published version shown while a newer one is
 unpublished) was seen on all three apps.
 
 <a id="fn-f-a11"></a>
-**f-a11** — Live-probed 2026-09-26 (q18, which gives the cause), all
-three apps, two runs each. Live-probed again 2026-09-29 (q33) on a press
-with chapter and format DOIs, and on a journal and a preprint server:
-the same.
-Issue report: [pkp-e2e#217](https://github.com/jardakotesovec/pkp-e2e/issues/217) ([docs/issues/U45-A11-doi-search-finds-different-sets.md](../../../../docs/issues/U45-A11-doi-search-finds-different-sets.md)).
+**f-a11** — Rule 21's search after `pkp/pkp-lib#13744`'s fix
+(pkp/ojs#6050, pkp/omp#2566, pkp/ops#1497 on `main`; pkp/ojs#6049,
+pkp/omp#2565, pkp/ops#1496 on 3.5; pkp/ojs#6051 on `ore`). Before it
+(q18, q33), each app's `Collector::addFilterByAssociatedDoiIdsToQuery()`
+built the first ticked kind's branch on a `1 = 0` query, so a journal
+missed galley DOIs, a press its books' own DOIs, and a preprint server
+every DOI (a 500 while only "Preprints" was ticked). Walked 2026-11-06
+at the PR heads and again WALKDATE at the merged tips (MERGEDTIPS), on
+fresh dataset fleets with `NEIGHBOUR=1`: A by its own DOI, B by its
+galley's or format's DOI, "10.1234/" both, the editorial dashboard's
+"Search submissions" A (on 3.5 through its `_submissions` request); a
+title word finds B, "10.9999/" nothing, and B's second DOI nothing once
+its kind is unticked. U45 S3's own-DOI search: red before the fix on a
+press and a preprint server, green after it.
 
 <a id="fn-f-a12"></a>
 **f-a12** — `addFilter()` sets the published status with `unregistered`
