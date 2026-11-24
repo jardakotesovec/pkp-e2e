@@ -26,7 +26,7 @@
  *   closed-version notice is `[class*="PkpCommentsNotificationNotLatest"]`.
  *   The sidebar block is `.entry_details .item.comments` with the link
  *   "All Comments (N)" (href `#public-comments`) and, signed out, the
- *   button "Log in to comment";
+ *   button "Sign in to leave a comment";
  * - the "Report Comment" and "Delete Comment" dialogs are `role=dialog`
  *   named by their heading; the reason box is the dialog's only textbox
  *   (a `label` element, no aria-label); "Submit" with an empty reason
@@ -68,7 +68,7 @@ const {EmailUserWindow} = require('../../../../shared/playwright/pages/UsersMana
 /** The comment box's placeholder (its only name). */
 const BOX_PLACEHOLDER = 'What do you think about this publication? Type your comments here.';
 /** The writer's notice on a pending or hidden comment (Rule 6a). */
-const PENDING_NOTICE = 'Your comment will be visible when the editor approves it';
+const PENDING_NOTICE = 'Your comment will be visible to everyone once a moderator approves it.';
 /** The older version's notice in place of the box (Rule 4a). */
 const CLOSED_NOTICE = 'Discussion is closed on this version, please comment on the latest version above.';
 /** The two task sentences (Side effects). */
@@ -89,7 +89,7 @@ const ACCESS_DENIED_TEXT = 'The current role does not have access to this operat
 /** The confirm dialogs' questions. */
 const DELETE_COMMENT_QUESTION = 'Are you sure you want to delete this comment? This action cannot be undone.';
 const DELETE_REPORT_QUESTION = 'Are you sure you want to delete this report? This action cannot be undone.';
-const OWN_DELETE_QUESTION = 'Are you sure you want to delete the following comment?';
+const OWN_DELETE_QUESTION = 'Are you sure you want to delete your comment?';
 const NOT_FOUND_MESSAGE = 'The requested resource was not found.';
 
 function escapeRegExp(text) {
@@ -211,7 +211,7 @@ exports.ArticleCommentsPage = class ArticleCommentsPage extends BasePage {
     }
 
     loginButton(scope = this.mainBlock()) {
-        return scope.getByRole('button', {name: 'Log in to comment', exact: true});
+        return scope.getByRole('button', {name: 'Sign in to leave a comment', exact: true});
     }
 
     closedNotice(scope = this.mainBlock()) {
@@ -219,7 +219,7 @@ exports.ArticleCommentsPage = class ArticleCommentsPage extends BasePage {
     }
 
     showMoreButton(scope = this.mainBlock()) {
-        return scope.getByRole('button', {name: /^Show more \(\d+\)$/});
+        return scope.getByRole('button', {name: /^Show \d+ more comments$/});
     }
 
     /** Every comment (an `article`) in the scope, newest first. */
@@ -420,7 +420,7 @@ exports.ArticleCommentsPage = class ArticleCommentsPage extends BasePage {
     }
 
     sidebarLoginButton() {
-        return this.sidebarBlock().getByRole('button', {name: 'Log in to comment', exact: true});
+        return this.sidebarBlock().getByRole('button', {name: 'Sign in to leave a comment', exact: true});
     }
 
     async expectAllComments(count) {

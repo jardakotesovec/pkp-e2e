@@ -271,8 +271,10 @@ cannot be reached by heading ⚠ [OMP3](#omp3). <sup>h</sup>
     link. Only the nearest parent is named: the page of a third-level
     category skips the top-level one ⚠ [A5](#a5). <sup>g</sup>
     <sup>td10</sup>
-12. **The picture.** With a "Cover Image" set, the page shows a small copy
-    of it, at most 100 × 100 pixels on a journal and a preprint server.
+12. **The picture.** With a "Cover Image" set, the page shows a copy of
+    it, reduced only when larger than 1024 × 1024 pixels on a journal and
+    a preprint server (a 400 × 400 picture is kept whole); the theme draws
+    it in a narrow column beside the description. <sup>pr13242</sup>
     The picture is not a link: the full-size picture has an address, but
     nothing on the page leads to it ⚠ [A6](#a6). The picture is kept as
     a file named after the category with the picture's own ending
@@ -586,8 +588,8 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      server): the breadcrumb reads "Home" then "Science", "Home" a link and
      "Science" not; the page is headed "Science"; it shows a small copy of
      the picture, on a press as on a journal, and "Work in the natural
-     sciences."; on a journal and a preprint server the copy is drawn at
-     most 100 × 100 pixels; "Subcategories" lists "Physics" alone, as a link
+     sciences."; on a journal and a preprint server the copy is the whole
+     400 × 400 picture, drawn no larger; "Subcategories" lists "Physics" alone, as a link
      (Fields, the category's page; Rules 11, 12).
    - **Nothing listed yet**: the same page reads "0 Items" ("0 Titles"
      on a press) and lists no article and none of Rule 9's empty-category
@@ -2526,6 +2528,17 @@ Issue report: [pkp-e2e#594](https://github.com/jardakotesovec/pkp-e2e/issues/594
 <a id="fn-f-a26"></a>
 **f-a26** — Live-probed 2026-11-13 on the `mysql` line (MySQL 8.0.46, PHP 8.3; OJS `3c99722dc8`, OPS `c74e5bf190`, pkp-lib `ad75b174f0`) and the `mariadb` line (MariaDB 10.11), each from a reset install, with `shared/playwright/checks/issues/category-without-translation-listed-first-mysql/walk.js` on OJS and OPS: a scratch context with English and French, "Arts"/"Beaux-arts", "Zoology"/"Animaux", "Science"/"Sciences" (under it "Physics"/"Physique", "Botany"/"Botanique", "Topology" in English only) and "Mathematics" in English only; "Browse Block" enabled and placed in the sidebar. In French the block read "Mathematics", "Animaux", "Beaux-arts", "Sciences" and the "Sciences" page's "Subcategories" "Topology", "Botanique", "Physique" (PostgreSQL: "Mathematics" and "Topology" last). The configurations run [43340246182](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43340246182) reds OJS and OPS U16 S7 the same way on PHP 8.2 MySQL, PHP 8.2 MariaDB and PHP 8.3 MySQL. Code: `PKP\category\Collector::getQueryBuilder()` left-joins the `title` setting in `Locale::getLocale()` only and orders by `COALESCE(category_settings.setting_value) ASC`, a COALESCE of one argument (no fallback), so a category with no name in that language sorts as NULL: first on MySQL and MariaDB, last on PostgreSQL (note i). Since `198595800a` (pkp/pkp-lib#10404, 2025-05-12); on `ore` too (pkp-lib `356d223ea0`); 3.5 and 3.4 order by `seq` and the tree (code). OMP by code: its lists use the same Collector. Two fixes tried on the `mysql` line (beside the script): `fix.diff`, a category with no name in the language last, which makes every database list as PostgreSQL does (OJS and OPS U16 S7 pass); `fix-shown-name.diff`, sorted by the name shown (the primary language's where the page's is missing), which places "Mathematics" alphabetically on every database and so changes Rule 2 on PostgreSQL too.
 Issue report: [pkp-e2e#1098](https://github.com/jardakotesovec/pkp-e2e/issues/1098) ([docs/issues/U16-A26-category-without-translation-listed-first-mysql.md](../issues/U16-A26-category-without-translation-listed-first-mysql.md)).
+
+<a id="fn-pr13242"></a>
+**pr13242** — Driven at the PR heads of pkp/pkp-lib#13242 (pkp-lib
+`f391a0c79f`, ojs `b1fb93402a`, ops `337b15c469`), before their merge,
+2026-11-24: a 400 × 400 PNG as "Cover Image" came back 400 × 400 from
+the category's small-copy address on a journal and a preprint server
+(drawn 160 × 160 at the suite's window size, 20% of the column), where
+`main` reduces it to 100 × 100.
+`CategoryCategoryController` now falls back to 1024 instead of 100 when
+the context's `coverThumbnailsMaxWidth` / `coverThumbnailsMaxHeight` are
+empty. The team called it intended in the PR review's thread the same day.
 
 ## Reference — entry points & surfaces
 

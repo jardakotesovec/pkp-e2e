@@ -894,7 +894,7 @@ test.describe('appearance & theming', () => {
         await pub.openFromMenu('About', 'Editorial Masthead');
         await expect(pub.heading).toHaveText('Editorial Masthead');
         await expect(roleHeadings).toHaveText(reordered.filter((r) => r !== 'Production editor'));
-        await visitor.locator('.page_masthead').getByRole('link', {name: 'Editorial History', exact: true}).click();
+        await visitor.locator('.page_masthead').getByRole('link', {name: 'editorial history', exact: true}).click();
         await expect(visitor).toHaveURL(/\/about\/editorialHistory$/);
         await expect(pub.heading).toHaveText(/^Editorial History/);
         await expect(roleHeadings.first()).toHaveText(BOARD);

@@ -928,12 +928,12 @@ test.describe('reader comments & moderation', () => {
         await expect(comments.pageButton(2)).toHaveAttribute('aria-current', 'true');
         await expect(comments.showingLine()).toHaveText('Showing 26 to 26 of 26');
 
-        // The landing page, signed out: 25 comments, "Show more (1)", then all 26.
+        // The landing page, signed out: 25 comments, "Show 1 more comments", then all 26.
         const landing = new ArticleCommentsPage(page, tag);
         await landing.goto(article.submissionId);
         await landing.expectPartCount(VERSION_1, 26);
         await expect(landing.comments()).toHaveCount(25);
-        await expect(landing.showMoreButton()).toHaveText('Show more (1)');
+        await expect(landing.showMoreButton()).toHaveText('Show 1 more comments');
         const more = page.waitForResponse(
             (r) => /\/api\/v1\/comments\/public\?.*page=2/.test(r.url()) && r.request().method() === 'GET' && r.ok(),
             {timeout: 30_000}
@@ -998,7 +998,7 @@ test.describe('reader comments & moderation', () => {
         await expect.poll(async () => (await landing.mainBlockPosition()).top).toBeLessThan(120);
         expect((await landing.mainBlockPosition()).top).toBeLessThan(before.top - 100);
 
-        // "Log in to comment", either one: the sidebar's opens the Login page
+        // "Sign in to leave a comment", either one: the sidebar's opens the Login page
         // (left with the browser's Back), the main block's too; signed in
         // there, back at the comments with the box.
         const login = new LoginPage(page);
@@ -1136,7 +1136,10 @@ test.describe('reader comments & moderation', () => {
         const comment = landing.comment(commentText);
         const dialog = await landing.openReportDialog(comment);
         await expect(dialog.getByRole('heading', {name: 'Report Comment'})).toBeVisible();
-        await expect(dialog.getByText('Report the following comment by Rob Reporter', {exact: true})).toBeVisible();
+        await expect(
+            dialog.getByText('Please tell us why you think this comment from Rob Reporter is inappropriate. Our moderators will review your message.', {exact: true})
+        ).toBeVisible();
+        await expect(dialog.locator('strong').filter({hasText: /^Rob Reporter$/})).toHaveCount(1);
         await expect(dialog.getByText(commentText)).toBeVisible();
         await expect(dialog.getByText('Please tell us why you want to report this comment')).toBeVisible();
         await expect(landing.reasonBox(dialog)).toBeVisible();
@@ -1215,7 +1218,7 @@ test.describe('reader comments & moderation', () => {
         const dialog = await landing.openDeleteDialog(landing.comment(ownText));
         await expect(dialog.getByRole('heading', {name: 'Delete Comment'})).toBeVisible();
         await expect(dialog.getByText(OWN_DELETE_QUESTION)).toBeVisible();
-        await expect(dialog.locator('strong, b').filter({hasText: ownText})).toHaveCount(1);
+        await expect(dialog.getByText(ownText)).toHaveCount(0);
         await expect(dialog.getByRole('button', {name: 'Delete', exact: true})).toBeVisible();
         await expect(dialog.getByRole('button', {name: 'Cancel', exact: true})).toBeVisible();
         await landing.confirmDelete(dialog);
@@ -1334,7 +1337,7 @@ test.describe('reader comments & moderation', () => {
         // The sidebar: the approved comments over every version, the pending one not counted.
         await landing.expectAllComments(2);
 
-        // Control: signed out, "Log in to comment" in the newest part only, the closed notice in the older.
+        // Control: signed out, "Sign in to leave a comment" in the newest part only, the closed notice in the older.
         const visitor = new ArticleCommentsPage(page, tag);
         await visitor.goto(article.submissionId);
         await expect(visitor.loginButton(visitor.partRegion(VERSION_2))).toBeVisible();

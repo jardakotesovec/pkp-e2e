@@ -362,10 +362,11 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
       browser tab when that iD is verified, and the "Affiliation"
       of their profile under the name when they filled it. No picture, no
       homepage and no email are shown. <sup>z</sup>
-    - 14d. **The history link.** After the roles a line reads "View
-      Editorial History", its last two words a link to the "Editorial
-      History" page, followed by a horizontal rule and the peer reviewers
-      (Rule 15). The page carries no "Edit" link.
+    - 14d. **The history link.** After the roles a line reads "View the
+      full editorial history.", the words "editorial history" a link to
+      the "Editorial History" page, followed by a horizontal rule and the
+      peer reviewers (Rule 15). The page carries no "Edit" link.
+      <sup>pr13242</sup>
     - 14e. **When the list changes.** Each of these shows on the next
       load of the masthead and of "Editorial History", with no other
       change needed: <sup>td12</sup>
@@ -695,10 +696,10 @@ and the tooling recipe are in the footnote. <sup>y</sup>
      and "Editorial Board Member" on a preprint server), and no "Reviewer"
      heading; under each come its members, each entry the year the role
      started followed by a dash and the member's name, with no picture
-     and no email; then the line "View Editorial History",
-     its last two words a link, and a horizontal rule, with no "Peer
+     and no email; then the line "View the full editorial history.",
+     "editorial history" a link, and a horizontal rule, with no "Peer
      Reviewers in Previous Year" after it (Rules 14a, 14c, 14d, 15).
-   - **"Editorial History"**: press "Editorial History" in that line: the
+   - **"Editorial History"**: press "editorial history" in that line: the
      page, under the breadcrumb "Home" › "Editorial History", is headed
      "Editorial History Page" [A6] and shows "This section lists past
      contributors." and nothing else, nobody having left the team and the
@@ -941,8 +942,8 @@ and the tooling recipe are in the footnote. <sup>y</sup>
      14b, 14c).
    - **The member who does not appear**: the fourth member is not under
      "Section editor" (Rule 14b).
-   - **The history**: press "Editorial History" in the line "View
-     Editorial History": under "Section editor" the first past member reads
+   - **The history**: press "editorial history" in the line "View the
+     full editorial history.": under "Section editor" the first past member reads
      "2019 – 2024" with the name and "Past University" under it, and the
      second "2020 – 2022, 2015 – 2016" with the name; the Section editors
      still serving are not listed (Rule 16).
@@ -1025,8 +1026,8 @@ and the tooling recipe are in the footnote. <sup>y</sup>
    last year.
 
    - **The box at its default**: open "Editorial Masthead": the page ends
-     with the line "View Editorial History" and the horizontal rule, with
-     no "Peer Reviewers in Previous Year" heading and no "The editors
+     with the line "View the full editorial history." and the horizontal
+     rule, with no "Peer Reviewers in Previous Year" heading and no "The editors
      express their appreciation of the reviewers …" after them, though
      Beta and Zeta submitted reviews last year (Rule 15; Settings bullet
      4c).
@@ -1040,7 +1041,7 @@ and the tooling recipe are in the footnote. <sup>y</sup>
    - **Beta's Reviewer row, reviewers listed**: press Beta's "Edit" again:
      the Reviewer row reads "Appear on the masthead" (Settings bullet 3).
    - **The block**: signed out, open "Editorial Masthead": after the
-     horizontal rule under "View Editorial History" come the heading "Peer
+     horizontal rule under "View the full editorial history." come the heading "Peer
      Reviewers in Previous Year" and "The editors express their
      appreciation of the reviewers for {year} listed below." with last
      year's number, then Beta and Zeta in that order, with no year before
@@ -1114,8 +1115,8 @@ App-specific:
       and "/information/librarians": each answers "404 Not Found" (Rule
       19c).
     - **The masthead**: open "Editorial Masthead": the page ends with the
-      line "View Editorial History" and the horizontal rule, with no "Peer
-      Reviewers in Previous Year" after them (Rule 15).
+      line "View the full editorial history." and the horizontal rule, with
+      no "Peer Reviewers in Previous Year" after them (Rule 15).
     - **Control**: the "Privacy Statement" side tab opens with its box;
       signed out, the "Contact" page opens at the address the header's
       "About" menu gives it, with its heading; and the masthead's role
@@ -1132,8 +1133,8 @@ Common to every application:
     "Cole".
 
     - **Before**: signed out, "Editorial Masthead" lists Able under
-      "Section editor", then the line "View Editorial History"; press
-      "Editorial History" in that line: the "Editorial History" page lists
+      "Section editor", then the line "View the full editorial history.";
+      press "editorial history" in that line: the "Editorial History" page lists
       Dale under "Section editor" with "2019 – 2024" (Rules 14, 16).
     - **The box unticked**: Journal Manager: open Settings › Website ›
       "Appearance" › "Editorial Masthead" and untick "Present a masthead
@@ -1142,7 +1143,7 @@ Common to every application:
       before any save; press "Save" (Settings bullet 4a).
     - **The masthead, its text empty**: open "Editorial Masthead": under
       the heading "Editorial Masthead" comes the "Edit" link alone, with
-      no role heading, no Able, no "View Editorial History" line and no
+      no role heading, no Able, no "View the full editorial history." line and no
       horizontal rule (Rules 14f, 21).
     - **Its "Edit" link**: press it: Settings › Journal opens in the same
       window on its "Masthead" tab (Rule 21); type "Founded in 2001." in
@@ -2985,6 +2986,16 @@ reads the role's saved name in the locale handed to the email. The same
 runs read `publicknowledge`'s French masthead, its "Entête" order list
 and its users list as above again on all three apps.
 Issue report: [pkp-e2e#360](https://github.com/jardakotesovec/pkp-e2e/issues/360) ([docs/issues/U57-A8-french-default-texts-stored-as-codes.md](../issues/U57-A8-french-default-texts-stored-as-codes.md)).
+
+<a id="fn-pr13242"></a>
+**pr13242** — Driven at the PR heads of pkp/pkp-lib#13242 (pkp-lib
+`f391a0c79f`, ojs `b1fb93402a`, omp `250b9466e6`, ops `337b15c469`),
+before their merge, 2026-11-24: the masthead's line reads "View the full
+editorial history." with "editorial history" the link
+(`about.editorialMasthead.linkToEditorialHistory` in
+`lib/pkp/locale/en/common.po`, reworded by the PR) in all three apps. The
+team called it intended in the PR review's thread the same day. Footnote
+r quotes the earlier "View Editorial History" as it was when probed.
 
 ## Reference — entry points & surfaces
 

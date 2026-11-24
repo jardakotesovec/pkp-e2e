@@ -321,7 +321,7 @@ test.describe('Categories', () => {
         await expect(win.root()).toHaveCount(0);
         await expect(tab.savedNotice()).toBeVisible();
 
-        // The visitor's page: breadcrumb, heading, the small picture, the
+        // The visitor's page: breadcrumb, heading, the picture, the
         // description, "Subcategories" with "Physics" alone (Rules 11, 12).
         await cat.goto('natural-science');
         expect(await cat.crumbs()).toEqual(['Home', 'Science']);
@@ -330,11 +330,14 @@ test.describe('Categories', () => {
         await expect(cat.heading()).toHaveText('Science');
         await expect(cat.picture()).toBeVisible();
         await expect.poll(async () => (await cat.pictureSize()).naturalWidth, {timeout: 30_000}).toBeGreaterThan(0);
+        // The copy keeps the 400 × 400 upload whole (it is reduced only above
+        // 1024 × 1024 when the journal sets no thumbnail size); the theme
+        // draws it no larger than that.
         const size = await cat.pictureSize();
-        expect(size.naturalWidth).toBeLessThanOrEqual(100);
-        expect(size.naturalHeight).toBeLessThanOrEqual(100);
-        expect(size.width).toBeLessThanOrEqual(100);
-        expect(size.height).toBeLessThanOrEqual(100);
+        expect(size.naturalWidth).toBe(400);
+        expect(size.naturalHeight).toBe(400);
+        expect(size.width).toBeLessThanOrEqual(400);
+        expect(size.height).toBeLessThanOrEqual(400);
         await expect(cat.description()).toHaveText('Work in the natural sciences.');
         await expect(cat.subcategories().getByRole('heading')).toHaveText('Subcategories');
         await expect(cat.subcategoryLinks()).toHaveText(['Physics']);

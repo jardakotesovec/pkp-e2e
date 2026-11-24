@@ -178,7 +178,7 @@ test.describe('journal identity & about pages', () => {
                 expect(await entries.nth(i).innerText()).not.toContain('@');
             }
         }
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await expect(about.historyLink()).toBeVisible();
         await expect(about.rule()).toHaveCount(1);
         await expect(about.main.locator('.page_masthead > hr ~ *')).toHaveCount(0);
@@ -1152,12 +1152,12 @@ test.describe('journal identity & about pages', () => {
         const managerAbout = new AboutPages(page, tag);
         const roles = new RolesTab(page, tag);
 
-        // Before: Able under "Series editor", then "View Editorial History";
+        // Before: Able under "Series editor", then "View the full editorial history.";
         // its link opens the history, listing Dale "2019 – 2024" (Rules 14,
         // 16).
         await about.goto('masthead');
         expect(await about.listNames('Series editor')).toEqual(['Ann Able']);
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await about.historyLink().click();
         await expect(about.heading).toHaveText(whole('Editorial History Page'));
         const historyAddress = visitor.url();
@@ -1289,7 +1289,7 @@ test.describe('journal identity & about pages', () => {
         await mastheadTab.save();
         await about.goto('masthead');
         expect(await about.listNames('Series editor')).toEqual(['Ann Able']);
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         expect(await about.bodyText()).not.toContain('Cy Cole');
         await about.historyLink().click();
         await expect(about.heading).toHaveText(whole('Editorial History Page'));

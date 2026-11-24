@@ -198,13 +198,13 @@ async function usersRolesRow(managerPage, contextPath, username, email, {locale 
 
 /**
  * The press's public "Editorial Masthead" page, read for the absence of a
- * name: the heading and the page's own "Editorial History" link are the
+ * name: the heading and the page's own "editorial history" link are the
  * positive control that the page rendered its content.
  */
 async function expectMastheadWithout(page, contextPath, name) {
     await page.goto(`/index.php/${contextPath}/about/editorialMasthead`);
     await expect(page.getByRole('heading', {name: 'Editorial Masthead'})).toBeVisible();
-    await expect(page.getByRole('link', {name: 'Editorial History', exact: true})).toBeVisible();
+    await expect(page.getByRole('link', {name: 'editorial history', exact: true})).toBeVisible();
     await expect(page.getByRole('main')).not.toContainText(name);
 }
 

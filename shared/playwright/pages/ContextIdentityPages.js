@@ -223,14 +223,14 @@ exports.AboutPages = class AboutPages extends BasePage {
         );
     }
 
-    /** The masthead's "View Editorial History" line (Rule 14d). */
+    /** The masthead's "View the full editorial history." line (Rule 14d). */
     historyLine() {
         return this.main.locator('.page_masthead > p').filter({has: this.page.locator('a')}).filter({hasText: /View/});
     }
 
-    /** The link words "Editorial History" of that line. */
+    /** The link words "editorial history" of that line. */
     historyLink() {
-        return this.historyLine().getByRole('link', {name: 'Editorial History', exact: true});
+        return this.historyLine().getByRole('link', {name: 'editorial history', exact: true});
     }
 
     /** The horizontal rule after the history line. */

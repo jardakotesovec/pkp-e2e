@@ -195,7 +195,7 @@ test.describe('journal identity & about pages', () => {
                 expect(await entries.nth(i).innerText()).not.toContain('@');
             }
         }
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await expect(about.historyLink()).toBeVisible();
         await expect(about.rule()).toHaveCount(1);
         await expect(about.main.locator('.page_masthead > hr ~ *')).toHaveCount(0);
@@ -959,7 +959,7 @@ test.describe('journal identity & about pages', () => {
         // role headings show above the rule (Rule 14a).
         await about.goto('masthead');
         await expect(about.listHeadings()).toHaveText([whole(ROLE), whole('Editorial Board Member')]);
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await expect(about.rule()).toHaveCount(1);
         await expect(about.main.locator('.page_masthead > hr ~ *')).toHaveCount(0);
         await expect(about.listHeading('Peer Reviewers in Previous Year')).toHaveCount(0);
@@ -1005,7 +1005,7 @@ test.describe('journal identity & about pages', () => {
         await about.goto('masthead');
         await expect(about.listHeadings()).toHaveText([whole(ROLE)]);
         expect(await about.listNames(ROLE)).toEqual(['Ann Able']);
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await about.historyLink().click();
         await expect(about.heading).toHaveText(whole('Editorial History Page'));
         expect(new URL(visitor.url()).pathname).toBe(historyAddress);
@@ -1137,7 +1137,7 @@ test.describe('journal identity & about pages', () => {
         await about.goto('masthead');
         await expect(about.listHeadings()).toHaveText([whole(ROLE)]);
         expect(await about.listNames(ROLE)).toEqual(['Ann Able']);
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await expect(about.rule()).toHaveCount(1);
         expect(await about.bodyText()).not.toContain('Cy Cole');
         await about.historyLink().click();

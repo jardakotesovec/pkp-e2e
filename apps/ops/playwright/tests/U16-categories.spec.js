@@ -293,9 +293,13 @@ test.describe('categories', () => {
         await expect(category.currentCrumb().locator('a')).toHaveCount(0);
         await expect(category.picture()).toBeVisible();
         await expect.poll(async () => (await category.pictureSize()).naturalWidth).toBeGreaterThan(0);
+        // The copy keeps the 400 × 400 upload whole (it is reduced only above
+        // 1024 × 1024 when the server sets no thumbnail size); the theme
+        // draws it no larger than that.
         const size = await category.pictureSize();
-        expect(Math.max(size.naturalWidth, size.width)).toBeLessThanOrEqual(100);
-        expect(Math.max(size.naturalHeight, size.height)).toBeLessThanOrEqual(100);
+        expect(size.naturalWidth).toBe(400);
+        expect(size.naturalHeight).toBe(400);
+        expect(Math.max(size.width, size.height)).toBeLessThanOrEqual(400);
         await expect(category.description()).toHaveText('Work in the natural sciences.');
         await expect(category.subcategoryLinks()).toHaveText(['Physics']);
 

@@ -874,9 +874,9 @@ exports.PreprintLandingPage = class PreprintLandingPage extends BasePage {
         return this.page.getByText(/All Comments \(\d+\)/);
     }
 
-    /** "Log in to comment" (OJS: the button in both blocks, signed out). */
+    /** "Sign in to leave a comment" (OJS: the button in both blocks, signed out). */
     loginToComment() {
-        return this.page.getByText('Log in to comment');
+        return this.page.getByText('Sign in to leave a comment');
     }
 
     /** The comment box (OJS: a textbox with the placeholder as its name). */

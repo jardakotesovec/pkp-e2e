@@ -1088,8 +1088,8 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
      headings follow the list's order, "Editorial Board Member" first,
      a role with no member having none
      ([Journal identity & about pages](U07-journal-identity-and-about-pages.md),
-     Rule 14a); the visitor presses "Editorial History" in the line
-     "View Editorial History": that page's first role heading is
+     Rule 14a); the visitor presses "editorial history" in the line
+     "View the full editorial history.": that page's first role heading is
      "Editorial Board Member" too (Rule 28).
    - **A role ticked after the first save** {OJS OMP}: on Settings ›
      Users & Roles › "Roles", tick "Consider role in masthead list" for

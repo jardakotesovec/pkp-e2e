@@ -238,7 +238,7 @@ test.describe('journal identity & about pages', () => {
                 expect(await entries.nth(i).innerText()).not.toContain('@');
             }
         }
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await expect(about.historyLink()).toBeVisible();
         await expect(about.rule()).toHaveCount(1);
         await expect(about.main.locator('.page_masthead > hr ~ *')).toHaveCount(0);
@@ -1063,7 +1063,7 @@ test.describe('journal identity & about pages', () => {
         // the rule, no heading and no sentence after them, though Beta and
         // Zeta submitted reviews last year (Rule 15; Settings bullet 4c).
         await about.goto('masthead');
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await expect(about.rule()).toHaveCount(1);
         await expect(about.main.locator('.page_masthead > hr ~ *')).toHaveCount(0);
         await expect(about.listHeading(PEERS)).toHaveCount(0);
@@ -1252,7 +1252,7 @@ test.describe('journal identity & about pages', () => {
         await about.goto('masthead');
         await expect(about.listHeadings()).toHaveText([whole(SE)]);
         expect(await about.listNames(SE)).toEqual(['Ann Able']);
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         await about.historyLink().click();
         await expect(about.heading).toHaveText(whole('Editorial History Page'));
         const historyAddress = visitor.url();
@@ -1372,7 +1372,7 @@ test.describe('journal identity & about pages', () => {
         await about.goto('masthead');
         await expect(about.listHeadings()).toHaveText([whole(SE)]);
         expect(await about.listNames(SE)).toEqual(['Ann Able']);
-        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.historyLine()).toHaveText(/^\s*View the full\s+editorial history\.\s*$/);
         expect(await about.bodyText()).not.toContain('Cy Cole');
         await about.historyLink().click();
         await expect(about.heading).toHaveText(whole('Editorial History Page'));

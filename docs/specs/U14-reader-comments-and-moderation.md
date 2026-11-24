@@ -125,11 +125,11 @@ Comments page is refused (Rule 2b).
      opens its part and closes the open one, pressing the open heading
      closes it. Inside a part: the
      comment box or its substitute (Rule 4), then the comments (Rule 6),
-     then "Show more ({remaining})" when there are more (Rule 6c).
+     then "Show {remaining} more comments" when there are more (Rule 6c).
    - 3b. **The sidebar block.** In the column beside the article, a block
      headed "Comments" with the link "All Comments ({count})", which
      scrolls the page to the main block, and, for a visitor who is not
-     signed in, the button "Log in to comment" (Rule 4b). The count is the
+     signed in, the button "Sign in to leave a comment" (Rule 4b). The count is the
      number of approved comments over every version; it does not count the
      viewer's own unapproved ones and does not change while the page is
      open.
@@ -172,7 +172,8 @@ Comments page is refused (Rule 2b).
      landing page and the Comments page both treat pending and hidden the
      same: the Comments page lists both under "Hidden/Needs Approval", and
      the landing page shows both to their writer alone with the same
-     "Your comment will be visible when the editor approves it" notice, so
+     "Your comment will be visible to everyone once a moderator approves
+     it." notice, so
      a writer cannot tell a hidden comment from one not yet looked at
      ⚠ [A1](#a1).
    - 6b. **What each viewer gets.** Everyone, signed in or not, sees the
@@ -192,7 +193,8 @@ Comments page is refused (Rule 2b).
      other articles never show, and the count in a version heading covers
      that version alone.
    - 6c. **Show more.** A version's part loads 25 comments (Settings
-     bullet 2) and offers "Show more ({remaining})" below them; each press
+     bullet 2) and offers "Show {remaining} more comments" below them (the
+     same words for one: "Show 1 more comments"); each press
      appends the next 25 to the list. The button is absent once every
      comment is listed.
 7. **The "…" menu on a comment.** Each comment's header carries a "…"
@@ -203,8 +205,10 @@ Comments page is refused (Rule 2b).
    on the viewer's own comment it offers "Delete Comment" alone. A
    moderator gets exactly the same menus on the landing page (Actors). <sup>g</sup>
 8. **Reporting.** "Report" opens the dialog "Report Comment": the line
-   "Report the following comment by {writer} ({affiliation})" (without the
-   parenthesis when the writer has no affiliation), the comment's text, the
+   "Please tell us why you think this comment from {writer}, {affiliation}
+   is inappropriate. Our moderators will review your message." with the
+   writer's name and affiliation in bold (", {affiliation}" left out when
+   the writer has none), the comment's text, the
    box "Please tell us why you want to report this comment", and the
    buttons "Submit" and "Cancel". "Submit" with a reason closes the dialog;
    nothing on the page confirms the report, the comment looks as before,
@@ -216,14 +220,14 @@ Comments page is refused (Rule 2b).
    ⚠ [A14](#a14).
    No screen but the Comments page shows the report (Rule 15)
    [A17](#a17); the comment stays showing. The moderators are told
-   (Side effects). <sup>g</sup>
+   (Side effects). <sup>g</sup> <sup>pr13242</sup>
 9. **Deleting one's own comment.** "Delete Comment" opens the dialog
-   "Delete Comment": "Are you sure you want to delete the following
-   comment?" with the comment's text in bold under it, and the buttons
+   "Delete Comment": "Are you sure you want to delete your comment?",
+   without the comment's text, and the buttons
    "Delete" and "Cancel". "Delete" removes the comment from the list at
    once; the count in the version heading changes on the next page load.
    The comment is gone from the Comments page too, with every report made
-   against it and the moderators' tasks about it (Side effects). <sup>h</sup>
+   against it and the moderators' tasks about it (Side effects). <sup>h</sup> <sup>pr13242</sup>
 10. **The Comments page.** Content › Comments in the editorial side menu,
     or its address, while public comments are on (Rule 2b). The page is headed "Comments" and holds four
     tabs over one table (Fields). The browser tab reads the journal's
@@ -710,13 +714,13 @@ scenario's footnote. <sup>s0</sup>
 
    - **Signed out**: open the article's landing page: under the abstract
      and details the section "Comments on this publication" holds one part,
-     headed "{version} (1)" and open, with the button "Log in to comment"
+     headed "{version} (1)" and open, with the button "Sign in to leave a comment"
      and then the approved comment with its date and time, its text and the
      writer's name, and no "…" button on it; in the column beside the
      article the block "Comments" holds the link "All Comments (1)" and the
-     button "Log in to comment". Press "All Comments (1)": the page scrolls
+     button "Sign in to leave a comment". Press "All Comments (1)": the page scrolls
      to the main block.
-   - **"Log in to comment"**: press either one: the journal's Login page
+   - **"Sign in to leave a comment"**: press either one: the journal's Login page
      opens; sign in as the first Reader: the browser returns to the same
      article, its address ending "#public-comments", with the main block on
      screen and, in the version's part, the comment box (its placeholder
@@ -727,8 +731,8 @@ scenario's footnote. <sup>s0</sup>
      "Submit" is enabled.
    - **Submitting**: press "Submit": the box empties and the comment appears
      at the top of the version's comments with a help icon and the notice
-     "Your comment will be visible when the editor approves it" above its
-     date; the heading reads "{version} (2)" while the sidebar still reads
+     "Your comment will be visible to everyone once a moderator approves
+     it." above its date; the heading reads "{version} (2)" while the sidebar still reads
      "All Comments (1)"; no message announces the submit.
    - **The "…" menus**: the "…" button on the own comment offers "Delete
      Comment" alone; on the second Reader's comment it offers "Report"
@@ -788,8 +792,8 @@ scenario's footnote. <sup>s0</sup>
 
     - **"Delete Comment"**: signed in as the Reader, on the own comment's
       "…" press "Delete Comment": the dialog "Delete Comment" reads "Are you
-      sure you want to delete the following comment?" with the comment's
-      text in bold under it, and the buttons "Delete" and "Cancel"; press
+      sure you want to delete your comment?", without the comment's text,
+      and the buttons "Delete" and "Cancel"; press
       "Delete": the comment leaves the list at once while the heading still
       reads "{version} (2)"; reload the page: "{version} (1)".
     - **The Comments page**: the Journal Manager: the comment is on no tab,
@@ -827,7 +831,7 @@ scenario's footnote. <sup>s0</sup>
       still reads "{version} (2)".
     - **The sidebar**: "All Comments (2)": the approved comments over every
       version, the pending one not counted.
-    - **Control**: signed out, the same page shows "Log in to comment" in
+    - **Control**: signed out, the same page shows "Sign in to leave a comment" in
       the newest part only, and the closed notice in the older.
       <sup>s11</sup>
 
@@ -886,7 +890,7 @@ scenario's footnote. <sup>s0</sup>
 
     - **The landing page, signed out**: the monograph's landing page carries
       no section "Comments on this publication", no "Comments" block in the
-      sidebar and no "Log in to comment".
+      sidebar and no "Sign in to leave a comment".
     - **The landing page, signed in**: the Reader sees the same page: no
       comment box, no "Submit" and no comment.
     - **The "Comments" tab**: the Press Manager opens Settings › Website › the
@@ -939,7 +943,7 @@ scenario's footnote. <sup>s0</sup>
     - **Writing**: type "A comment from another journal's reader." in the
       box and press "Submit": the box empties and the comment appears at
       the top of the version's comments with the notice "Your comment will
-      be visible when the editor approves it" above its date.
+      be visible to everyone once a moderator approves it." above its date.
     - **Reporting**: on the approved comment's "…" press "Report", type
       "Reported by another journal's reader." in the box "Please tell us
       why you want to report this comment" and press "Submit": the dialog
@@ -2472,6 +2476,20 @@ assigns `ROLE_ID_SITE_ADMIN` the `access` op only;
 entry and the address answering the access-denied page, the journal
 opening the page for the same account. The question and the lean are the
 author's; no screen settles them.
+
+<a id="fn-pr13242"></a>
+**pr13242** — Driven at the PR heads of pkp/pkp-lib#13242 (pkp-lib
+`f391a0c79f`, ui-library `6ab62bbb8b`, ojs `b1fb93402a`), before their
+merge, 2026-11-24: the Default theme's comments read "Sign in to leave a
+comment", "Show 1 more comments", "Your comment will be visible to
+everyone once a moderator approves it.", the report line "Please tell us
+why you think this comment from **Daniel Barnes, University of
+Melbourne** is inappropriate. Our moderators will review your message."
+and the delete question "Are you sure you want to delete your comment?"
+(`lib/pkp/locale/en/UserComment.po`). The team accepted the wording in
+the PR review's thread the same day (the confirmation without the comment
+deliberately). The footnotes above quote the earlier texts as they were
+when probed.
 
 ## Reference — entry points & surfaces
 
