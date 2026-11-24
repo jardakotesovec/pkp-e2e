@@ -10,12 +10,17 @@ and no CI follows this branch. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `7f23f05a93` | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13807, VM s0) |
-| omp | `272333e34f` | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13789, VM s2) |
-| ops | `5a7aec98df` | 2026-11-20 | claude (daily upstream session, VM s1) |
+| ojs | `1c3c1eba08` | 2026-11-24 | claude (daily upstream session, VM s1) |
+| omp | `20a9f79d18` | 2026-11-24 | claude (daily upstream session, VM s1) |
+| ops | `227f0b49f8` | 2026-11-24 | claude (daily upstream session, VM s1) |
 | pkp-lib | `b0f7eaecc2` (the branch tip, the merge of pkp/pkp-lib#13802; ojs, omp and ops at its head `9295edd4f0`) | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13789, VM s2); ui-library `fd00e45f` (ojs, omp, ops; 2026-11-11, daily maintenance session); ojs `plugins/generic/jatsTemplate` `fc51429cd4` (2026-10-26, the merge of pkp/jatsTemplate#125, the tree of `96eacdab48`, the pointer of pkp/ojs#5921, 2026-10-12); ojs and ops `plugins/generic/pdfJsViewer` `ce6a128` (2026-10-26, the legacy build); ojs `plugins/generic/oaiJats` `96221e3f4a` (2026-10-26, pkp/oaiJats#89); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
 
 ## Read log
+
+- **2026-11-24 (daily session, VM s1) — ojs `7f23f05a93..1c3c1eba08` (1), omp `272333e34f..20a9f79d18` (1), ops `5a7aec98df..227f0b49f8` (1); pkp-lib `b0f7eaecc2`, ui-library `fd00e45f`: no commits (`bin/line-range.js`). Read in full; baselines advanced (ojs, omp, ops).**
+  - ojs `1c3c1eba08`, omp `20a9f79d18`, ops `227f0b49f8` `=main` `6ce58ddbb2`, `05c0fee47a`, `a80a5decc1` (pkp/pkp-lib#13744, the DOI search queries; pkp/ojs#6049, pkp/omp#2565, pkp/ops#1496) → read by the PR review and walked at the merged 3.5 tips by its merge step (`upstream-sync.md`, 2026-11-24): the issue's Expected on all three apps. No 3.5 spec covers U45. No regression, no security question.
+  - Carried from `main`: no regression confirmed on `main` today. Open stable-line rows: no code they rest on moved; none re-run.
+  - Security: 1 read, 0 reproduced, 0 routed.
 
 - **2026-11-23 — PR review of pkp/pkp-lib#13847's `stable-3_5_0` PRs (asked in the thread, VM s0; 3.4's in `upstream-sync.md`, `main` TBD): pkp/pkp-lib#13863 (`911975aee8`, one commit on the tip `b0f7eaecc2`), pkp/ojs#6110 (`403ada0517`), pkp/omp#2592 (`9fb6bb2f5b`), pkp/ops#1524 (`79314cd5df`), ewhanson `i13847-350`, the app PRs pointer-only on their tips (ojs `7f23f05a93`, omp `272333e34f`, ops `5a7aec98df`), moving `lib/pkp` from `9295edd4f0` and so carrying the reviewed merge `b0f7eaecc2` (pkp-lib#13802). Nothing outstanding; review file `docs/reports/pr-review/2026-11-23-pkp-lib-13863.md`. No companion (no spec span or test outdated). Not merged; baselines not advanced.**
   - The change: the core `orcid` rule escapes the dot and ends in `\z`; `RegistrationForm` adds an optional `FormValidatorORCID` on `orcid`; `templates/form/orcidProfile.tpl` escapes the link's address and text; `frontend/pages/orcidVerify.tpl` escapes `orcidAPIError`; the rest of `ValidationServiceProvider.php` is formatting.

@@ -2056,9 +2056,8 @@ scenario and run, every account a `users[]` entry (`<username>@mail.test`,
 password the username twice), the Journal Manager a `manager` role entry.
 ORCID is enabled with dummy sandbox credentials through the context's
 `orcid` key (`orcid: {}` = enabled, Public Sandbox, the dummy
-`APP-TESTCLIENTID` pair; scenario 1's journal omits the key, which leaves
-ORCID off, and scenario 7's first journal passes `enabled: false`, ORCID
-off with the Public Sandbox type stored; scenario 9's journal and scenario 4's second
+`APP-TESTCLIENTID` pair; scenario 1's and scenario 7's first journal omit the
+key, which leaves ORCID off; scenario 9's journal and scenario 4's second
 journal pass `apiType: memberSandbox`; scenario 8's two journals pass
 `sendMailToAuthorsOnPublication` true and false). The OAuth exchange itself
 needs orcid.org — outbound HTTP fails fast at the test config's dead-port

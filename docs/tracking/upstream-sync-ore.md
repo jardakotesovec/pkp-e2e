@@ -14,7 +14,7 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `372fc18701` | 2026-11-23 | claude (merge of the PR review of the `ore` ports of pkp/pkp-lib#11972, VM s1) |
+| ojs | `3ef13cb7fb` | 2026-11-24 | claude (daily upstream session, VM s1) |
 | pkp-lib | `663955ef34` (the branch tip, the merge of pkp/pkp-lib#13865; ojs at its head `eb496f125a`); ui-library `1358f5e2` (the branch tip, the merge of pkp/ui-library#1062; ojs at its head `f57dfe21`); ojs `plugins/generic/jatsTemplate` `d6ff313256` | 2026-11-23 | claude (merge of the PR review of the `ore` ports of pkp/pkp-lib#11972, VM s1: `=main`) |
 
 The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U14 A6 retired, U30 and U26 follow pkp/ui-library#981), its specs brought to the present template by script: the Planned lists dropped, retired entries one line. CI from the folder at the same OJS commit as the branch's last run, the same counts (run 43259507107 against 43211539187: 543 + 38 + 33 passed, 1 skipped).
@@ -38,6 +38,12 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
   developer in the thread 2026-11-17).
 
 ## Read log
+
+- **2026-11-24 (daily session, VM s1) — ojs `ore` `372fc18701..3ef13cb7fb` (1); pkp-lib `ore` `663955ef34`, ui-library `ore` `1358f5e2`: no commits. Read in full; ojs baseline advanced.**
+  - ojs `3ef13cb7fb` `=main` `6ce58ddbb2` (pkp/pkp-lib#13744, pkp/ojs#6051) → read by the PR review and walked at the merged `ore` tip by its merge step (`upstream-sync.md`, 2026-11-24), which carried `lines/ore/` U45 the same day.
+  - Carried from `main`: the accommodation of pkp/pkp-lib#11972 (`=main` on `ore` since 2026-11-23): `lines/ore/` U41 (Fields rows, A18 retired, the S1 bullets) and U63 (Rules 10a, 12, 12b, 20c, note z, the S4 bullets), with the OJS tests and page objects; left out as `main`-only: U41 Rule 4a and A29–A33, U63 Rule 20b, the Planned lists. `lines/ore/` U04 the same day: the ORCID iD field for a Person only, Rules 8b–8d, 11 and 13 for persons only, the S4, S5, S7 and S8 bullets; `main`'s A25–A27 are the copy's A16–A18 (the copy numbers its own entries); its OJS suite green on the ore line (9 + 1 + 1 passed).
+  - Runs: pkp/ojs `ore` hook [45323352439](https://github.com/pkp/ojs/actions/runs/45323352439) at `3ef13cb7fb` green; the gate [45404738768](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45404738768) (`--line ore`, pkp-e2e `99c9fe77`) 3/3 green.
+  - Carried findings: no regression confirmed on `main` today. Security: none routed.
 
 - **2026-11-23 — merge of the PR review of the `ore` ports of pkp/pkp-lib#11972 (pinged in the thread, VM s1): pkp-lib#13865 → `663955ef34`, ui-library#1062 → `1358f5e2`, ojs#6112 → `372fc18701`, each merging the reviewed head. No other commit on the three tips; baselines advanced. `=main` of pkp-lib `19ca682321` + `b18c557ff2` and ui-library `0549a357`: the `lines/ore/` folder takes the same spec edits as `main`'s fold (`upstream-sync.md`).**
 - **2026-11-23 — PR review of the `ore` ports of pkp/pkp-lib#11972 (asked in the thread, VM s1): pkp/pkp-lib#13865 (bozana `ore`, `50261bb5ea` + `eb496f125a` on the tip `4b60635195`), pkp/ui-library#1062 (`f57dfe2117` on the tip `b48195c3`), pkp/ojs#6112 (`ba2cddfed2` on the tip `df1583e5f3`: pointers to the two heads and jatsTemplate `d6ff313256`). `git range-diff` against the reviewed `main` commits: pkp-lib `19ca682321` and `b18c557ff2` both `=`, ui-library `0549a357` `=`; the jatsTemplate bump `2e50ada..d6ff313` carries pkp/jatsTemplate#128 (reviewed) and the tree-equal merge of #127; the pkp-lib range between the ojs pointer `b1a1545571` and the tip is the tree-equal merge `4b60635195`. Nothing outstanding. No companion (no `lines/ore/` test changes; no red). Not merged; baselines not advanced.**
