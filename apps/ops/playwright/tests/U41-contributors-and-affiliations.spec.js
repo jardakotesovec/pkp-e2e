@@ -18,7 +18,7 @@
  * Deliberately NOT covered (register IDs; the spec's Coverage section
  * records everything else left out): A1, A3, A5, A7, A9, A10, A12, A14, A20,
  * A22, A24, A25, A26, A27, A28, A29, A30, A31, A32, A33, OPS2 (🐞, never
- * asserted either way); A2, A4, A6, A8, A11, A13, A16, A18, A19 (❓, only
+ * asserted either way); A2, A4, A6, A8, A11, A13, A16, A19 (❓, only
  * the scenario's own sentence); OMP1, OMP2 (no OPS surface).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster

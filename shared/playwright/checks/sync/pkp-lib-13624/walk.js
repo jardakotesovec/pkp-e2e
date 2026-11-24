@@ -14,10 +14,12 @@
 //         ORCID (as one imported or verified while ORCID was on), the type switch is refused,
 //         and deleteForAuthor answers 403, so the form and the API offer no way out.
 //
-//   npm run fleet-prep -- --feature sync --apps ojs
-//   PROBE_FEATURE=sync PROBE_AGENT=r13624 node bin/probe.js ojs shared/playwright/checks/sync/pkp-lib-13624/walk.js
+//   npm run fleet-prep -- --feature sync [--apps ojs]
+//   PROBE_FEATURE=sync PROBE_AGENT=r13624 [PROBE_RUN=r1] node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13624/walk.js
+// Runs on OJS, OMP and OPS: an app whose lib/pkp predates the merge (d03b7729f6) refuses the Organization's empty
+// email in the form (form.orgSave "no request sent", form.orgSaveRefused) and is the control.
 //
-// Facts: walk-<app>.json; screenshots walk-*-<app>.png.
+// Facts: walk-[<run>-]<app>.json; screenshots walk-*-<app>.png.
 const {forEachApp, launch, signIn, idle, screen, shot, record, apiAs, sql, tag} = require('../../../probe');
 
 const T = 30_000;
@@ -100,13 +102,22 @@ forEachApp(async (app) => {
         await dlg.locator('select[name="country"]').selectOption({label: 'Canada'});
         const role = dlg.getByRole('checkbox', {name: 'Author', exact: true});
         if ((await role.count()) && !(await role.isChecked())) await role.check();
-        const answer = page.waitForResponse((r) => /\/contributors(\?|$)/.test(r.url()) && r.request().method() === 'POST', {timeout: T});
+        // Before pkp-lib#11972 (OMP and OPS until their pointers move) the form itself refuses the empty email and
+        // sends nothing, so the answer is optional and the form's own errors are read.
+        const answer = page.waitForResponse((r) => /\/contributors(\?|$)/.test(r.url()) && r.request().method() === 'POST', {timeout: 15_000}).catch(() => null);
         await dlg.getByRole('button', {name: 'Save', exact: true}).click();
         const r = await answer;
-        const added = await r.json().catch(() => null);
-        facts.form.orgSave = {status: r.status(), email: added && added.email, type: added && added.contributorType};
+        const added = r ? await r.json().catch(() => null) : null;
+        facts.form.orgSave = r ? {status: r.status(), email: added && added.email, type: added && added.contributorType} : {status: 'no request sent'};
         await sleep(1000);
         facts.form.orgSaveScreen = (await screen(page)).notices;
+        if (!r) {
+            facts.form.orgSaveRefused = {errors: await dlg.locator('.pkpFieldError').allInnerTexts().catch(() => null),
+                foot: ((await dlg.innerText().catch(() => '')).replace(/\s+/g, ' ').match(/Please correct[^.]*\.[^]*?(Jump to next error|Save)/) || [null])[0]};
+            await shot(page, 'walk-form-org-refused');
+            await dlg.getByRole('button', {name: 'Close', exact: true}).first().click().catch(() => {});
+            await sleep(800);
+        }
 
         // ---- api
         const post = async (body) => {

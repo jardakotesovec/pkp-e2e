@@ -81,13 +81,13 @@ nothing typed into its own fields clears, so Save stays disabled
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Contributor Type** | Yes | Radio choice: **"Person"** (preselected), **"Organization or group"** or **"Anonymous"**. An Anonymous contributor has no name of its own and is shown everywhere as "Anonymous" (Rule 3). For it, only Email, Country, Contributor Roles, CRediT roles and Publication Lists remain; there are no name fields, ROR ID, Homepage URL, Bio Statement or Affiliations. Of those, only Contributor Roles is actually enforced. Email and Country keep their required markers, yet an Anonymous save with both empty is accepted ⚠ [A18](#a18). Switching types leaves what you typed on screen. On save, the other type's entries are discarded, as the guidance warns. The exception is a typed ROR ID, which silently stays in the saved record ⚠ [A4](#a4). |
+| **Contributor Type** | Yes | Radio choice: **"Person"** (preselected), **"Organization or group"** or **"Anonymous"**. An Anonymous contributor has no name of its own and is shown everywhere as "Anonymous" (Rule 3). For it, only Email, Country, Contributor Roles, CRediT roles and Publication Lists remain; there are no name fields, ROR ID, Homepage URL, Bio Statement or Affiliations. Of those, only Contributor Roles is required, and on an install with pkp-lib#11972 (Fields "Email") only it is marked "* Required". Without it, Email and Country keep their "* Required" markers for an Anonymous contributor, yet a save with both empty goes through. Switching types leaves what you typed on screen. On save, the other type's entries are discarded, as the guidance warns. The exception is a typed ROR ID, which silently stays in the saved record ⚠ [A4](#a4). <sup>c</sup> |
 | **Given Name** | Yes (Person) | Text, multilingual. Person only. |
 | **Family Name** | No | Text, multilingual. Person only. |
 | **Preferred Public Name** | No | Text, multilingual. Person only. Guidance: "Please provide the full name as the author should be identified on the published work. Example: Dr. Alan P. Mwandenga" |
 | **Organization Name** | Yes (Organization) | Text, multilingual. Organization only. |
-| **Email** | Yes | Text; must be an email address. Not enforced for an Anonymous contributor, despite the marker ([A18](#a18)). The label reads "Email" on some installs and "Email address" on others ⚠ [A19](#a19). |
-| **Country** | Yes | Drop-down of countries. The submitting author's auto-created contributor can arrive with no country. Every later edit of that contributor is then refused until one is chosen ⚠ [A16](#a16). Not enforced for an Anonymous contributor ([A18](#a18)). |
+| **Email** | Yes (Person; also Organization without pkp-lib#11972) | Text; must be an email address when filled. Required, and marked "* Required", for a Person only: an Organization or an Anonymous contributor saves with it empty. That holds on an install with pkp-lib#11972 (merged 2026-11-23), which OJS `main` has and OMP and OPS `main` lacked on 2026-11-24; an "Organization or group" Email without "* Required" tells one. Without it, an Organization's save with Email empty is refused as a missing required field too, and an Anonymous contributor's Email is marked "* Required" but not enforced. The label reads "Email" on some installs and "Email address" on others ⚠ [A19](#a19). <sup>c</sup> |
+| **Country** | Yes (Person, Organization) | Drop-down of countries. The submitting author's auto-created contributor can arrive with no country. Every later edit of that contributor is then refused until one is chosen ⚠ [A16](#a16). Not required for an Anonymous contributor, and on an install with pkp-lib#11972 (Fields "Email") not marked for one either; without it, marked "* Required" but not enforced. <sup>c</sup> |
 | **ROR ID** | No | Organization only. A plain text box ("Enter organization's ROR ID."), separate from the Affiliations field below. Anything typed is accepted without a shape check ⚠ [A4](#a4). |
 | **Homepage URL** | No | Must be a web address. |
 | **ORCID iD** | No | Person only. Present only while the journal has ORCID enabled. The field's states, its "Request verification" flow and iD removal are owned by *[ORCID integration](U04-orcid-integration.md)*. |
@@ -155,8 +155,19 @@ screen, Rule 12): <sup>e</sup>
      keeps the family name, email and country. The affiliations are the
      exception: left out, every one is removed ⚠ [A30](#a30); resent as
      read, each is kept.
+   - **An email sent empty.** An organization's edit naming the type
+     with the email empty removes the email, with or without
+     pkp-lib#11972 (Fields "Email"). A person's is refused with "This
+     field is required." for the email, and nothing changes, on an
+     install with it; without it, the person's email is removed.
    - **The contributor type left out.** On `main`, an edit not naming
-     the type empties the contributor ⚠ [A31](#a31).
+     the type empties an organization or an anonymous contributor,
+     whatever it sends; an organization's edit fails with a server
+     error, and the submission's workflow then no longer opens. A
+     person's edit, on an install with pkp-lib#11972 (Fields "Email"),
+     is refused with "This field is required." for the email, whatever
+     it sends, an email included, and nothing changes; without it, it
+     empties the person ⚠ [A31](#a31).
    - **The contributor type sent empty.** On `main`, the edit is refused
      with "This field is required." for the type, and nothing changes.
    - **A contributor type no type has.** On `main` (PostgreSQL; MySQL
@@ -487,8 +498,8 @@ throwaway accounts, because each needs the journal set up differently
 (a second submission language, added contributor roles, the
 competing-interests requirement, a review type, French as a form
 language, a Guest Editor account). Each
-scenario's accounts, seeding and the mail catcher's address are in its
-footnote.
+scenario's footnote holds its accounts, seeding, requests and the mail
+catcher's address.
 
 1. **Maintain the contributor list**
 
@@ -527,6 +538,12 @@ footnote.
      "Person": Given Name is empty, the other type's entry discarded on
      save as the guidance warns; choose "Organization or group" again
      and press Save (Fields; Rule 4).
+   - **An organization without Email** {OJS}: press "Add Contributor"
+     and choose "Organization or group": Email shows without
+     "* Required"; type "Mailless Org" as Organization Name, leave Email
+     empty, pick "Canada", tick "Author" and press Save: the panel closes
+     and the row shows "Mailless Org" with an "Author" badge (Fields
+     "Email").
    - **Edit**: open the person's "Edit", type "Mwandenga" as Family Name
      and press Save: the row updates to "Alan Mwandenga" (Rule 4).
    - **"Close" and the Escape key**: open the person's "Edit" again,
@@ -553,10 +570,13 @@ footnote.
    - **An Anonymous contributor**: press "Add Contributor" and choose
      "Anonymous": there are no name fields, ROR ID, Homepage URL, Bio
      Statement or Affiliations, only Email, Country, Contributor Roles,
-     CRediT roles and Publication Lists; type "anon@example.test" as
-     Email, pick "Canada", tick "Author" and press Save: the row is
-     titled "Anonymous" with an "Author" badge, and "Preview"'s "Full"
-     row ends "; Anonymous (Author)" (Fields; Rules 3, 7).
+     CRediT roles and Publication Lists. On a journal {OJS}, only
+     Contributor Roles shows "* Required", Email and Country without it;
+     leave both empty there. On a press or a preprint server, type
+     "anon@example.test" as Email and pick "Canada". Tick "Author" and
+     press Save: the row is titled "Anonymous" with an "Author" badge,
+     and "Preview"'s "Full" row ends "; Anonymous (Author)" (Fields
+     "Contributor Type"; Rules 3, 7).
    - **Delete**: press "Delete" on "Probe Org": the dialog "Delete
      Contributor" asks "Are you sure you want to remove Probe Org as a
      contributor? This action can not be undone."; "Cancel" keeps the
@@ -937,20 +957,26 @@ Common to every application:
 
     - **An edit that resends the affiliations**: a program using the
       Journal Manager's API key (*[User profile](U03-user-profile.md)*)
-      sends an edit of "Robin Okafor" that names the contributor type
-      `PERSON` and carries "Dana" as the given name and the affiliations
-      as it read them; reload the "Contributors" page: the row reads
-      "Dana Okafor", and its "Edit" still shows "robin@example.test",
-      "Canada" and "Probe Institute" under "Affiliations" (Rule 4a).
+      sends, as the footnote shows, an edit of "Robin Okafor" that names
+      the contributor type `PERSON` and carries "Dana" as the given name
+      and the affiliations as it read them; reload the "Contributors"
+      page: the row reads "Dana Okafor", and its "Edit" still shows
+      "robin@example.test", "Canada" and "Probe Institute" under
+      "Affiliations" (Rule 4a).
     - **An edit of the given name alone**: the program sends an edit
       that names the type `PERSON` and carries only "Kim" as the given
       name: after a reload the row reads "Kim Okafor", and its "Edit"
       still shows "robin@example.test" and "Canada"; the institution is
-      not read here, because an edit that leaves the affiliations out
-      removes them (⚠ [A30](#a30)) (Rule 4a).
+      not read here: an edit leaving the affiliations out removes them
+      (⚠ [A30](#a30)) (Rule 4a).
+    - **The email sent empty** {OJS}: the program sends an edit that
+      names the type `PERSON` and carries an empty email: its answer
+      refuses it with "This field is required." for the email; after a
+      reload the row still reads "Kim Okafor" and its "Edit" still shows
+      "robin@example.test" and "Canada" (Rule 4a "An email sent empty").
     - **The type sent empty**: the program sends an edit with the
       contributor type empty and "kim@example.test" as the email: its
-      answer refuses the edit with "This field is required." for the
+      answer refuses it with "This field is required." for the
       contributor type; after a reload the row still reads "Kim Okafor"
       and its "Edit" still shows "robin@example.test" (Rule 4a).
     - **Control**: the same edit naming the type `PERSON` goes through:
@@ -1047,6 +1073,11 @@ Left out of the scenarios above, by reason:
     names ("Auteur-e", "Traducteur-trice", on a press also "Auteur du
     chapitre" and "Rédacteur/Rédactrice en chef du volume") (Rule 11);
     waits for a seed of a context upgraded from 3.5 [sweep 2026-11-20]
+  - on a press and a preprint server, the organization added with Email
+    empty, the Anonymous contributor's Email and Country without "*
+    Required" and the person's email sent empty by a program (Fields
+    "Email", "Contributor Type"; Rule 4a): waits for OMP and OPS
+    `main` to take pkp-lib#11972 [upstream 2026-11-24]
 - **Nothing new to test**:
   - a fresh hand-entered institution's status on a journal with English
     alone under "Metadata", "All translations available" (Fields
@@ -1090,8 +1121,6 @@ Left out of the scenarios above, by reason:
     Settings)
   - A16 (the auto-created contributor without a Country, every edit
     refused until one is chosen; Fields)
-  - A18 (an Anonymous save with Email and Country empty accepted;
-    Fields)
   - A19 (the email field labeled "Email" or "Email address" by the
     install; Fields)
   - A20 (the workflow's "Add Contributor" refused where a "Forms"
@@ -1116,7 +1145,10 @@ Left out of the scenarios above, by reason:
   - A30 (a program's edit that does not resend the affiliations
     removing them all; Rule 4a; Fields)
   - A31 (a program's edit on `main` that does not name the contributor
-    type emptying the contributor; Rule 4a)
+    type emptying an organization, with a server error that leaves the
+    workflow unopenable, or an anonymous contributor, and refusing a
+    person's on the email, or without pkp-lib#11972 emptying the
+    person; Rule 4a)
   - A32 (a contributor sent back by a program as it was read refused,
     on `main` with a server error; Rule 4a)
   - A33 (a program's edit on `main` naming a contributor type the
@@ -1188,7 +1220,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A27](#a27) | A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ" | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A29](#a29) | A program saving a contributor with an unknown CRediT degree gets a server error, and part of the change is kept | 🐞 | low · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A30](#a30) | A program that changes one field of a contributor through the REST API silently removes all their affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
-| [A31](#a31) | A program that edits a contributor through the REST API without the contributor type erases the contributor's names, email, country, biography, homepage URL and affiliations | 🐞 | medium | issues (claude), 2026-10-29 — re-verified |
+| [A31](#a31) | A program that edits a contributor through the REST API without the contributor type empties it; an organization's edit fails and the submission's workflow no longer opens, and a journal refuses a person's edit on the email | 🐞 | medium · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A32](#a32) | A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved | 🐞 | low · crash: server | issues (claude), 2026-10-21 — re-verified |
 | [A33](#a33) | A program that names a contributor type the install does not have gets a server error, and the contributor's affiliations are deleted | 🐞 | low · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A2](#a2) | Deleting the primary contact silently leaves the publication with none | ❓ | user-visible | — |
@@ -1198,7 +1230,6 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A8](#a8) | Institution text typed but never picked is silently dropped on save | ❓ | minor | — |
 | [A11](#a11) | After a registry-error dialog the institution search stays dead until the Edit panel is reopened | ❓ | minor | — |
 | [A13](#a13) | A contributor role's name saves with a language left empty, despite the required marker | ❓ | minor | — |
-| [A18](#a18) | An Anonymous contributor's Email and Country are marked "* Required" but save empty | ❓ | minor | — |
 | [A19](#a19) | The contributor form's email field is labeled "Email" on one install and "Email address" on another, and the error summary's "Go to …:" link follows the label | ❓ | minor | — |
 | [A21](#a21) | A new journal's contributor roles arrive named in the primary language only, so readers in another language see "Author" | ❓ | minor | — |
 | [OMP1](#omp1) | A book with five or more contributors compacts to bare name-and-affiliation lines | ✅ | user-visible | — |
@@ -1450,20 +1481,6 @@ form's assumption is broken only by the administrator-created account
 path.
 Basis: probe + code reading. <sup>f-a16</sup>
 
-<a id="a18"></a>
-**A18 — Anonymous's required markers on Email and Country do not bind** · ❓ · minor.
-With "Anonymous" picked as the contributor type, the form marks Email,
-Country and Contributor Roles "* Required". A save with only a
-contributor role ticked is nonetheless accepted without a word, and the
-stored contributor has no email or country. Only Contributor Roles is
-enforced: an all-empty save is refused for that field alone, and Email
-and Country are never flagged.
-Question: should Email and Country be enforced for an Anonymous
-contributor, or their required markers dropped? Lean: drop the markers.
-An entry with no identity of its own plausibly has no contact details,
-and nothing downstream is observed to need them.
-Basis: probe. <sup>f-a18</sup>
-
 <a id="a19"></a>
 **A19 — The email field's label differs between installs** · ❓ · minor.
 The contributor form's email field is labeled "Email" on one install and
@@ -1674,22 +1691,46 @@ page too.
 Basis: probe, 2026-10-21. <sup>f-a30</sup>
 
 <a id="a31"></a>
-**A31 — A program that edits a contributor through the REST API without the contributor type erases the contributor's names, email, country, biography, homepage URL and affiliations** · 🐞 · medium.
-The REST API's contributor edit (`PUT …/contributors/{id}`) empties the
-contributor when the request does not name the contributor type
-("Person", "Organization or group" or "Anonymous"), and answers success.
-The given, family and preferred public names, the email, the country,
-the "Bio Statement", the "Homepage URL" and every affiliation are
-blanked, even when the request resends the affiliations. The new value
-the request sends is not saved either.
-The Contributors list then shows a row with no name, and on a published
-item the public page lists an author without a name.
-Every script written for 3.5, which has no contributor types (read from the code), sends exactly such edits,
-so on 3.6 (the release `main` becomes) it erases each contributor it touches; no screen sends such an edit.
-The values are gone from the edited version: they can be copied back
-by hand from an earlier version of the submission where one exists,
-and otherwise only typed in again.
-Basis: probe, 2026-10-21; issue report refresh walk, 2026-10-29. <sup>f-a31</sup>
+**A31 — A program that edits a contributor through the REST API without the contributor type empties it; an organization's edit fails and the submission's workflow no longer opens, and a journal refuses a person's edit on the email** · 🐞 · medium · crash: server.
+The REST API's contributor edit (`PUT …/contributors/{id}`) does not
+save an edit that leaves out the contributor type ("Person",
+"Organization or group" or "Anonymous"). A program that changes one
+field, a new email for one, expects that field saved and the rest kept.
+What it gets depends on the type:
+
+- **An organization** is emptied and the edit fails with a server
+  error. Its organization name, email, country, "Homepage URL", "Bio
+  Statement" and every affiliation are gone, and the value sent is not
+  saved. From then on the submission's workflow does not open for
+  anyone: an "Error" window with a raw programming error ("… Return
+  value must be of type string, null returned") and "OK" shows in its
+  place, and a program's read of the contributor fails too. This lasts
+  until a program sends the contributor again with its type and its
+  organization name.
+- **An anonymous contributor** is emptied and the edit answers
+  success: its email and country are removed, a new country sent is
+  not kept, and the row still reads "Anonymous".
+- **A person**, on an install with pkp-lib#11972 (Fields "Email"),
+  is left unchanged: the edit is refused with "This field is
+  required." for the email, whatever it sends, an email included.
+  Without it, the edit answers success and empties the person: the
+  given, family and preferred public names, the email, the country,
+  the "Bio Statement", the "Homepage URL" and every affiliation are
+  blanked, even when the request resends the affiliations, and the
+  value sent is not saved. The Contributors list then shows a row with
+  no name, and on a published item the public page lists an author
+  without a name.
+
+Every script written for 3.5, which has no contributor types (read from
+the code), sends exactly such edits, so on 3.6 (the release `main`
+becomes) it empties each contributor it touches on a press or a
+preprint server, and on a journal has every edit refused on the email;
+no screen sends such an edit.
+An emptied contributor's values are gone from the edited version: they
+can be copied back by hand from an earlier version of the submission
+where one exists, and otherwise only typed in again.
+Basis: probe, 2026-10-21; issue report refresh walk, 2026-10-29; probe, 2026-11-24. <sup>f-a31</sup>
+Report: refresh owed — pkp-lib#11972 (merged 2026-11-23; OJS `main` has it, OMP and OPS once their pointers move) narrows the reach: on OJS a person's edit without the type is refused with 400 `email: This field is required.` instead of emptied (the new "Persons require an email" check in `Repo::author()->validate()` reads the stored type while `removeIrrelevantContributorTypeData()` has already nulled the email); probed 2026-11-24, an organization's edit without the type empties it with a 500 from `Author::getFullName()` and every later `GET …/submissions/{id}` fails the same way (the workflow unopenable), and an anonymous contributor's empties it with 200, on OJS, OMP and OPS; the title, Summary, Affects, Steps and Impact change, the proposed fix (fill the stored type when the key is missing) also covers the refusal and the crash; touches `PKPSubmissionController::editContributor()` and `PKP\author\Repository::validate()` (2026-11-24)
 
 <a id="a32"></a>
 **A32 — A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved** · 🐞 · low · crash: server.
@@ -1784,6 +1825,9 @@ Basis: probe + code reading, 2026-11-23. <sup>f-ops2</sup>
 
 <a id="a17"></a>
 **A17 — The affiliation completeness total may follow the publication's languages** · ✅ · retired. Not reproduced.
+
+<a id="a18"></a>
+**A18 — Anonymous's required markers on Email and Country do not bind** · ✅ · retired. Fixed upstream (pkp/pkp-lib#11972).
 
 <a id="a23"></a>
 **A23 — A CRediT role's degree prints as a raw code on a French landing page** · ✅ · retired. Overturned: not a bug.
@@ -1990,6 +2034,46 @@ Email and Homepage URL went to the server, which answered 400 with
 "This is not a valid email address." and "This is not a valid URL.",
 shown under both fields, with "Please correct 2 errors." at the foot
 and the page notice "The form was not saved because 2 error(s) …".
+The markers and the email by contributor type: since pkp/pkp-lib#11972
+(pkp-lib `19ca682321`, merged 2026-11-23 as `d03b7729f6`, with
+`73bb87216e`; ui-library `72ec3278`) `email` is `isRequired` for
+`PERSON` alone (was Person or Organization), and the server's
+`PKP\author\Repository::validate()` refuses an empty email for a
+`PERSON` only ("Persons require an email"); the ORCID iD field's
+`showWhen` moved from the Person condition to
+`ContributorType::getTypesWithOrcid()` (Person alone, so the screen is
+unchanged). Live-probed 2026-11-24 (Fields preamble; rows Contributor
+Type, Email, Country, ORCID iD): OJS `main` with the change, OMP and
+OPS `main` without it (installs in fn o's 2026-11-24 paragraph), two
+runs each, scratch journals and a throwaway Journal Manager; kept
+script `shared/playwright/checks/U41/S11972/s11972.js` (parts `form`,
+`orcid`). The preamble's empty save, "Alan" typed and the server's
+refusal of a bad Email and Homepage URL (400 `{"email":[…],"url":[…]}`,
+"Please correct 2 errors.", the page notice) held on all three. On
+OJS, "Anonymous" showed "Email address" and "Country" with no "*
+Required" and no `required` attribute, and "Organization or group"
+showed "Email address" without them; on OMP and OPS both types showed
+"Email address * Required" and "Country * Required", with `required`.
+An Anonymous empty save flagged Contributor Roles alone and sent
+nothing, on all three; with "Author" ticked it saved, stored with no
+email and no country (`ANONYMOUS|(null)||0`). "Mailless Org" with
+"Canada", "Author" and Email empty saved on OJS (`POST` 200, stored
+email null, row "Mailless Org Author …"); on OMP and OPS the form
+refused it with "This field is required." under Email and "Please
+correct one error. Go to Email address: This field is required.", no
+request sent. A Person with Email empty was refused in the form on all
+three; "Countryless Org" was refused on Country on all three;
+"not-an-address" as an organization's email was refused by the server
+with "This is not a valid email address." on all three. The submitter's
+own row opened with Country empty and its unchanged "Save" was refused
+on Country alone (A16). With ORCID on (a scratch journal created with
+it), "ORCID iD" showed for a Person and not for the other two types; a
+person's "Edit" lost it on switching to "Organization or group"; with
+ORCID off the field was absent. "Casey" typed as Given Name survived
+Organization → Person; a saved organization's "Edit" switched to
+Person showed Given Name empty; "u41s-not-a-ror-id" typed as an
+organization and saved as a Person was stored and back under "ROR ID"
+on switching to Organization (A4).
 
 <a id="fn-d"></a>
 **d — affiliations.** Model `PKP\affiliation\*` + `author_affiliations`
@@ -2451,6 +2535,31 @@ string conversion" warnings: `ValidatorFactory::required()` checks on an
 edit only the required keys present in the body, so the null is refused
 while a body without the key passes (A31). Kept script
 `shared/playwright/checks/U41/H29/h29.js`.
+Re-probed 2026-11-24 (Rule 4a, A31; scenario 12): OJS `main`
+`6ce58ddbb2` (lib/pkp `8096e67cd2`, carrying pkp/pkp-lib#11972's
+`d03b7729f6` and `73bb87216e`; ui-library `0549a357`), OMP `main`
+`05c0fee47` and OPS `main` `a80a5decc1` (both lib/pkp `3ea73a1a7e`,
+ui-library `836c01b5`, before the change), two runs each, scratch
+journals and a throwaway Journal Manager, the requests sent from the
+signed-in page with its CSRF token; every outcome read in the answer,
+a GET, the stored row and the contributor's "Edit" after a reload.
+Scenario 12's steps held on all three apps on a scratch journal
+("Probe Institute" added through Robin's "Edit"): `PERSON` + "Dana" +
+the affiliations as read kept "robin@example.test", "Canada" and
+"Probe Institute"; `PERSON` + "Kim" alone kept the email and country
+and removed the institution (A30); `{contributorType: null, email:
+"kim@example.test"}` answered 400 `{"contributorType":["This field is
+required."]}` and changed nothing, for a person and for an
+organization, the log still carrying the three "Array to string
+conversion" warnings. An email sent empty, naming the type:
+`{contributorType: "PERSON", email: ""}` and `email: null` answered
+400 `{"email":["This field is required."]}` on OJS and changed nothing,
+and on OMP and OPS answered 200 with the email removed (stored
+`(null)`) and the affiliation gone (A30);
+`{contributorType: "ORGANIZATION", email: ""}` answered 200 on all
+three apps with the email removed and the name, country, URL and
+biography kept. The type left out: f-a31. Kept script
+`shared/playwright/checks/U41/S11972/s11972.js` (part `api`).
 
 <a id="fn-p"></a>
 **p — registry names in a language with no two-letter code (Rule 16).**
@@ -2505,7 +2614,13 @@ after "Close" and Escape is the page's own. The screen-reader list is
 the foot's "Go to …" buttons in the accessibility tree, none drawn on
 screen (fn c, 2026-11-20; the email field's own label is A19's). The
 two-row save leaves both rows on "Conceptualization" and reads the
-reopened "Edit" (fn c, 2026-11-20).
+reopened "Edit" (fn c, 2026-11-20). All three apps, except the
+organization without Email and the Anonymous contributor's empty Email
+and Country, which run on OJS alone: OJS `main` carries
+pkp/pkp-lib#11972 and OMP and OPS `main` do not yet (fn c,
+2026-11-24), so on a press and a preprint server the organization
+bullet is skipped and the Anonymous contributor is saved with
+"anon@example.test" and "Canada".
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** A scratch submission of its own (the
@@ -2669,18 +2784,24 @@ nothing for this scenario.
 <a id="fn-s12"></a>
 **s12 — scenario 12 seeding.** Seeded journal, Journal Manager (ready
 account). One scratch submission whose `contributors[]` entry is
-`{givenName: "Robin", familyName: "Okafor", email:
-"robin@example.test"}` (country `CA`, scenarios.md "`contributors[]`");
-"Probe Institute" is added through that contributor's "Edit" as a typed
-institution (no seed key exists for affiliations), and the edits go to
-the submission's current, unpublished version. The requests are fn o's:
-a by-hand tester sends them with `curl` and the Journal Manager's API
-key; the suites send them in the Journal Manager's signed-in session
-with `apiAs(page, 'PUT', …)` (patterns.md, "A request replayed in a
-role's session"), the affiliations resent as the `GET` of the same
-address gave them. The empty type is `contributorType: null`. Every read
-is the "Contributors" page and the contributor's "Edit" after a reload.
-All three apps.
+`{givenName: "Robin", familyName: "Okafor", email: "robin@example.test"}`
+(country `CA`, scenarios.md "`contributors[]`"); "Probe Institute" is
+added through that contributor's "Edit" as a typed institution (no seed
+key exists for affiliations), and the edits go to the submission's
+current, unpublished version. The requests are fn o's (the address, the
+`PUT` and its `curl` form): a by-hand tester sends them with `curl` and
+the Journal Manager's API key, the fields named `givenName`, `email`,
+`contributorType` and `affiliations`, and reads a refusal in the
+answer's 400 body, `{"email":["This field is required."]}`; the suites
+send them in the Journal Manager's signed-in session with
+`apiAs(page, 'PUT', …)` (patterns.md, "A request replayed in a role's
+session"), the affiliations resent as the `GET` of the same address gave
+them. The empty type is `contributorType: null`. Every read is the
+"Contributors" page and the contributor's "Edit" after a reload. All
+three apps, except the email sent empty,
+`{contributorType: "PERSON", email: ""}`, which runs on OJS alone: OMP
+and OPS `main` do not carry pkp/pkp-lib#11972 yet and remove the email
+there (fn o, 2026-11-24).
 
 <a id="fn-s13"></a>
 **s13 — scenario 13 seeding.** A scratch context from `POST
@@ -2937,17 +3058,6 @@ country was picked. The campaign's seeded test accounts carry no
 country, so test installs hit this on every seeded submission — the
 observed frequency is fixture-inflated, but the administrator-created
 path is real product surface.
-
-<a id="fn-f-a18"></a>
-**f-a18 — A18 evidence.** Live-probed 2026-08-28 (OJS; shared form):
-Save on an all-empty Anonymous form was refused client-side with a
-single error — "Please correct one error. Go to Contributor Roles:
-This field is required. Jump to next error" — Email and Country
-unflagged despite their "* Required" markers, no request sent; with
-only a role ticked, the save posted and returned 200, the stored
-record carrying `"email":null,"country":null` and
-`fullName: "Anonymous"`. The throwaway record deleted normally through
-the row's Delete dialog.
 
 <a id="fn-f-a19"></a>
 **f-a19 — A19 evidence.** Seen 2026-09-16 on two OMP installs at the
@@ -3381,6 +3491,46 @@ edits naming the type (`contributorType: "PERSON"`) saved the value
 sent and kept every other field but the affiliations (A30). On
 `stable-3_5_0` the same two edits saved the value sent and kept every
 field but the affiliations (A30).
+Re-probed 2026-11-24 (fn o for the installs and runs): OJS `main`
+with pkp/pkp-lib#11972 (lib/pkp `8096e67cd2`, carrying `d03b7729f6`
+and `73bb87216e`), OMP and OPS `main` without it (lib/pkp
+`3ea73a1a7e`), two runs each, as a throwaway Journal Manager on a
+scratch journal. A person with every field filled and one typed
+affiliation, sent `{givenName}`, `{givenName, affiliations as read}`,
+`{email: "newmail@example.test"}` or `{biography}` without the type:
+on OJS each answered 400 `{"email":["This field is required."]}` and
+the answer, a GET, the stored row and "Edit" after a reload kept
+everything; on OMP and OPS each answered 200 and emptied the person as
+above (stored row `PERSON|(null)||0`, list row "Author Set Primary
+Contact Edit Delete"). The refusal is the "Persons require an email"
+check pkp/pkp-lib#11972 added to `PKP\author\Repository::validate()`
+(lib/pkp `19ca682321`): with the key absent it reads the stored type
+(`PERSON`), while `removeIrrelevantContributorTypeData()` has already
+set `email` null in the params. An organization ("Wipe Org", with
+email, country, homepage URL, biography and one typed affiliation)
+sent `{organizationName}` or `{email: "neworg@example.test"}` without
+the type, on all three apps: 500
+`{"error":"PKP\\author\\Author::getFullName(): Return value must be of type string, null returned"}`,
+the stored row `ORGANIZATION|(null)||0` (name, email, country, URL,
+biography and affiliation gone); the GET of the contributor answered
+the same 500, and opening the submission's workflow showed an "Error"
+window reading "PKP\author\Author::getFullName(): Return value must be
+of type string, null returned" with "OK" and no contributor list, its
+`GET …/api/v1/submissions/{id}` answering 500 twice per open (four
+such crashes per run per app). Mechanism:
+`removeIrrelevantContributorTypeData()` nulls `organizationName`, and
+`Author::getFullName()`, typed `string`, returns
+`getLocalizedOrganizationName()` for an `ORGANIZATION`. A `PUT` naming
+`ORGANIZATION` with the name and the rest restored it (the workflow
+opened again). Server log per edit: `Undefined array key
+"contributorType"` plus three "Array to string conversion". An
+anonymous contributor ("wipeanon@example.test", Canada) sent
+`{country: "DE"}` without the type, on all three apps: 200, the
+answer, GET and stored row (`ANONYMOUS|(null)||0`) with no email and no
+country, the list row still "Anonymous Author …", and its "Edit" after
+a reload showed Email and Country empty; the same edit naming
+`ANONYMOUS` saved "Germany" and kept "wipeanon@example.test". Kept
+script `shared/playwright/checks/U41/S11972/s11972.js` (part `api`).
 Issue report: [pkp-e2e#1043](https://github.com/jardakotesovec/pkp-e2e/issues/1043) ([docs/issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md](../issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md)).
 
 <a id="fn-f-a32"></a>

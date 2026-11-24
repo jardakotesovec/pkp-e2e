@@ -1,6 +1,8 @@
 // PR review pkp/pkp-lib#13624, item 2 (regression reader rr13624 S1): an Organization / Anonymous contributor that already carries an ORCID (base-era data)
 // edited with its type unchanged, through the form and the API, ORCID off and on.
-//   PROBE_FEATURE=sync PROBE_AGENT=r13624 node bin/probe.js ojs shared/playwright/checks/sync/pkp-lib-13624/same-type.js
+//   PROBE_FEATURE=sync PROBE_AGENT=r13624 [PROBE_RUN=r1] node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13624/same-type.js
+// (OMP and OPS, until their lib/pkp moves past d03b7729f6, are the control: every edit saves, but formOn.control
+// reads status null there, since their form refuses the email-less Control Org itself and sends nothing.)
 // Reads fixed when: apiOff.orgSameType and anonSameType answer 200 and the form saves both.
 const {forEachApp, launch, signIn, idle, screen, shot, record, apiAs, sql, tag} = require('../../../probe');
 
@@ -77,12 +79,13 @@ forEachApp(async (app) => {
             await sleep(800);
             const orcidShown = await edit.getByText(/ORCID/).count();
             await change(edit);
-            const ans = page.waitForResponse((x) => /\/contributors\/\d+/.test(x.url()) && x.request().method() === 'PUT', {timeout: 15_000}).catch(() => null);
+            // The form tunnels its edit as a POST with X-Http-Method-Override: PUT and a form-encoded body.
+            const ans = page.waitForResponse((x) => /\/contributors\/\d+/.test(x.url()) && ['PUT', 'POST'].includes(x.request().method()), {timeout: 15_000}).catch(() => null);
             await edit.getByRole('button', {name: 'Save', exact: true}).click();
             const x = await ans;
             await sleep(1000);
             const text = (await edit.innerText().catch(() => '')).replace(/\s+/g, ' ');
-            const out = {orcidShown, sentType: x && JSON.parse(x.request().postData() || '{}').contributorType,
+            const out = {orcidShown, sentType: x && new URLSearchParams(x.request().postData() || '').get('contributorType'),
                 status: x && x.status(), body: x && await x.json().catch(() => null),
                 notices: (await screen(page)).notices, shown: text.match(/[^.]*ORCID iD[^.]*\./g)};
             await shot(page, `same-type-${label}`);
