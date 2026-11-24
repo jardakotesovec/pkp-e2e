@@ -38,6 +38,7 @@ const {
     REQUESTED_TEXT,
 } = require('../pages/OrcidPages.js');
 const {WorkflowPage, performReview} = require('../pages/ReviewStagePages.js');
+const {ContributorsPanel} = require('../pages/ContributorPages.js');
 const {RegisterPage, RegistrationCompletePage, siteHeader} = require('../pages/RegistrationPages.js');
 const {SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
@@ -48,6 +49,12 @@ const TEST_ORCID = 'https://sandbox.orcid.org/0000-0002-1825-0097';
 
 const UNVERIFIED_NOTE =
     'This ORCID has not been verified. Please remove this unverified ORCID and request verification from the user/author directly.';
+
+/** Rule 8c's refusal under "Contributor Type", and the page notice beside it. */
+const TYPE_REFUSAL =
+    'This contributor has an ORCID iD. Remove the ORCID iD before changing the contributor type.';
+const FORM_NOT_SAVED =
+    'The form was not saved because 1 error(s) were encountered. Please correct these errors and try again.';
 
 /** Unique per-run tag: single alphanumeric token, carries app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -217,14 +224,51 @@ test.describe('ORCID integration', () => {
         const modal = await openContributorEditor(managerPage, author);
 
         // Unauthenticated state: the suffixed iD link, the not-verified
-        // warning, and Delete (Fields table; Rule 8c).
+        // warning, and Delete (Fields table; Rule 8a).
         const field = orcidField(modal);
         const idLink = field.getByRole('link', {name: new RegExp(TEST_ORCID.split('/').pop())});
         await expect(idLink).toBeVisible();
         await expect(field).toContainText('(unauthenticated)');
         await expect(field).toContainText(UNVERIFIED_NOTE);
 
-        await field.getByRole('button', {name: 'Delete', exact: true}).click();
+        // Another type while the iD is held {OJS}: "Anonymous" chosen and
+        // "Save" pressed is refused (the contributors API answers 400) with
+        // the message under "Contributor Type" and the page notice; the
+        // form stays open (Rule 8c). The "Anonymous" form has no given-name
+        // box, so the side panel is read by its own name ("Edit") from here.
+        const contributors = new ContributorsPanel(managerPage);
+        const editDialog = contributors.editDialog();
+        const editField = orcidField(editDialog);
+        await contributors.chooseType(editDialog, 'Anonymous');
+        const typeField = contributors.fieldOf(
+            editDialog,
+            managerPage.getByRole('radio', {name: 'Person', exact: true})
+        );
+        const refused = managerPage.waitForResponse(
+            (response) =>
+                response.url().includes('/contributors/') && response.request().method() === 'POST'
+        );
+        await contributors.saveRefused(
+            editDialog,
+            contributors.fieldError(typeField).filter({hasText: TYPE_REFUSAL})
+        );
+        expect((await refused).status()).toBe(400);
+        await expect(contributors.fieldError(typeField)).toHaveText([TYPE_REFUSAL], {useInnerText: true});
+        await expect(
+            managerPage.locator('.app__notifications .pkpNotification').filter({hasText: FORM_NOT_SAVED})
+        ).toHaveCount(1);
+        await expect(contributors.typeRadio(editDialog, 'Anonymous')).toBeChecked();
+
+        // "Person" chosen again: the iD and "Delete" are back (Rule 8c), and
+        // the message under "Contributor Type" goes with the change.
+        await contributors.chooseType(editDialog, 'Person');
+        await expect(editField.getByRole('link', {name: new RegExp(TEST_ORCID.split('/').pop())})).toBeVisible();
+        await expect(editField.getByRole('button', {name: 'Delete', exact: true})).toBeVisible();
+        await expect(editField).toContainText('(unauthenticated)');
+        await expect(contributors.fieldError(typeField)).toHaveCount(0);
+
+        // "Delete" and its "Yes" (Rule 8a).
+        await editField.getByRole('button', {name: 'Delete', exact: true}).click();
         const dialog = managerPage
             .getByRole('dialog')
             .filter({hasText: 'Are you sure you want to remove this ORCID?'});
@@ -235,10 +279,21 @@ test.describe('ORCID integration', () => {
         await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
         await deleted;
 
-        // The field reverts to the no-iD state offering a fresh request.
-        await expect(field.getByRole('button', {name: 'Request verification'})).toBeVisible();
-        await expect(idLink).toHaveCount(0);
-        await expect(field).not.toContainText('(unauthenticated)');
+        // Control: the field reverts to the no-iD state offering a fresh
+        // request.
+        await expect(editField.getByRole('button', {name: 'Request verification'})).toBeVisible();
+        await expect(editField.getByRole('link', {name: new RegExp(TEST_ORCID.split('/').pop())})).toHaveCount(0);
+        await expect(editField).not.toContainText('(unauthenticated)');
+
+        // {OJS} with the iD gone, "Anonymous" chosen and "Save" pressed now
+        // saves: the contributors API answers OK, the form closes with no
+        // message under "Contributor Type", and the list's row reads
+        // "Anonymous" (Rule 8c).
+        await contributors.chooseType(editDialog, 'Anonymous');
+        await expect(editField).toHaveCount(0);
+        await contributors.savePanel(editDialog);
+        await expect(contributors.row('Anonymous')).toHaveCount(1);
+        await expect(contributors.row(author)).toHaveCount(0);
     });
 
     test('S6: the public ORCID pages render by URL', async ({page, ojsApi}, testInfo) => {
@@ -282,8 +337,11 @@ test.describe('ORCID integration', () => {
             });
         await seedFor(tagOff, false);
         await seedFor(tagOn, true);
+        // The off journal's contributor is a Person holding a verified iD
+        // (seeded).
         const {submissionId: subOff} = await ojsApi.createSubmission({
             tag: tagOff, context: tagOff, submitter: `aut${tagOff}`,
+            author: {orcid: TEST_ORCID, orcidIsVerified: true},
         });
         const {submissionId: subOn} = await ojsApi.createSubmission({
             tag: tagOn, context: tagOn, submitter: `aut${tagOn}`,
@@ -361,12 +419,56 @@ test.describe('ORCID integration', () => {
         await expect(offModal.locator('#contributor-email-control')).toBeVisible();
         await expect(offModal.getByText('ORCID iD')).toHaveCount(0);
 
+        // Another type with ORCID off {OJS}: on the same form, "Anonymous"
+        // chosen and "Save" pressed saves: the contributors API answers OK,
+        // the form closes with no message under "Contributor Type", and the
+        // list's row reads "Anonymous" (Rule 8d). The "Anonymous" form has
+        // no given-name box, so the side panel is read by its own name.
+        const offContributors = new ContributorsPanel(offManagerPage);
+        const offDialog = offContributors.editDialog();
+        await offContributors.chooseType(offDialog, 'Anonymous');
+        await expect(offContributors.typeRadio(offDialog, 'Anonymous')).toBeChecked();
+        await offContributors.savePanel(offDialog);
+        await expect(offContributors.row('Anonymous')).toHaveCount(1);
+        await expect(offContributors.row(`aut${tagOff}`)).toHaveCount(0);
+
         const onManagerPage = await (await asUser(`mgr${tagOn}`)).newPage();
         const onWorkflow = new WorkflowPage(onManagerPage, tagOn);
         await onWorkflow.gotoEditorial(subOn);
         await openContributors(onManagerPage);
         const onModal = await openContributorEditor(onManagerPage, `aut${tagOn}`);
         await expect(orcidField(onModal).getByRole('button', {name: 'Request verification'})).toBeVisible();
+
+        // ORCID on again {OJS}: on the off journal, the Journal Manager
+        // ticks "Enable ORCID functionality" on Settings → Users & Roles,
+        // tab "ORCID", picks "Public Sandbox", types scenario 1's
+        // placeholders and saves: the tab shows "Saved".
+        const offSettings = new OrcidSettingsTab(offManagerPage, tagOff);
+        await offSettings.goto();
+        await expect(offSettings.enableCheckbox).not.toBeChecked();
+        await offSettings.enableCheckbox.check();
+        await offSettings.apiSelect.selectOption({label: 'Public Sandbox'});
+        await offSettings.clientIdInput.fill('APP-TEST');
+        await offSettings.clientSecretInput.fill('test-secret');
+        await offSettings.save();
+        await expect(offSettings.savedStatus).toContainText('Saved');
+
+        // The same contributor, "Person" chosen without saving: the ORCID iD
+        // field offers "Request verification", the iD gone with the type
+        // change (Rule 8d); the form is closed unsaved.
+        await offWorkflow.gotoEditorial(subOff);
+        await openContributors(offManagerPage);
+        const reopened = await offContributors.openEdit('Anonymous');
+        await expect(offContributors.typeRadio(reopened, 'Anonymous')).toBeChecked();
+        await expect(orcidField(reopened)).toHaveCount(0);
+        await offContributors.chooseType(reopened, 'Person');
+        const reopenedField = orcidField(reopened);
+        await expect(reopenedField.getByRole('button', {name: 'Request verification'})).toBeVisible();
+        await expect(
+            reopenedField.getByRole('link', {name: new RegExp(TEST_ORCID.split('/').pop())})
+        ).toHaveCount(0);
+        await expect(reopenedField).not.toContainText(TEST_ORCID.split('/').pop());
+        await offContributors.closePanel(reopened);
     });
 
     test('S9: a completed review is sent to ORCID from the reviewer row', async ({asUser, ojsApi}, testInfo) => {

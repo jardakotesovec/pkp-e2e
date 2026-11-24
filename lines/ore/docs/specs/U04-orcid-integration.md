@@ -61,7 +61,16 @@ Site ORCID settings ("ORCID" side tab, Administration › Site Settings):
 City, the email toggle and the log level have no site-wide field. They
 remain per-journal. <sup>b</sup>
 
-Contributor's ORCID iD field (add/edit contributor, Contributors list):
+Contributor's ORCID iD field (add/edit contributor, Contributors list).
+It shows only while "Contributor Type" is "Person": an "Organization or
+group" or "Anonymous" contributor's form has no ORCID iD field
+(Rules 8b–8d). Several rules below differ on an install with
+pkp-lib#11972 (merged 2026-11-23), which OJS `main` and `ore` have and
+OMP and OPS `main` lacked on 2026-11-24; on this same form, an
+"Organization or group" contributor's "Email" without "* Required"
+tells one (see
+[Contributors & affiliations](U41-contributors-and-affiliations.md),
+Fields "Email"). <sup>e</sup>
 
 | State | What the field shows |
 |-------|----------------------|
@@ -144,6 +153,36 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
    a refused "Delete" still shows the iD gone.
    8a. "Delete" beside a contributor's iD (verified or not) removes it after
    confirmation and cancels its token at ORCID. <sup>e</sup>
+   8b. **Who can be asked.** On an install with pkp-lib#11972 (Fields,
+   contributor's ORCID iD field), only a person with an email. The
+   request is refused for an Organization or Anonymous contributor:
+   ⚠ [A17](#a17) a contributor being added who was asked as a Person and
+   then given another type cannot be saved from that form. It is refused
+   for a person stored without an email as well, who is still offered
+   "Request verification" ⚠ [A16](#a16). Without the change both are
+   accepted: an Organization or Anonymous contributor asked while being
+   added is saved and emailed like a person, and a person without an
+   email is sent nothing [A16](#a16). <sup>e</sup>
+   8c. **Changing the type of a contributor who holds an iD.** On an
+   install with pkp-lib#11972, while ORCID is on, a contributor holding
+   an iD, verified or not, cannot be changed from "Person": "Save" is
+   refused with "This contributor has an ORCID iD. Remove the ORCID iD
+   before changing the contributor type." under "Contributor Type", and
+   the page notice "The form was not saved because 1 error(s) were
+   encountered. Please correct these errors and try again." The way out
+   is on the same form: choose "Person" again (the iD and "Delete" are
+   back), press "Delete" and "Yes" (Rule 8a), choose the other type,
+   "Save". Without the change it saves with the iD kept (Rule 8d
+   shows where). ⚠ [A18](#a18) a Person whose verification was
+   requested but who holds no iD yet can be changed on any install, and
+   keeps the request. <sup>e</sup>
+   8d. **The same change with ORCID off.** On an install with
+   pkp-lib#11972, the form has no ORCID iD field (Rule 4), and changing
+   a Person who holds an iD to "Organization or group" or "Anonymous"
+   saves; the iD and its permission are removed with it. With ORCID
+   on again, the contributor's form with "Person" chosen, unsaved, shows
+   "Request verification". Without the change the iD stays: the same
+   form shows it with "Delete". <sup>e</sup>
 9. **The emailed link and the verification landing.** The emailed
    authorization link leads to ORCID's sign-in. ORCID then returns the
    browser to the journal's "ORCID Authorization" page, which answers one
@@ -178,7 +217,10 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
     permission (Rule 14). ⚠ [A14](#a14) that email's link, back from
     ORCID, ends on a blank page because the app fails, so the deposit
     never resumes. Works deposited once are updated in place on later
-    publishes.
+    publishes. On an install with pkp-lib#11972 (Fields, contributor's
+    ORCID iD field) all of this is for persons only: an Organization or
+    Anonymous contributor that still holds a verified iD from before the
+    change gets no work and no re-authorization email.
     [OMP1](#omp1) presses request and verify iDs identically but deposit
     nothing. <sup>j</sup>
 12. **Review deposits {OJS}.** On a journal with the member API, a completed
@@ -197,8 +239,14 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
     incomplete review. <sup>g</sup>
 13. **Automatic author emails {OJS OMP}.** With the settings tab's email
     toggle on, recording the editorial decision Accept (or Skip Review) emails
-    every contributor who does not yet hold a verified iD with a live
-    permission (Rule 11) the verification request of Rule 8 ⚠ [A6](#a6). ⚠ [OPS1](#ops1) a preprint
+    the verification request of Rule 8 to every person contributor with an
+    email who does not yet hold a verified iD with a live permission
+    (Rule 11) ⚠ [A6](#a6). An Organization or Anonymous contributor, or a
+    person without an email, gets nothing. That holds on an install with
+    pkp-lib#11972 (Fields, contributor's ORCID iD field); without it, an
+    Organization or Anonymous contributor with an email is emailed too,
+    and a person without one still gets nothing [A16](#a16).
+    ⚠ [OPS1](#ops1) a preprint
     server shows the toggle but has no accepting decision to trigger it. <sup>k</sup>
 14. **Which email goes out.** Under a public API the request email's subject
     line reads "Submission ORCID", which asks the contributor to connect
@@ -241,7 +289,8 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
 
 - **On "Request verification" / the Rule 13 decision**: one email to the
   contributor (Rule 14 chooses which), carrying their single-use
-  authorization link. <sup>l</sup>
+  authorization link; on an install with pkp-lib#11972, to a person
+  with an email only (Rules 8b, 13). <sup>l</sup>
 - **On completing an emailed authorization for a published article**: the
   work is deposited at once and the landing page adds "The submission has
   been added to your ORCID record." For an article not yet published it says
@@ -255,7 +304,9 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
   reaches their ORCID record
   ⚠ [→ Publish, schedule & versions OJS4](U49-publish-schedule-and-versions.md#ojs4). <sup>j</sup>
 - **On removing an iD** (own profile or a contributor's): the install asks
-  ORCID to cancel the matching access token in the background. <sup>d</sup>
+  ORCID to cancel the matching access token in the background. The iD
+  removed with a type change while ORCID is off (Rule 8d) sends ORCID
+  nothing: the cancellation goes out only while ORCID is on. <sup>d</sup> <sup>e</sup>
 - **ORCID request log**: traffic with ORCID is written to the application
   log at the level the settings tab chooses. <sup>a</sup>
 
@@ -281,8 +332,9 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
   (Rules 5–6). The tab itself and its other fields belong to the *User
   profile* feature.
 - **Contributors list** (workflow and submission wizard) hosts the
-  contributor ORCID field (Rule 8). The list's own mechanics belong to
-  *Contributors & affiliations*.
+  contributor ORCID field (Rule 8); an iD there keeps the form's
+  "Contributor Type" on "Person" while ORCID is on (Rules 8c, 8d). The
+  list's own mechanics belong to *Contributors & affiliations*.
 - **Reviewers table** {OJS} hosts "Send Review To ORCID" (Rule 12). The
   table, its other row actions and its confirm-dialog chrome belong to
   [Reviewer assignment & management](U27-reviewer-assignment-and-management.md).
@@ -394,9 +446,15 @@ the footnote. <sup>s</sup>
    - **The What-is-ORCID link in each email**: open it: each journal's "What
      is ORCID?" page renders, and the member-API journal's "How and why"
      section differs from the public-API journal's (Rule 10).
-   - **A contributor being added**: back on the first journal's Contributors
-     list, add a contributor: Given Name Nova, Email a throwaway address of
-     its own (the footnote names it), Country Canada. On the new form press
+   - **The field per contributor type**: back on the first journal's
+     Contributors list, press "Add Contributor". Choose "Organization or
+     group" under "Contributor Type": the form has no ORCID iD field.
+     Choose "Anonymous": it has none either. Choose "Person": the ORCID
+     iD field shows "Request verification" (Fields, contributor's ORCID
+     iD field).
+   - **A contributor being added**: on the same form, with "Person"
+     chosen, fill in Given Name Nova, Email a throwaway address of its
+     own (the footnote names it), Country Canada. On the new form press
      "Request verification": the dialog now adds "The email will be sent
      once the author has been created."; confirm. The new address's mailbox
      holds nothing: the request is remembered and waits for the save
@@ -412,8 +470,17 @@ the footnote. <sup>s</sup>
 
    - **The contributor's ORCID iD field**: edit the contributor. The field
      shows the hollow-icon iD link, the not-verified warning, and "Delete".
+   - **Another type while the iD is held** {OJS}: choose "Anonymous" under
+     "Contributor Type" and press "Save": the save is refused with "This
+     contributor has an ORCID iD. Remove the ORCID iD before changing the
+     contributor type." under "Contributor Type" and the page notice "The
+     form was not saved because 1 error(s) were encountered. Please
+     correct these errors and try again." Choose "Person" again: the iD
+     and "Delete" are back (Rule 8c).
    - **"Delete"**: press Delete and confirm: the iD is gone.
-   - **Control**: the field offers "Request verification" again.
+   - **Control**: the field offers "Request verification" again; {OJS}
+     with the iD gone, choosing "Anonymous" and pressing "Save" now saves,
+     with no message under "Contributor Type" (Rule 8c).
 
 6. **The public ORCID pages by URL**
 
@@ -435,12 +502,20 @@ the footnote. <sup>s</sup>
 
 7. **A journal with ORCID off shows none of it**
 
-   Given: a visitor and a Journal Manager on a scratch journal with ORCID
-   disabled; a second scratch journal with ORCID enabled. <sup>s</sup>
+   Given: a visitor, and an Author and a Journal Manager signed in, on a
+   scratch journal with ORCID disabled and a submission whose contributor
+   is a Person holding a verified iD (seeded); a second scratch journal
+   with ORCID enabled and its own Author, Journal Manager and submission,
+   whose contributor has no iD. <sup>s</sup>
 
    - **The registration page**: has no ORCID block.
-   - **A contributor form**: has no ORCID iD field.
-   - **The profile's Identity tab**: shows no ORCID field at all.
+   - **A contributor form**: the Journal Manager edits the contributor
+     holding the iD, on the submission's Contributors list: the form has
+     no ORCID iD field (Rule 4).
+   - **Another type with ORCID off** {OJS}: on the same form, choose
+     "Anonymous" under "Contributor Type" and press "Save": the change
+     saves, with no message under "Contributor Type" (Rule 8d).
+   - **The profile's Identity tab**: the Author's tab shows no ORCID field.
    - **The site-level Register page**: the site's own Register page, reached
      from the site homepage that lists the journals, shows no ORCID block
      either, while the enabled journal's Register page offers "Create or
@@ -450,25 +525,39 @@ the footnote. <sup>s</sup>
      footnote names them; the form's own fields belong to *Registration &
      account validation*) and press "Register" without pressing "Create or
      Connect your ORCID iD": the registration completes as any registration
-     does; connecting is never required to register (Rule 7).
-   - **Control**: the same screens on the enabled journal show the Rule 5
-     and Rule 8 controls: "Create or Connect your ORCID iD" on the Identity
-     tab and at the top of the registration form, "Request verification" on
-     the contributor's ORCID iD field.
+     does (Rule 7).
+   - **ORCID on again** {OJS}: on the first journal, the Journal Manager
+     opens Settings → Users & Roles, tab "ORCID", ticks "Enable ORCID
+     functionality", picks "Public Sandbox" under "ORCID API", types
+     APP-TEST in "Client ID" and test-secret in "Client Secret"
+     (scenario 1's placeholders), and presses "Save": the tab shows
+     "Saved". They edit the same contributor and choose "Person" under
+     "Contributor Type", without saving: the ORCID iD field shows
+     "Request verification", the iD gone with the type change (Rule 8d).
+   - **Control**: the second journal's Author and Journal Manager see the
+     Rule 5 and Rule 8 controls: "Create or Connect your ORCID iD" on the
+     Author's Identity tab, "Request verification" on its contributor's
+     ORCID iD field.
 
 App-specific:
 
 8. **Accepting a submission asks the authors** {OJS OMP}
 
    Given: a Journal Manager, signed in, on a scratch journal with the ORCID
-   email toggle on and two submissions in review, the second submitted by a
-   contributor whose iD is verified (seeded); a second scratch journal with
-   the toggle off and a submission in review. <sup>s</sup>
+   email toggle on and two submissions in review, the first also listing
+   an "Organization or group" and an "Anonymous" contributor, each with
+   an email {OJS}, the second submitted by a contributor whose iD is
+   verified (seeded); a second scratch journal with the toggle off and a
+   submission in review. <sup>s</sup>
 
    - **Accept with the toggle on**: record Accept on the first submission in
-     review. Each contributor without a verified iD receives the Rule 14
-     request email, subject line "Submission ORCID" on this public-API
-     journal (observe the mailbox).
+     review. Each person contributor without a verified iD receives the
+     Rule 14 request email, subject line "Submission ORCID" on this
+     public-API journal (observe the mailbox).
+   - **An Organization and an Anonymous contributor** {OJS}: the first
+     submission's "Organization or group" and "Anonymous" contributors
+     receive no request email, though each has an email (Rule 13); the
+     person contributors' emails are the positive control.
    - **A contributor already verified**: record Accept on the second
      submission: nothing arrives for its verified contributor's address
      (Rule 13); the first submission's email is the positive control.
@@ -547,11 +636,15 @@ Left out of the scenarios above, by reason:
   - A1 (the action offered before the review is complete; Rule 12; scenario 9 marks it)
   - A6 (the toggle's label misdescribing when it fires; Rule 13)
   - OPS2 (the preprint server's Emails screen lacking the three ORCID rows; Rule 14)
+  - OPS1 (a preprint server's ORCID tab showing the author-email toggle, with no accepting decision to trigger it; Rule 13; scenario 8's preprint-server sentence)
   - OPS3 (the legacy ORCID Profile plugin on preprint servers; Rule 16)
   - A11 (the French interface: both ORCID tabs named after the old plugin; Rule 17)
   - A13 (no "Delete" for the owner's unauthenticated iD on the Identity tab; Actors row 4, Rule 6c; scenario 3 marks it)
   - A14 (the re-authorization email's link failing with a server error; Rule 11)
   - A15 (the public ORCID pages' browser tab showing no page name; Rule 10)
+  - A16 ("Request verification" offered for a person stored without an email, which sends nothing and says nothing; Rules 8b, 13)
+  - A17 (a contributor asked to verify while being added, then given another type, refused on "Save"; Rule 8b)
+  - A18 (a Person with a pending request changed to another type, keeping the request; Rule 8c)
 - **No seed**:
   - the Site Administrator enabling ORCID site-wide (Actors row 2, Rule 2): Site Settings → ORCID is one setting shared by every test running at once, so it stays off
   - the journal tab locked read-only under the site-wide configuration, and its own values back once the box is unticked (Rule 3): the same site-wide setting
@@ -572,6 +665,8 @@ Left out of the scenarios above, by reason:
   - City plus the journal's country required for review deposits, else skipped silently (Settings; Rule 12): the same deposit
   - the Sandbox variants aiming at ORCID's test service (Settings): the same service
   - removing an iD cancelling the token at ORCID (Side effects): the same service
+  - the iD removed by a type change with ORCID off sending ORCID nothing (Side effects; Rule 8d): the cancellation runs in the background job queue, which the screens do not show
+  - an Organization or Anonymous contributor holding a verified iD getting no work and no re-authorization email on publication (Rule 11): the scenario API seeds iDs on persons only, and the deposit needs ORCID's own service
   - the ORCID request log written at the chosen level (Side effects): the application log is not read by the suites
   - a verified contributor whose permission has lapsed being asked again on Accept (Rule 13): no seed for a lapsed permission
   - a customized request email keeping the journal's wording through an upgrade (Rule 14a): the test installs are never upgraded
@@ -587,7 +682,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-07; additions
-2026-08-29, 2026-09-28 and 2026-10-05), unreviewed unless an entry notes otherwise; the team settles
+2026-08-29, 2026-09-28, 2026-10-05 and 2026-11-24), unreviewed unless an entry notes otherwise; the team settles
 them on spec review. The summary is sorted 🐞 → ❓ → ✅ and the entries below
 are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
@@ -601,11 +696,14 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A11](#a11) | In 32 interface languages, both ORCID settings tabs carry the name of the retired ORCID Profile plugin | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | A contributor following the "Requesting updated ORCID record access" link gets a blank page and can never allow deposits | 🐞 | medium · crash: server | issues (claude), 2026-10-07 — re-verified |
 | [A15](#a15) | The "What is ORCID?" and "ORCID Authorization" pages' browser tab shows only "\| {journal name}" | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
+| [A16](#a16) | "Request verification" for a contributor without an email sends nothing, and nobody is told | 🐞 | low · crash: server | — |
+| [A17](#a17) | A contributor asked to verify while being added, then made an Organization or Anonymous, cannot be saved | 🐞 | low | — |
 | [OPS2](#ops2) | The ORCID request emails have no rows on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A3](#a3) | An iD connected while registering lands on the account unverified | ❓ | minor | — |
 | [A6](#a6) | The author-email toggle's label misdescribes when it fires | ❓ | minor | — |
 | [A7](#a7) | The re-authorization email template is not editable in any app. Resolved upstream for journals and presses (pkp/pkp-lib#13050); the preprint-server gap is [OPS2](#ops2)'s | ❓ | latent | rebase check (claude) 2026-08-25 |
 | [A13](#a13) | A user whose own iD is unauthenticated is offered no "Delete" on the profile's Identity tab | ❓ | minor | — |
+| [A18](#a18) | A Person asked to verify can be made an Organization or Anonymous, and keeps the verification link | ❓ | latent | — |
 | [OPS1](#ops1) | The author-email toggle exists on a preprint server that can never trigger it | ❓ | latent | — |
 | [OMP1](#omp1) | A press requests and verifies iDs but deposits no works | ✅ | user-visible | — |
 | [OPS3](#ops3) | A preprint server additionally bundles the legacy ORCID Profile plugin | ✅ | invisible | — |
@@ -676,7 +774,10 @@ to "ORCID Verification has been requested!" or shows the iD gone, until
 the form is closed and opened again. Until 2026-10-30 the server refused
 both actions to every Assistant allowed to edit the contributor; the
 routes now admit that Assistant (pkp/pkp-lib#13517), so the stock
-routes that met it are gone and a refusal now takes another cause.
+routes that met it are gone and a refusal now takes another cause. On
+an install with pkp-lib#11972 (Fields, contributor's ORCID iD field) a
+request for a contributor stored without an email is refused too, with
+no window at all ([A16](#a16)).
 Basis: probe, 2026-10-03; the Assistant's refusal gone at the `main`
 tips, 2026-11-02. <sup>[f-a5](#fn-a5)</sup>
 Report: refresh owed — pkp/pkp-lib#13659 + pkp/ui-library#1033 (merged 2026-10-30, pkp-lib `9dfab21b47`, ui-library `eb988214e9`) admit the Assistant, so pkp-e2e#749's steps no longer meet a refusal: its Steps need a refusal the screens still reach, or the report says it is latent (2026-11-02)
@@ -785,6 +886,61 @@ turned on, but nothing links to them until it is. The fix is one
 attribute in each of the two page templates, the way the other public
 pages already pass their title. (Rules 9, 10)
 Basis: probe, 2026-10-07. <sup>[f-a15](#fn-a15)</sup>
+
+<a id="a16"></a>
+**A16 — "Request verification" for a contributor without an email sends nothing, and nobody is told** · 🐞 · low · crash: server.
+A person contributor stored without an email (the form refuses to
+save a person without one, but before pkp-lib#11972 a program could
+empty a person's email) is still offered "Request verification" on
+their ORCID iD field. On an install with pkp-lib#11972 (Fields,
+contributor's ORCID iD field), pressing it and answering "Yes" is
+refused, but no window or notice says so: the field reads "ORCID
+Verification has been requested!" with "Resend Verification Email"
+until the form is opened again, when it shows "Request verification"
+([A5](#a5)). Without the change the request is accepted and the field
+reads the same, but the app fails sending the email in the background
+and nothing is delivered; accepting the submission with the email
+toggle on (Rule 13) sends that contributor nothing either (seen on a
+press). Either way nobody is emailed, and the editor is not told that
+the contributor needs an email.
+(Rules 8b, 13)
+Basis: probe, 2026-11-24. <sup>[f-a16](#fn-a16)</sup>
+
+<a id="a17"></a>
+**A17 — A contributor asked to verify while being added, then made an Organization or Anonymous, cannot be saved** · 🐞 · low.
+On an install with pkp-lib#11972 (Fields, contributor's ORCID iD
+field), a Journal Manager on "Add Contributor" presses "Request
+verification" for a Person and answers "Yes", then changes "Contributor
+Type" to "Organization or group" (or "Anonymous") and presses "Save".
+The form is refused with the page notice "The form was not saved
+because 1 error(s) were encountered. Please correct these errors and
+try again." and, at its foot, "Please correct one error. Go to ORCID
+iD: ORCID verification can only be sent to a person.", but that type's
+form has no ORCID iD field, so no field shows the error and "Jump to
+next error" goes nowhere. Choosing "Person" again shows "Request
+verification", as if the request had been dropped, yet choosing the
+other type again and pressing "Save" is refused the same way. Only
+closing the form and adding the contributor again saves it. Nothing is
+lost but the typing. Without the change the same steps save the
+contributor and email it "Submission ORCID". (Rule 8b)
+Basis: probe, 2026-11-24. <sup>[f-a17](#fn-a17)</sup>
+
+<a id="a18"></a>
+**A18 — A Person asked to verify can be made an Organization or Anonymous, and keeps the verification link** · ❓ · latent.
+A Person whose verification was requested, and who holds no iD yet,
+can be changed to "Organization or group" on the contributor form, on
+every install: the change saves, keeping the request and its emailed
+link, and the form, reopened with "Person" chosen (unsaved), reads
+"ORCID Verification has been requested!". Rule 8c's refusal covers only a
+contributor who holds an iD. Not seen: whether completing the emailed
+link afterwards stores a verified iD on the Organization, which only
+persons may hold on an install with pkp-lib#11972. (Rules 8c, 9)
+Question: should a type change away from Person drop a pending
+request, or the "ORCID Authorization" page refuse a contributor who is
+no longer a person?
+Lean: drop the pending request with the type change, so that no live
+link outlives the person it was sent to.
+Basis: probe, 2026-11-24. <sup>[f-a18](#fn-a18)</sup>
 
 ### OMP
 
@@ -1039,6 +1195,53 @@ on OPS: the submitting author's dashboard list on an unposted preprint
 carried "Order", "Preview", "Add Contributor" and the row's "Edit" and
 "Delete", and "Edit" opened the form with the ORCID iD field's "Request
 verification", the *Contributors & affiliations* OPS1 baseline).
+pkp/pkp-lib#11972 (pkp-lib `19ca682321`, merged 2026-11-23 as
+`d03b7729f6`, and `b18c557ff2`, merged as `73bb87216e`; ui-library
+`72ec3278`): the field's `showWhen` is
+`ContributorType::getTypesWithOrcid()` (Person alone, as before);
+`OrcidController::requestAuthorVerification()` answers 400
+`api.orcid.400.personOnly` for a non-person and
+`api.orcid.400.authorEmailRequired` for an empty email, before storing
+`orcidVerificationRequested`; `PKPSubmissionController::addContributor()`
+refuses `orcid=shouldRequestVerification` for a non-person (finding
+A17); `PKP\author\Repository::validate()` refuses a type without ORCID
+(`author.contributorType.orcidMustBeRemoved`) for a contributor holding
+an `orcid` while `OrcidManager::isEnabled()`, and with ORCID off
+`PKPSubmissionController::editContributor()` nulls the iD and calls
+`OrcidManager::removeOrcidAccessToken()`, whose `RevokeOrcidToken`
+returns at once while ORCID is off. `ore` carries the same patch since
+pkp/pkp-lib#13865 (merged 2026-11-23; OJS `372fc18701`). Live-probed 2026-11-24 (OJS `main`
+`6ce58ddbb2` with the change; OMP `05c0fee47` and OPS `a80a5decc1`
+without it; two runs each, scratch journals, a throwaway Journal
+Manager; kept script `shared/playwright/checks/U04/S11972/s11972.js`,
+parts `field` and `off`, beside `checks/U04/SW3/sw3.js`; the verified
+iD's switch read from the U41 check's walk,
+`shared/playwright/checks/sync/pkp-lib-13624/walk.js`): "Add
+Contributor" showed the ORCID iD field with "Request verification" for
+"Person" and none for "Organization or group" or "Anonymous", on all
+three. A person with an unauthenticated iD switched to "Organization or
+group" and saved: on OJS 400 `{"contributorType":["This contributor has
+an ORCID iD. Remove the ORCID iD before changing the contributor
+type."]}`, the message under "Contributor Type * Required", the page
+notice and the foot "Please correct one error. Go to Contributor Type:
+…"; "Person" chosen again showed the iD with "Delete", "Delete" › "Yes"
+posted `orcid/deleteForAuthor` (200), "Organization or group" and
+"Save" answered 200, and after a reload the list read the Organization,
+stored with `orcidIsVerified=0` alone; a verified iD's switch was
+refused the same way, on the form and through the API. On OMP and OPS
+the same switch saved (200) and the Organization kept the iD, verified
+or not. ORCID off (Settings › Users & Roles › "ORCID", "Enable ORCID
+functionality" unticked, saved): on OJS a person with a verified iD
+switched to "Organization or group", another to "Anonymous", each saved
+(200), the list showing the new name or "Anonymous" at once and after a
+reload, the rows keeping `orcidIsVerified=0` only, one
+`RevokeOrcidToken` queued for each; drained while ORCID was off (third
+run), both ended with no failure and no log line, where a cancellation
+with ORCID on fails at the test config's dead-port `[proxy]`; ORCID
+turned on again (the tab answering "Saved"), the contributor reopened
+as a Person showed "Request verification". On OMP and OPS the switch
+saved and the iD and token stayed: ORCID on again, the contributor reopened as a Person showed the
+iD with "Delete".
 
 <a id="fn-f"></a>
 **f** — Pages: `PKP\pages\orcid\OrcidHandler` (ROUTE-021), ops
@@ -1179,6 +1382,29 @@ contributors sharing a verified iD; it still offered "Publish" ("Post"),
 which published the publication each time.
 `PKP\publication\Repository::validatePublishWarnings()` now holds the
 two checks `validatePublish()` held before the PR.
+Persons only (Rule 11): since pkp/pkp-lib#11972
+`PKPSendSubmissionToOrcid::execute()` collects only contributors whose
+type is in `ContributorType::getTypesWithOrcid()`. Live-probed
+2026-11-24 (OJS `main` `6ce58ddbb2` with the change, OPS `a80a5decc1`
+and OMP `05c0fee47` without it; two runs each, Member Sandbox; kept
+script `shared/playwright/checks/U04/S11972/s11972.js`, part `deposit`,
+beside `checks/U04/SW1/sw1.js` `deposit`; job outcomes read per
+scratch journal from `failed_jobs`, where the dead `[proxy]` fails
+every call and names the address it tried): a submission whose Person,
+Organization and Anonymous contributors each held a verified iD and a
+live member token, and a second Organization a public-scope token (the
+non-persons added on the form, their iDs set in the database as data
+from before the change), published on screen (200). OJS: only the
+Person's `…/0000-0002-1825-0097/work` was tried, for the publish and,
+on another submission, for "Schedule For Publication" into "Vol. 9 No.
+2 (2027)" (status 5, the work sent at once); the public-scope
+Organization received no mail. OPS: the Person's, the Organization's
+`…/0000-0001-5109-3700/work` and the Anonymous's
+`…/0000-0002-9079-593X/work`, and "Requesting updated ORCID record
+access" to the public-scope Organization. OMP: nothing (OMP1). The
+rest of Rule 11 (the put-code update, the expired token, the
+unauthenticated iD, the public scope's email and its 500 return, and
+A14) held on OJS and OPS, both runs.
 
 <a id="fn-k"></a>
 **k** — Listener `PKP\observers\listeners\SendAuthorOrcidEmail` on
@@ -1193,6 +1419,23 @@ listeners` in all three apps (`EventServiceProvider`). Live-probed
 and "Accept and Skip Review" each delivered one "Submission ORCID" mail per
 contributor alongside the decision mail; with it off, only the decision
 mail arrived.
+Persons with an email only: since pkp/pkp-lib#11972 the listener skips
+a contributor whose type is not in `ContributorType::getTypesWithOrcid()`,
+and `SendAuthorMail::handle()` returns for such a contributor or an
+empty email. Live-probed 2026-11-24 (OJS `main` `6ce58ddbb2` with the
+change, OMP `05c0fee47` without it; two runs each; kept script
+`shared/playwright/checks/U04/S11972/s11972.js`, part `rule13`): with the
+toggle on, a submission in review whose contributors were the submitter,
+Cora (a Person), Nemo (a Person without an email, set in the database),
+an Organization and an Anonymous contributor, the last two with an
+email and added on the form; "Accept Submission" recorded on screen
+(200). OJS: "Submission ORCID" to the submitter and Cora only; OMP: to
+the submitter, Cora, the Organization and the Anonymous contributor,
+none to Nemo (finding A16). The earlier Rule 13 reads held on OJS and
+OMP, both runs (`checks/U04/SW1/sw1.js` `rule13`): Accept and Accept and
+Skip Review mailed the contributors without an iD, the verified
+submitter nothing, the toggle off only the decision mail; OPS offered
+"Post the preprint" and "Decline Submission" (OPS1).
 
 <a id="fn-l"></a>
 **l** — Emails: `SendAuthorMail` picks
@@ -1341,8 +1584,27 @@ journals set `context.contactName` ("ORCID Contact <tag>") and
 `context.contactEmail` (`contact-<tag>@mail.test`) and the request email's
 From is read against them; its added contributor's address is
 `nova-<tag>@mail.test`, typed on the Contributors list's add form (Given
-Name, Email and the form's required Country). Scenario 7's second journal is
-the enabled one (`orcid: {}`), the site-level Register page is the site's
+Name, Email and the form's required Country), after the same form is read
+with "Contributor Type" on "Organization or group", "Anonymous" and
+"Person" in turn (all three apps: the field is a Person's alone with or
+without pkp-lib#11972, note e). Scenario 5's {OJS} steps switch the
+seeded person to "Anonymous", which needs no name of its own, and press
+the form's own "Save": refused while the iD is held, saved after
+"Delete" › "Yes"; the refusal and the save are read on the form. Scenario
+8's toggle-on journal on OJS adds to its first submission, before Accept,
+an "Organization or group" contributor (`org-<tag>@mail.test`) and an
+"Anonymous" one (`anon-<tag>@mail.test`) on the Contributors list's add
+form, as note k's probe did (`contributors[]` seeds persons only); their
+silence waits on the person contributors' "Submission ORCID" from the
+same drain. Scenario 7's first journal's
+submission is seeded with `author: {orcid, orcidIsVerified: true}`, the
+Person the Journal Manager edits; on OJS the switch to "Anonymous" is the
+form's own "Save", and ORCID is turned on again with the "ORCID" tab's
+own "Save", the box ticked and the placeholder pair typed, before the
+contributor is reopened and "Person" chosen unsaved. Scenario 7's second
+journal is the enabled one (`orcid: {}`), its submission seeded with
+no `orcid`; each journal's Identity tab is its submitter's, a
+throwaway `author` entry; the site-level Register page is the site's
 `index/user/register` (present because the install hosts more than one
 context once any scratch context exists), and its registration types a
 throwaway username `u04s7-<app>` with `<username>@mail.test`. Scenario 6
@@ -1519,6 +1781,69 @@ and "Login | {context name}". Cause: `orcidAbout.tpl` and
 `orcidVerify.tpl` include `frontend/components/header.tpl` without a
 `pageTitle` (contrast `userLogin.tpl`, `pageTitle="user.login"`).
 Issue report: [pkp-e2e#933](https://github.com/jardakotesovec/pkp-e2e/issues/933) ([docs/issues/U04-A15-orcid-pages-tab-no-page-name.md](../../../../docs/issues/U04-A15-orcid-pages-tab-no-page-name.md)).
+
+<a id="fn-a16"></a>
+**f-a16** — Live-probed 2026-11-24 (OJS `main` `6ce58ddbb2`, lib/pkp
+`8096e67cd2`, carrying pkp/pkp-lib#11972; OMP `05c0fee47` and OPS
+`a80a5decc1`, lib/pkp `3ea73a1a7e`, ui-library `836c01b5`, before it;
+two runs each, scratch journals with ORCID on, Public Sandbox, a
+throwaway Journal Manager; the person's email emptied in the database as
+data from before the change; kept script
+`shared/playwright/checks/U04/S11972/s11972.js`, part `field`, step
+`noEmail`): on OJS "Request verification" › "Yes" posted
+`orcid/requestAuthorVerification/{authorId}`, answered 400
+`{"error":"ORCID verification cannot be sent to a contributor without an
+email."}` (`api.orcid.400.authorEmailRequired`, checked in
+`OrcidController::requestAuthorVerification()` before
+`orcidVerificationRequested` is stored); no "Error" window, no notice,
+the field read "ORCID Verification has been requested!" with "Resend
+Verification Email" (the `isSuccess` ref of finding A5; `useFetch()`
+opens its network-error window only outside the `expectValidationError`
+400 path), and reopened read "Request verification"; nothing was
+queued. On OMP and OPS the same press answered 200, stored the request
+and queued `SendAuthorMail`, which failed in the drain:
+"Symfony\Component\Mime\Address::__construct(): Argument #1
+($address) must be of type string, null given" (`failed_jobs`, both
+runs); nothing was delivered. Rule 13 (part `rule13`, OJS and OMP, two
+runs): with the toggle on and a person "Nemo" without an email among
+the contributors, "Accept Submission" delivered nothing to Nemo on OJS
+and OMP; on OMP the second run's drain recorded Nemo's
+`SendAuthorMail` failing with the same error (the first run's read,
+kept to its scratch journal, recorded no failed job); on OJS the job
+was queued and ended quietly (`SendAuthorMail::handle()` returns for a
+non-person or an empty email), no failed job in either run.
+
+<a id="fn-a17"></a>
+**f-a17** — Live-probed 2026-11-24 (the installs and script of note
+f-a16, part `field`, steps `deferOrg` and `deferAnon`, two runs each):
+on OJS the "Add Contributor" save sent `contributorType` `ORGANIZATION`
+(or `ANONYMOUS`) with `orcid` `shouldRequestVerification` and answered
+400 `{"orcid":["ORCID verification can only be sent to a person."]}`
+(`api.orcid.400.personOnly`, from
+`PKPSubmissionController::addContributor()`); the form stayed open with
+the page notice and the foot list quoted in the entry, "Save" disabled,
+"Jump to next error" leaving the focus on itself; back on "Person" the
+field read "Request verification" while the foot still listed the error;
+the type chosen again and "Save" answered the same 400; the stored rows
+were unchanged and nothing was queued or delivered. On OMP and OPS the
+same save answered 200, stored the Organization or Anonymous row with
+`orcidEmailToken` and `orcidVerificationRequested=1`, and "Submission
+ORCID" was delivered to it.
+
+<a id="fn-a18"></a>
+**f-a18** — Live-probed 2026-11-24 (the installs and script of note
+f-a16, part `field`, step `pendingSwitch`, OJS, OMP and OPS, two runs
+each): a Person's "Request verification" (200, one "Submission ORCID"
+delivered), then "Edit", "Organization or group", "Save": 200, the row
+stored as `ORGANIZATION` still holding `orcidEmailToken` and
+`orcidVerificationRequested=1`; reopened as the Organization, no ORCID iD
+field; switched to "Person" on the reopened form, the field read "ORCID
+Verification has been requested!" with "Resend Verification Email". The
+type check pkp/pkp-lib#11972 added to `PKP\author\Repository::validate()`
+fires only when the contributor holds an `orcid`. The landing
+(`OrcidHandler::verify()`, `getAuthorToVerify()`, note f) matches the
+contributor by the emailed token and checks no type (code); completing
+the link needs ORCID's token answer, not stood in on this run.
 
 <a id="fn-omp1"></a>
 **f-omp1** — `omp-main/classes/orcid/actions/SendSubmissionToOrcid`:

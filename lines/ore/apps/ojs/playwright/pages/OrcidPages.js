@@ -20,7 +20,8 @@
  * Verbatim strings and DOM anchors were live-confirmed by the U04 probes
  * (2026-08-07); the retained evidence is the U04 spec's footnotes
  * (docs/specs/U04-orcid-integration.md). The read-only list, the request
- * dialog helper and the About page were added on the 2026-09-13 revision.
+ * dialog helper and the About page were added on the 2026-09-13 revision;
+ * the tab's "Saved" status on the 2026-11-24 revision (scenario 7).
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
@@ -43,6 +44,9 @@ exports.OrcidSettingsTab = class OrcidSettingsTab extends BasePage {
         this.clientIdInput = this.panel.locator('input[name="orcidClientId"]');
         this.clientSecretInput = this.panel.locator('input[name="orcidClientSecret"]');
         this.saveButton = this.panel.getByRole('button', {name: 'Save', exact: true});
+        // The form's status line beside "Save" ("Saved" after a save;
+        // read live 2026-11-24, tojs04 probe).
+        this.savedStatus = this.panel.getByRole('status');
     }
 
     /** Settings → Users & Roles, tab "ORCID". */
