@@ -1,0 +1,14 @@
+diff --git a/classes/components/forms/context/DoiSetupSettingsForm.php b/classes/components/forms/context/DoiSetupSettingsForm.php
+index d94b7fc2bc..41c22c6170 100644
+--- a/classes/components/forms/context/DoiSetupSettingsForm.php
++++ b/classes/components/forms/context/DoiSetupSettingsForm.php
+@@ -67,7 +67,8 @@ class DoiSetupSettingsForm extends PKPDoiSetupSettingsForm
+             'description' => __('doi.manager.settings.doiObjectsRequired'),
+             'groupId' => self::DOI_SETTINGS_GROUP,
+             'options' => $filteredOptions,
+-            'value' => $context->getData(Context::SETTING_ENABLED_DOI_TYPES) ? $context->getData(Context::SETTING_ENABLED_DOI_TYPES) : [],
++            // Only the kinds this form offers, so that a kind no longer supported (authorResponse) is dropped on the next save
++            'value' => array_values(array_intersect($context->getData(Context::SETTING_ENABLED_DOI_TYPES) ?? [], array_column($this->objectTypeOptions, 'value'))),
+         ]), [FIELD_POSITION_BEFORE, Context::SETTING_DOI_PREFIX])
+             ->addField(new FieldText(Repo::doi()::CUSTOM_ISSUE_PATTERN, [
+                 'label' => __('issue.issues'),
