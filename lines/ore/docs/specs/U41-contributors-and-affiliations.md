@@ -77,13 +77,13 @@ nothing typed into its own fields clears, so Save stays disabled
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Contributor Type** | Yes | Radio choice: **"Person"** (preselected), **"Organization or group"** or **"Anonymous"**. An Anonymous contributor has no name of its own and is shown everywhere as "Anonymous" (Rule 3). For it, only Email, Country, Contributor Roles, CRediT roles and Publication Lists remain; there are no name fields, ROR ID, Homepage URL, Bio Statement or Affiliations. Of those, only Contributor Roles is actually enforced. Email and Country keep their required markers, yet an Anonymous save with both empty is accepted ⚠ [A18](#a18). Switching types leaves what you typed on screen. On save, the other type's entries are discarded, as the guidance warns. The exception is a typed ROR ID, which silently stays in the saved record ⚠ [A4](#a4). |
+| **Contributor Type** | Yes | Radio choice: **"Person"** (preselected), **"Organization or group"** or **"Anonymous"**. An Anonymous contributor has no name of its own and is shown everywhere as "Anonymous" (Rule 3). For it, only Email, Country, Contributor Roles, CRediT roles and Publication Lists remain; there are no name fields, ROR ID, Homepage URL, Bio Statement or Affiliations. Of those, only Contributor Roles is required, and on an install with pkp-lib#11972 (Fields "Email") only it is marked "* Required". Without it, Email and Country keep their "* Required" markers for an Anonymous contributor, yet a save with both empty goes through. Switching types leaves what you typed on screen. On save, the other type's entries are discarded, as the guidance warns. The exception is a typed ROR ID, which silently stays in the saved record ⚠ [A4](#a4). <sup>c</sup> |
 | **Given Name** | Yes (Person) | Text, multilingual. Person only. |
 | **Family Name** | No | Text, multilingual. Person only. |
 | **Preferred Public Name** | No | Text, multilingual. Person only. Guidance: "Please provide the full name as the author should be identified on the published work. Example: Dr. Alan P. Mwandenga" |
 | **Organization Name** | Yes (Organization) | Text, multilingual. Organization only. |
-| **Email** | Yes | Text; must be an email address. Not enforced for an Anonymous contributor, despite the marker ([A18](#a18)). The label reads "Email" on some installs and "Email address" on others ⚠ [A19](#a19). |
-| **Country** | Yes | Drop-down of countries. The submitting author's auto-created contributor can arrive with no country. Every later edit of that contributor is then refused until one is chosen ⚠ [A16](#a16). Not enforced for an Anonymous contributor ([A18](#a18)). |
+| **Email** | Yes (Person; also Organization without pkp-lib#11972) | Text; must be an email address when filled. Required, and marked "* Required", for a Person only: an Organization or an Anonymous contributor saves with it empty. That holds on an install with pkp-lib#11972 (merged 2026-11-23), which OJS `main` and `ore` have and OMP and OPS `main` lacked on 2026-11-24; an "Organization or group" Email without "* Required" tells one. Without it, an Organization's save with Email empty is refused as a missing required field too, and an Anonymous contributor's Email is marked "* Required" but not enforced. The label reads "Email" on some installs and "Email address" on others ⚠ [A19](#a19). <sup>c</sup> |
+| **Country** | Yes (Person, Organization) | Drop-down of countries. The submitting author's auto-created contributor can arrive with no country. Every later edit of that contributor is then refused until one is chosen ⚠ [A16](#a16). Not required for an Anonymous contributor, and on an install with pkp-lib#11972 (Fields "Email") not marked for one either; without it, marked "* Required" but not enforced. <sup>c</sup> |
 | **ROR ID** | No | Organization only. A plain text box ("Enter organization's ROR ID."), separate from the Affiliations field below. Anything typed is accepted without a shape check ⚠ [A4](#a4). |
 | **Homepage URL** | No | Must be a web address. |
 | **ORCID iD** | No | Person only. Present only while the journal has ORCID enabled. The field's states, its "Request verification" flow and iD removal are owned by *[ORCID integration](U04-orcid-integration.md)*. |
@@ -461,15 +461,24 @@ footnote.
      "Person": Given Name is empty, the other type's entry discarded on
      save as the guidance warns; choose "Organization or group" again
      and press Save (Fields; Rule 4).
+   - **An organization without Email** {OJS}: press "Add Contributor"
+     and choose "Organization or group": Email shows without
+     "* Required"; type "Mailless Org" as Organization Name, leave Email
+     empty, pick "Canada", tick "Author" and press Save: the panel closes
+     and the row shows "Mailless Org" with an "Author" badge (Fields
+     "Email").
    - **Edit**: open the person's "Edit", type "Mwandenga" as Family Name
      and press Save: the row updates to "Alan Mwandenga" (Rule 4).
    - **An Anonymous contributor**: press "Add Contributor" and choose
      "Anonymous": there are no name fields, ROR ID, Homepage URL, Bio
      Statement or Affiliations, only Email, Country, Contributor Roles,
-     CRediT roles and Publication Lists; type "anon@example.test" as
-     Email, pick "Canada", tick "Author" and press Save: the row is
-     titled "Anonymous" with an "Author" badge, and "Preview"'s "Full"
-     row ends "; Anonymous (Author)" (Fields; Rules 3, 7).
+     CRediT roles and Publication Lists. On a journal {OJS}, only
+     Contributor Roles shows "* Required", Email and Country without it;
+     leave both empty there. On a press or a preprint server, type
+     "anon@example.test" as Email and pick "Canada". Tick "Author" and
+     press Save: the row is titled "Anonymous" with an "Author" badge,
+     and "Preview"'s "Full" row ends "; Anonymous (Author)" (Fields
+     "Contributor Type"; Rules 3, 7).
    - **Delete**: press "Delete" on "Probe Org": the dialog "Delete
      Contributor" asks "Are you sure you want to remove Probe Org as a
      contributor? This action can not be undone."; "Cancel" keeps the
@@ -820,8 +829,6 @@ Left out of the scenarios above, by reason:
     refused until one is chosen; Fields)
   - A17 (the "{count} of {total} languages" total following the
     publication's languages; Fields)
-  - A18 (an Anonymous save with Email and Country empty accepted;
-    Fields)
   - A19 (the email field labeled "Email" or "Email address" by the
     install; Fields)
   - A20 (the workflow's "Add Contributor" refused where a "Forms"
@@ -908,7 +915,6 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A11](#a11) | After a registry-error dialog the institution search stays dead until the Edit panel is reopened | ❓ | minor | — |
 | [A13](#a13) | A contributor role's name saves with a language left empty, despite the required marker | ❓ | minor | — |
 | [A17](#a17) | The typed affiliation's "{count} of {total} languages" total may follow the publication's languages, not the journal's | ❓ | minor | — |
-| [A18](#a18) | An Anonymous contributor's Email and Country are marked "* Required" but save empty | ❓ | minor | — |
 | [A19](#a19) | The contributor form's email field is labeled "Email" on one install and "Email address" on another, and the error summary's "Go to …:" link follows the label | ❓ | minor | — |
 | [A21](#a21) | Contributor roles arrive named in the primary language only, so readers in another language see "Author" | ❓ | minor | — |
 | [OMP1](#omp1) | A book with five or more contributors compacts to bare name-and-affiliation lines | ✅ | user-visible | — |
@@ -1169,20 +1175,6 @@ with differing language sets, comparing each typed entry's box count and
 total.
 Basis: probe (single observation). <sup>f-a17</sup>
 
-<a id="a18"></a>
-**A18 — Anonymous's required markers on Email and Country do not bind** · ❓ · minor.
-With "Anonymous" picked as the contributor type, the form marks Email,
-Country and Contributor Roles "* Required". A save with only a
-contributor role ticked is nonetheless accepted without a word, and the
-stored contributor has no email or country. Only Contributor Roles is
-enforced: an all-empty save is refused for that field alone, and Email
-and Country are never flagged.
-Question: should Email and Country be enforced for an Anonymous
-contributor, or their required markers dropped? Lean: drop the markers.
-An entry with no identity of its own plausibly has no contact details,
-and nothing downstream is observed to need them.
-Basis: probe. <sup>f-a18</sup>
-
 <a id="a19"></a>
 **A19 — The email field's label differs between installs** · ❓ · minor.
 The contributor form's email field is labeled "Email" on one install and
@@ -1411,6 +1403,9 @@ Basis: probe + code reading, 2026-10-03. <sup>f-ops2</sup>
 <a id="a15"></a>
 **A15 — A new contributor can land at the top of the list, varying between loads** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13003).
 
+<a id="a18"></a>
+**A18 — Anonymous's required markers on Email and Country do not bind** · ✅ · retired. Fixed upstream (pkp/pkp-lib#11972).
+
 <a id="a23"></a>
 **A23 — A CRediT role's degree prints as a raw code on a French landing page** · ✅ · retired. Overturned: not a bug.
 
@@ -1582,6 +1577,49 @@ panels) and the Escape key (the workflow's "Edit") shut the panel with
 no browser dialog and no notice, and no CRediT role was stored. "Close"
 after a refused save asked nothing either, and a refused "Edit" left by
 it showed the old name after a reload (f-a24).
+The markers and the email by contributor type: since pkp/pkp-lib#11972
+(pkp-lib `19ca682321`, merged 2026-11-23 as `d03b7729f6`, with
+`73bb87216e`; ui-library `72ec3278`) `email` is `isRequired` for
+`PERSON` alone (was Person or Organization), and the server's
+`PKP\author\Repository::validate()` refuses an empty email for a
+`PERSON` only ("Persons require an email"); the ORCID iD field's
+`showWhen` moved from the Person condition to
+`ContributorType::getTypesWithOrcid()` (Person alone, so the screen is
+unchanged). `ore` carries the same patch since pkp/pkp-lib#13865
+(merged 2026-11-23; OJS `372fc18701`). Live-probed 2026-11-24 (Fields
+preamble; rows Contributor Type, Email, Country, ORCID iD): OJS `main`
+with the change, OMP and OPS `main` without it (OJS `6ce58ddbb2`,
+lib/pkp `8096e67cd2`; OMP `05c0fee47` and OPS `a80a5decc1`, lib/pkp
+`3ea73a1a7e`), two runs each, scratch journals and a throwaway Journal
+Manager; kept
+script `shared/playwright/checks/U41/S11972/s11972.js` (parts `form`,
+`orcid`). The preamble's empty save, "Alan" typed and the server's
+refusal of a bad Email and Homepage URL (400 `{"email":[…],"url":[…]}`,
+"Please correct 2 errors.", the page notice) held on all three. On
+OJS, "Anonymous" showed "Email address" and "Country" with no "*
+Required" and no `required` attribute, and "Organization or group"
+showed "Email address" without them; on OMP and OPS both types showed
+"Email address * Required" and "Country * Required", with `required`.
+An Anonymous empty save flagged Contributor Roles alone and sent
+nothing, on all three; with "Author" ticked it saved, stored with no
+email and no country (`ANONYMOUS|(null)||0`). "Mailless Org" with
+"Canada", "Author" and Email empty saved on OJS (`POST` 200, stored
+email null, row "Mailless Org Author …"); on OMP and OPS the form
+refused it with "This field is required." under Email and "Please
+correct one error. Go to Email address: This field is required.", no
+request sent. A Person with Email empty was refused in the form on all
+three; "Countryless Org" was refused on Country on all three;
+"not-an-address" as an organization's email was refused by the server
+with "This is not a valid email address." on all three. The submitter's
+own row opened with Country empty and its unchanged "Save" was refused
+on Country alone (A16). With ORCID on (a scratch journal created with
+it), "ORCID iD" showed for a Person and not for the other two types; a
+person's "Edit" lost it on switching to "Organization or group"; with
+ORCID off the field was absent. "Casey" typed as Given Name survived
+Organization → Person; a saved organization's "Edit" switched to
+Person showed Given Name empty; "u41s-not-a-ror-id" typed as an
+organization and saved as a Person was stored and back under "ROR ID"
+on switching to Organization (A4).
 
 <a id="fn-d"></a>
 **d — affiliations.** Model `PKP\affiliation\*` + `author_affiliations`
@@ -1909,6 +1947,12 @@ the only place users are created, and submitting to the seeded journal,
 as U40's scenario 1 does); the absence is read against a positive
 control the test itself sends the same way (scenarios.md "Mailpit").
 The log is the submission's Activity Log & Notes → History.
+All three apps, except the organization without Email and the
+Anonymous contributor's empty Email and Country, which run on OJS
+alone: OJS `main` and `ore` carry pkp/pkp-lib#11972 and OMP and OPS
+`main` do not yet (fn c, 2026-11-24), so on a press and a preprint
+server the organization bullet is skipped and the Anonymous contributor
+is saved with "anon@example.test" and "Canada".
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** The scenario-1 submission with two PERSON
@@ -2249,17 +2293,6 @@ languages completed" on another, same journal languages. The form's
 locale list is driven by the publication's languages
 (`getPublicationLanguages()`), which would explain the difference;
 unsettled pending the two-publication comparison the entry names.
-
-<a id="fn-f-a18"></a>
-**f-a18 — A18 evidence.** Live-probed 2026-08-28 (OJS; shared form):
-Save on an all-empty Anonymous form was refused client-side with a
-single error — "Please correct one error. Go to Contributor Roles:
-This field is required. Jump to next error" — Email and Country
-unflagged despite their "* Required" markers, no request sent; with
-only a role ticked, the save posted and returned 200, the stored
-record carrying `"email":null,"country":null` and
-`fullName: "Anonymous"`. The throwaway record deleted normally through
-the row's Delete dialog.
 
 <a id="fn-f-a19"></a>
 **f-a19 — A19 evidence.** Seen 2026-09-16 on two OMP installs at the

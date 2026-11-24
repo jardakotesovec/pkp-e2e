@@ -24,10 +24,9 @@
  * confirm button is reached as the non-Cancel button; its text is never
  * asserted), A13 ❓ (S5 runs on a single-language journal), A14 🐞 (no
  * test reduces a journal to one role), A16 ❓ (the seeded contributor's
- * Country is filled before each of its edits), A17 ❓, A18 ❓ (S1's
- * Anonymous save fills Email and Country), OMP1, OMP2, OPS1 and OPS2
- * (press- and preprint-only, in those trees). The spec's Coverage section
- * records everything else left out.
+ * Country is filled before each of its edits), A17 ❓, OMP1, OMP2, OPS1
+ * and OPS2 (press- and preprint-only, in those trees). The spec's
+ * Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only for settings (S4, S5, S8 and S11 run on scratch journals
@@ -315,6 +314,27 @@ test.describe('contributors and affiliations', () => {
         await panel.savePanel(dialog);
         await expect(panel.row('Probe Org')).toBeVisible({timeout: 30_000});
 
+        // An organization without Email {OJS}: on "Organization or group"
+        // Email shows without "* Required" (Organization Name and Country
+        // beside it carry the mark: the positive control); saved with Email
+        // empty, "Canada" and "Author", the panel closes and the row shows
+        // "Mailless Org" with an "Author" badge (Fields "Email").
+        dialog = await panel.openAdd();
+        await panel.chooseType(dialog, 'Organization or group');
+        await expect(panel.organizationNameInput(dialog)).toBeVisible({timeout: 30_000});
+        await expect(panel.requiredMark(panel.fieldByName(dialog, 'organizationName-en'))).toHaveCount(1);
+        await expect(panel.requiredMark(panel.fieldByName(dialog, 'country'))).toHaveCount(1);
+        await expect(panel.control(dialog, 'email')).toBeVisible();
+        await expect(panel.fieldByName(dialog, 'email')).toHaveCount(1);
+        await expect(panel.requiredMark(panel.fieldByName(dialog, 'email'))).toHaveCount(0);
+        await panel.organizationNameInput(dialog).fill('Mailless Org');
+        await expect(panel.control(dialog, 'email')).toHaveValue('');
+        await panel.fillPerson(dialog, {country: 'Canada'});
+        await panel.tickRole(dialog, 'Author');
+        await panel.savePanel(dialog);
+        await expect(panel.row('Mailless Org')).toBeVisible({timeout: 30_000});
+        await expect(panel.badge('Mailless Org', 'Author')).toBeVisible();
+
         // Edit: the person's "Edit" opens prefilled; a Family Name typed
         // updates the row in place to "Alan Mwandenga" (Rule 4).
         dialog = await panel.openEdit('Alan');
@@ -325,9 +345,12 @@ test.describe('contributors and affiliations', () => {
 
         // An Anonymous contributor: no name fields, ROR ID, Homepage URL,
         // Bio Statement or Affiliations; only Email, Country, Contributor
-        // Roles, CRediT roles and Publication Lists (Fields). Saved, the
-        // row is titled "Anonymous" with an "Author" badge, and Preview's
-        // "Full" row ends "; Anonymous (Author)" (Rules 3, 7).
+        // Roles, CRediT roles and Publication Lists (Fields). On a journal
+        // {OJS} only Contributor Roles shows "* Required" (the positive
+        // control), Email and Country without it, and both stay empty.
+        // Saved, the row is titled "Anonymous" with an "Author" badge, and
+        // Preview's "Full" row ends "; Anonymous (Author)" (Fields
+        // "Contributor Type"; Rules 3, 7).
         dialog = await panel.openAdd();
         await panel.chooseType(dialog, 'Anonymous');
         await expect(panel.control(dialog, 'email')).toBeVisible({timeout: 30_000});
@@ -340,7 +363,13 @@ test.describe('contributors and affiliations', () => {
         }
         await expect(panel.affiliationsField(dialog)).toHaveCount(0);
         await expect(dialog.locator('[id^="contributor-biography"]')).toHaveCount(0);
-        await panel.fillPerson(dialog, {email: `${tag}anon@mail.test`, country: 'Canada'});
+        await expect(panel.requiredMark(panel.rolesField(dialog))).toHaveCount(1);
+        for (const name of ['email', 'country']) {
+            await expect(panel.fieldByName(dialog, name)).toHaveCount(1);
+            await expect(panel.requiredMark(panel.fieldByName(dialog, name))).toHaveCount(0);
+        }
+        await expect(panel.control(dialog, 'email')).toHaveValue('');
+        await expect(panel.control(dialog, 'country')).toHaveValue('');
         await panel.tickRole(dialog, 'Author');
         await panel.savePanel(dialog);
         await expect(panel.row('Anonymous')).toBeVisible({timeout: 30_000});
@@ -401,7 +430,6 @@ test.describe('contributors and affiliations', () => {
             spare,
         });
         expect(await pkpMail.count({to: `${tag}alan@mail.test`})).toBe(0);
-        expect(await pkpMail.count({to: `${tag}anon@mail.test`})).toBe(0);
     });
 
     test('S2: reorder and preview the display formats', async ({asUser, ojsApi}, testInfo) => {

@@ -30,6 +30,7 @@
  *
  * The browser-side ROR registry stub is FundingPages.stubRegistrySearch
  * (the Affiliations field queries the same api.ror.org endpoint family).
+ * Revised 2026-11-24: a field's "* Required" mark (requiredMark).
  */
 const {expect} = require('@playwright/test');
 
@@ -390,6 +391,14 @@ exports.ContributorsPanel = class ContributorsPanel {
     /** The "Contributor Roles" field (the wrapper of the "Author" box). */
     rolesField(dialog) {
         return this.fieldOf(dialog, this.page.getByRole('checkbox', {name: 'Author', exact: true}));
+    }
+
+    /**
+     * A field's "* Required" mark (`.pkpFormFieldLabel__required` in its
+     * label; read live 2026-11-24, `.reports/U41/screen-notes.md` ccS41).
+     */
+    requiredMark(field) {
+        return field.locator('.pkpFormFieldLabel__required');
     }
 
     /** A field's inline error(s) (`.pkpFieldError`). */

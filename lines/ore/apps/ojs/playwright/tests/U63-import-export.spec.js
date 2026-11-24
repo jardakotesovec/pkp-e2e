@@ -14,7 +14,7 @@
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
  * - A8: S4's "Errors occured:" lines under a successful import are left
- *   unread.
+ *   unread, the no-email lines among them aside.
  * - A10: S3 reads the stage filters' lists as the set they give; that the
  *   published submission is in no stage is read only as its absence there.
  * - OJS4: S7 never presses a PubMed export (outbound HTTP is dead on the
@@ -30,9 +30,12 @@
  * other scenario seeds its own scratch journals with `POST
  * scenarios/context` (a principal contact, a throwaway Journal Manager
  * named in both journals of S1, S4 and S6) and `POST scenarios/submission`
- * (`files[]`, `decisions[]`, `published`, `issue`). The files a test
- * imports are written by the test into its own output folder, from an
- * export it made on screen (S4) or by the builders of
+ * (`files[]`, `decisions[]`, `published`, `issue`, `author`). A test-side
+ * workaround the footnote names: S4's "Organization or group" and
+ * "Anonymous" contributors of "Puffin colony notes" added through the
+ * contributors API (`addContributor`). The files a test imports are
+ * written by the test into its own output folder, from an export it made
+ * on screen (S4, its "Kea notes" included) or by the builders of
  * `shared/playwright/pages/ImportExportPages.js` (S5). Scratch names
  * ("kiwi", "moss") carry the test's tag.
  *
@@ -69,8 +72,13 @@ const {
     md5,
     nativeWithIssue,
     nativeWithUnknownElement,
+    addContributor,
+    nativeWithContributorsEdited,
+    authorsInFile,
+    whole,
 } = require('../../../../shared/playwright/pages/ImportExportPages.js');
 const {PublishScreen} = require('../pages/PublishSchedulePages.js');
+const {ContributorsPanel} = require('../pages/ContributorPages.js');
 
 const T = 30_000;
 const JOURNAL = 'publicknowledge';
@@ -101,6 +109,7 @@ const NEW_PASSWORD_SENT = (u) =>
     `The imported user "${u}" password could not be imported as is. A new password is been send to the user email. The user has been imported.`;
 const ROLE_HELD = (u, g) =>
     `The role "${g}" of the user "${u}" has not been imported because the user already holds this role in an overlapping period.`;
+const NO_EMAIL = (name) => `The author ${name} does not have an email.`;
 const NO_MATCH = (u, e) => `The username "${u}" and the e-mail "${e}" do not match to the one and the same existing user.`;
 const SAVED = 'Your changes have been saved.';
 const NONE_SELECTED = 'No objects selected.';
@@ -118,6 +127,10 @@ const OKAPI = 'Okapi field notes';
 const QUOKKA = 'Quokka survey';
 const AXOLOTL = 'Axolotl limb memory';
 const WOMBAT = 'Wombat notes';
+const PUFFIN = 'Puffin colony notes';
+const KEA = 'Kea notes';
+/** Ada Lovelace's ORCID iD on "Puffin colony notes" (S4, footnote sc). */
+const ORCID = 'https://orcid.org/0000-0002-1825-0097';
 const OKAPI_CENSUS = 'Okapi forest census';
 const ISSUE_1 = 'Vol. 1 No. 1 (2025)';
 const ISSUE_2 = 'Vol. 1 No. 2 (2026)';
@@ -496,6 +509,19 @@ test.describe('Import & export', () => {
         });
         await ojsApi.createContext({tag: b, context: contact(b), users: [{username: manager, roles: ['manager']}]});
         const okapi = await ojsApi.createSubmission({tag: `${a}ok`, context: a, submitter: ada, title: OKAPI, files: [{file: 'article.pdf'}]});
+        // "Puffin colony notes" {OJS}: Ada Lovelace with her ORCID iD as
+        // the submitter's contributor record; its "Organization or group"
+        // and "Anonymous" contributors are added below through the
+        // contributors API, since `contributors[]` makes a Person alone
+        // (footnote sc).
+        const puffin = await ojsApi.createSubmission({
+            tag: `${a}pf`,
+            context: a,
+            submitter: ada,
+            title: PUFFIN,
+            files: [{file: 'article.pdf'}],
+            author: {orcid: ORCID, orcidIsVerified: false},
+        });
         const page = await pageAs(asUser, manager);
         // Dashboard reads go through a second page, so the Native page's
         // upload box keeps its file between the imports (Rule 8).
@@ -504,6 +530,13 @@ test.describe('Import & export', () => {
         // A's file: "Okapi field notes" exported and downloaded (Rule 16).
         const nativeA = new NativeXmlPage(page, a, NATIVE);
         await nativeA.goto();
+        for (const contributor of [
+            {contributorType: 'ORGANIZATION', organizationName: {en: 'Puffin Trust'}, country: 'CA'},
+            {contributorType: 'ANONYMOUS'},
+        ]) {
+            const added = await addContributor(page, a, puffin, contributor);
+            expect(added.status, `${contributor.contributorType} added: ${JSON.stringify(added.body).slice(0, 300)}`).toBe(200);
+        }
         await nativeA.openExportTab();
         await nativeA.list.box(OKAPI).check();
         const exported = await nativeA.list.pressExport(nativeA);
@@ -583,6 +616,122 @@ test.describe('Import & export', () => {
         await expect(dashB.row(OKAPI).first()).toBeVisible();
         await dashboardSearch(dashB, 'Wombat');
         await expect(dashB.row(WOMBAT)).toHaveCount(0);
+
+        // Contributors of three types {OJS}: A's "Puffin colony notes"
+        // exported alone and imported into B: the success text and its
+        // line, and no "The author Puffin Trust does not have an email."
+        // (Rule 12b), the item line its positive control in the same
+        // settled panel; its other lines are left unread (A8).
+        const nativeA2 = new NativeXmlPage(side, a, NATIVE);
+        await nativeA2.goto();
+        await nativeA2.openExportTab();
+        await nativeA2.list.box(PUFFIN).check();
+        const puffinExported = await nativeA2.list.pressExport(nativeA2);
+        const puffinXml = (await nativeA2.download(puffinExported)).text;
+        const puffinFile = testInfo.outputPath('puffin-from-a.xml');
+        fs.writeFileSync(puffinFile, puffinXml);
+        // The "Kea notes" file, written from that export (footnote sc):
+        // the title and the two names replaced, the Person's email
+        // removed, an ORCID iD added to the organization, the Anonymous
+        // contributor removed.
+        const keaFile = testInfo.outputPath('kea-notes.xml');
+        fs.writeFileSync(
+            keaFile,
+            nativeWithContributorsEdited(puffinXml, {
+                from: PUFFIN,
+                to: KEA,
+                edits: {
+                    PERSON: {names: {Ada: 'Kea', Lovelace: 'Moana'}, dropEmail: true},
+                    ORGANIZATION: {names: {'Puffin Trust': 'Kea Trust'}, addOrcid: ORCID},
+                    ANONYMOUS: {remove: true},
+                },
+            })
+        );
+        await nativeB.openTab('Import');
+        await nativeB.upload(puffinFile);
+        const puffinResults = await nativeB.pressImport();
+        await expect(nativeB.tabsNamed(NATIVE.importResults)).toHaveCount(4);
+        await expect(puffinResults).toContainText(IMPORTED);
+        const puffinLine = resultLines(puffinResults).filter({hasText: new RegExp(`^\\s*"\\d+" - "${PUFFIN}"\\s*$`)});
+        await expect(puffinLine).toHaveCount(1);
+        await expect(resultLines(puffinResults).filter({hasText: whole(NO_EMAIL('Puffin Trust'))})).toHaveCount(0);
+        const puffinNumber = Number(((await puffinLine.innerText()).match(/"(\d+)"/) || [])[1]);
+        expect(puffinNumber).toBeGreaterThan(0);
+
+        // The copy's "Contributors" in B: each contributor's "Edit" shows
+        // the type it had in A, a Person with its names and email, an
+        // organization with its name and Country, an Anonymous one with
+        // no name box (Rule 20c).
+        const copy = new PublishScreen(side, b);
+        await copy.gotoWorkflow(puffinNumber);
+        await copy.openEntry('Contributors');
+        const contributors = new ContributorsPanel(side);
+        await expect(contributors.rows()).toHaveCount(3, {timeout: T});
+        let edit = await contributors.openEdit('Ada Lovelace');
+        await expect(contributors.typeRadio(edit, 'Person')).toBeChecked();
+        await expect(contributors.control(edit, 'givenName-en')).toHaveValue('Ada');
+        await expect(contributors.control(edit, 'familyName-en')).toHaveValue('Lovelace');
+        await expect(contributors.control(edit, 'email')).toHaveValue(mailOf(ada));
+        await contributors.closePanel(edit);
+        edit = await contributors.openEdit('Puffin Trust');
+        await expect(contributors.typeRadio(edit, 'Organization or group')).toBeChecked();
+        await expect(contributors.organizationNameInput(edit)).toHaveValue('Puffin Trust');
+        await expect(contributors.control(edit, 'country').locator('option:checked')).toHaveText('Canada');
+        await contributors.closePanel(edit);
+        edit = await contributors.openEdit('Anonymous');
+        await expect(contributors.typeRadio(edit, 'Anonymous')).toBeChecked();
+        await expect(contributors.control(edit, 'email')).toBeVisible();
+        await expect(contributors.control(edit, 'givenName-en')).toHaveCount(0);
+        await expect(contributors.control(edit, 'familyName-en')).toHaveCount(0);
+        await expect(contributors.organizationNameInput(edit)).toHaveCount(0);
+        await contributors.closePanel(edit);
+
+        // A Person with no email {OJS}: the "Kea notes" file imported:
+        // the success text, its line and "The author Kea does not have an
+        // email."; the copy's Kea Moana has an empty email box, and "Save"
+        // is refused with "This field is required." under it (Rule 12b).
+        await nativeB.openTab('Import');
+        await nativeB.upload(keaFile);
+        const keaResults = await nativeB.pressImport();
+        await expect(nativeB.tabsNamed(NATIVE.importResults)).toHaveCount(5);
+        await expect(keaResults).toContainText(IMPORTED);
+        const keaLine = resultLines(keaResults).filter({hasText: new RegExp(`^\\s*"\\d+" - "${KEA}"\\s*$`)});
+        await expect(keaLine).toHaveCount(1);
+        await expect(keaResults).toContainText('Errors occured:');
+        await expect(resultLines(keaResults).filter({hasText: whole(NO_EMAIL('Kea'))})).toHaveCount(1);
+        const keaNumber = Number(((await keaLine.innerText()).match(/"(\d+)"/) || [])[1]);
+        expect(keaNumber).toBeGreaterThan(0);
+        await copy.gotoWorkflow(keaNumber);
+        await copy.openEntry('Contributors');
+        await expect(contributors.rows()).toHaveCount(2, {timeout: T});
+        edit = await contributors.openEdit('Kea Moana');
+        await expect(contributors.typeRadio(edit, 'Person')).toBeChecked();
+        await expect(contributors.control(edit, 'givenName-en')).toHaveValue('Kea');
+        await expect(contributors.control(edit, 'email')).toHaveValue('');
+        await contributors.saveRefused(
+            edit,
+            contributors.fieldError(contributors.fieldByName(edit, 'email')).filter({hasText: 'This field is required.'})
+        );
+        await contributors.closePanel(edit);
+
+        // The copies exported {OJS}: B's "Puffin colony notes" and "Kea
+        // notes" exported: Ada Lovelace's ORCID iD, "ANONYMOUS" for the
+        // Anonymous contributor's name, and no ORCID iD for Kea Trust,
+        // whose element is there (Rule 20c).
+        await nativeB.goto();
+        await nativeB.openExportTab();
+        await nativeB.list.box(PUFFIN).check();
+        await nativeB.list.box(KEA).check();
+        const copiesExported = await nativeB.list.pressExport(nativeB);
+        const copiesXml = (await nativeB.download(copiesExported)).text;
+        fs.writeFileSync(testInfo.outputPath('copies-from-b.xml'), copiesXml);
+        const authors = authorsInFile(copiesXml);
+        const named = (type, name) => authors.filter((x) => x.type === type && x.givenName === name);
+        expect(named('PERSON', 'Ada'), 'Ada Lovelace in the file').toHaveLength(1);
+        expect(named('PERSON', 'Ada')[0].xml).toContain(`<orcid>${ORCID}</orcid>`);
+        expect(named('ANONYMOUS', 'ANONYMOUS'), 'the Anonymous contributor named "ANONYMOUS"').toHaveLength(1);
+        expect(named('ORGANIZATION', 'Kea Trust'), 'Kea Trust in the file').toHaveLength(1);
+        expect(named('ORGANIZATION', 'Kea Trust')[0].xml).not.toContain('<orcid>');
 
         // Control: A's Dashboard still lists "Okapi field notes" in
         // "Submission" (Side effects bullet 3); no email from the import
