@@ -6,7 +6,9 @@
 //   person-noemail PERSON, no <email>                                    → refused, missingEmail
 //   person-emptyemail PERSON, <email></email>                            → refused, missingEmail
 //   person-orcid  PERSON with email and <orcid>                          → imported with the ORCID (control)
-//   PROBE_FEATURE=sync PROBE_AGENT=r13624 node bin/probe.js ojs shared/playwright/checks/sync/pkp-lib-13624/import.js
+//   PROBE_FEATURE=sync PROBE_AGENT=r13624 node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13624/import.js
+// OJS exports an `article`, OMP a `monograph`, OPS a `preprint` (run on all three since the 2026-11-24 sync,
+// OMP and OPS the controls until their lib/pkp pointers move past pkp-lib d03b7729f6).
 // Facts: import-<app>.json, the XML files beside it.
 const fs = require('fs');
 const path = require('path');
@@ -33,7 +35,8 @@ forEachApp(async (app) => {
             {username: `${t}au`, givenName: 'Ada', familyName: 'Author', email: `${t}au@mail.test`, roles: ['author']}]});
     const S = await app.api.createSubmission({tag: `${t}s`, context: t, submitter: `${t}au`, title: `Import ${t}`});
     const exp = outFile('import-export.xml');
-    facts.export = cli(app, ['export', exp, t, 'article', String(S.submissionId)]);
+    const entity = {ojs: 'article', omp: 'monograph', ops: 'preprint'}[app.name];
+    facts.export = cli(app, ['export', exp, t, entity, String(S.submissionId)]);
     const xml = fs.readFileSync(exp, 'utf8');
     const author = xml.match(/<author [\s\S]*?<\/author>/)[0];
     facts.exportedAuthor = author.replace(/\s+/g, ' ');

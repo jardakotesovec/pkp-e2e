@@ -29,6 +29,10 @@
  * - putPublication() — a publication's fields saved through the
  *   publications API as the signed-in user, the spec's named workaround
  *   for fields no scenario key sets (U63 S4's three statements).
+ * - addContributor() — a contributor added through the contributors API
+ *   as the signed-in user, the request the "Add Contributor" form sends:
+ *   the spec's named workaround for the "Organization or group" and
+ *   "Anonymous" contributors no scenario key adds (U63 S4 {OJS}).
  * - PubMedPage (a ToolPage) — "PubMed XML Export Plugin" {OJS}: the
  *   "NLM Title Abbreviation" form and the two export lists.
  * - DoajPage (a ToolPage) — "DOAJ Export Plugin" {OJS}: the Settings form,
@@ -991,15 +995,31 @@ exports.UserRolesPage = UserRolesPage;
  * @param {Record<string, unknown>} data e.g. `{dataAvailability: {en: '<p>…</p>'}}`
  */
 async function putPublication(page, contextPath, {submissionId, publicationId}, data) {
-    const url = `/index.php/${contextPath}/api/v1/submissions/${submissionId}/publications/${publicationId}`;
+    return apiInSession(page, contextPath, 'PUT', `submissions/${submissionId}/publications/${publicationId}`, data);
+}
+exports.putPublication = putPublication;
+
+/**
+ * Send a request to the context's REST API as the signed-in user of
+ * `page` (a backend page of the context, whose `pkp.currentUser` carries
+ * the CSRF token). Returns the answer's status and body.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} contextPath
+ * @param {string} method
+ * @param {string} path below `api/v1/`
+ * @param {unknown} [data] sent as JSON
+ */
+async function apiInSession(page, contextPath, method, path, data) {
+    const url = `/index.php/${contextPath}/api/v1/${path}`;
     await expect.poll(() => page.evaluate(() => Boolean(/** @type {any} */ (window).pkp?.currentUser?.csrfToken)), {timeout: T}).toBe(true);
     return page.evaluate(
-        async ({url, data}) => {
+        async ({url, method, data}) => {
             const token = /** @type {any} */ (window).pkp.currentUser.csrfToken;
             const res = await fetch(url, {
-                method: 'PUT',
+                method,
                 headers: {'Content-Type': 'application/json', 'X-Csrf-Token': token},
-                body: JSON.stringify(data),
+                ...(data === undefined ? {} : {body: JSON.stringify(data)}),
                 credentials: 'same-origin',
             });
             const text = await res.text();
@@ -1011,10 +1031,37 @@ async function putPublication(page, contextPath, {submissionId, publicationId}, 
             }
             return {status: res.status, body};
         },
-        {url, data}
+        {url, method, data}
     );
 }
-exports.putPublication = putPublication;
+
+/**
+ * Add a contributor to a publication through the contributors API, as the
+ * signed-in user of `page`: the request the "Add Contributor" form sends,
+ * the spec's named workaround for the contributor types `contributors[]`
+ * does not make (U63 footnote sc, S4's "Organization or group" and
+ * "Anonymous" {OJS}, the way `checks/U63/S11972/s11972.js` adds them).
+ * Without `contributorRoles` in `data` the contributor takes the roles of
+ * the publication's first contributor ("Author" on a seeded submission).
+ * Returns the answer's status and body.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} contextPath
+ * @param {{submissionId: number, publicationId: number}} ids
+ * @param {Record<string, unknown>} data e.g. `{contributorType: 'ANONYMOUS'}`
+ */
+async function addContributor(page, contextPath, {submissionId, publicationId}, data) {
+    const path = `submissions/${submissionId}/publications/${publicationId}/contributors`;
+    let body = data;
+    if (!('contributorRoles' in data)) {
+        const list = await apiInSession(page, contextPath, 'GET', path);
+        expect(list.status, `the contributors list: ${JSON.stringify(list.body).slice(0, 300)}`).toBe(200);
+        const items = /** @type {any} */ (list.body).items || list.body;
+        body = {contributorRoles: (items[0].contributorRoles || []).map((/** @type {any} */ r) => r.id), ...data};
+    }
+    return apiInSession(page, contextPath, 'POST', path, body);
+}
+exports.addContributor = addContributor;
 
 // ---------------------------------------------------------------------------
 // PubMed XML Export Plugin {OJS}
@@ -1453,3 +1500,50 @@ function nativeWithSeries(xml, {from, to, path, title}) {
     return x.replace(/(\s*)<\/publication>/, `$1  ${series}$1</publication>`);
 }
 exports.nativeWithSeries = nativeWithSeries;
+
+/**
+ * A Native XML file with its contributors edited (U63 footnote sc, S4's
+ * "Kea notes" {OJS}, the way `checks/U63/S11972/s11972.js` writes its
+ * variants): the export's submission renamed `to`, then each `<author>`
+ * edited by its `contributor_type` ("PERSON", "ORGANIZATION",
+ * "ANONYMOUS"): `names` replaces whole element texts (`{Ada: 'Kea'}`),
+ * `dropEmail` removes its `<email>`, `addOrcid` adds an `<orcid>` before
+ * its `<contributor_roles>`, `remove` drops the `<author>`.
+ *
+ * @param {string} xml a one-submission export
+ * @param {{from: string, to: string, edits: Record<string, {names?: Record<string, string>, dropEmail?: boolean, addOrcid?: string, remove?: boolean}>}} what
+ */
+function nativeWithContributorsEdited(xml, {from, to, edits}) {
+    return xml
+        .split(from)
+        .join(to)
+        .replace(/\s*<author\s[^>]*contributor_type="([A-Z]+)"[^>]*>[\s\S]*?<\/author>/g, (author, type) => {
+            const edit = edits[type];
+            if (!edit) return author;
+            if (edit.remove) return '';
+            let a = author;
+            for (const [old, now] of Object.entries(edit.names || {})) a = a.split(`>${old}<`).join(`>${now}<`);
+            if (edit.dropEmail) a = a.replace(/\s*<email>[^<]*<\/email>/, '');
+            if (edit.addOrcid) a = a.replace(/(\s*)<contributor_roles>/, `$1<orcid>${edit.addOrcid}</orcid>$1<contributor_roles>`);
+            return a;
+        });
+}
+exports.nativeWithContributorsEdited = nativeWithContributorsEdited;
+
+/**
+ * The `<author>` elements of an exported file, each as its text, its
+ * `contributor_type` and its `<givenname>` (an organization's name, an
+ * anonymous contributor's "ANONYMOUS"), for reading what a copy's export
+ * carries per contributor (U63 Rule 20c).
+ *
+ * @param {string} xml
+ * @returns {{type: string, givenName: string, xml: string}[]}
+ */
+function authorsInFile(xml) {
+    return [...xml.matchAll(/<author\s[^>]*contributor_type="([A-Z]+)"[^>]*>[\s\S]*?<\/author>/g)].map((m) => ({
+        type: m[1],
+        givenName: ((m[0].match(/<givenname[^>]*>([^<]*)<\/givenname>/) || [])[1] || '').trim(),
+        xml: m[0],
+    }));
+}
+exports.authorsInFile = authorsInFile;

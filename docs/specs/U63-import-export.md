@@ -210,15 +210,20 @@ Sync", "Error"), and a "Search" button. That "Search" narrows the list
 10a. **Error lines on a clean file.** Even the app's own exported
     file lists, under "Errors occured:", on a journal "The issue
     identification element is missing for the article "{title}"." for
-    an article in no issue and, imported into another journal, press
-    or server, "The author '{name}' does not have any contributor
-    role. Defaults to AUTHOR." for every contributor, whose role then
-    reads "Author". Everything is still imported ⚠ [A8](#a8).
+    an article in no issue and, only when imported into a journal,
+    press or server other than its own, "The author '{name}' does not
+    have any contributor role. Defaults to AUTHOR." for every
+    contributor, whose role then reads "Author". An "Anonymous"
+    contributor is named there by the number the file gives it ("The
+    author '78' …"), a number the manager meets nowhere else. On a
+    press and a preprint server, an "Organization or group" with no
+    email also gets Rule 12b's email line.
+    Everything is still imported ⚠ [A8](#a8).
     On a press, the press's own exported file also lists, under
     "Warnings encountered:" and "Publication", one line "Unknown
     element sequence" for each book that belongs to a series; the
     books are imported, each still in its series ⚠ [OMP5](#omp5).
-    <sup>f</sup>
+    <sup>f</sup> <sup>z</sup>
 11. **A failed import keeps nothing.** When the file does not match the
     format, or the import stops on an error part-way, the tab reads "The
     process failed. Check below for errors/warnings.", then the "Errors
@@ -240,7 +245,8 @@ Sync", "Error"), and a "Search" button. That "Search" narrows the list
     being the contributor's given name alone: "The author Ada does not
     have a country." for "Ada Lovelace" (how a Country goes missing:
     [Contributors and affiliations](U41-contributors-and-affiliations.md#a16)).
-    <sup>f</sup> <sup>td18</sup>
+    For an organization, {name} is its name; an "Anonymous"
+    contributor gets no such line. <sup>f</sup> <sup>td18</sup> <sup>z</sup>
 12a. **An unknown section.** An article or preprint whose section the
     journal lacks ends in an empty results tab, with no text. The
     submission is kept with no version: its Dashboard row shows only its
@@ -250,6 +256,19 @@ Sync", "Error"), and a "Search" button. That "Search" narrows the list
     encountered:" and the line "Unknown series {path}", and the press
     gains that series with the file's title [OMP3](#omp3).
     <sup>f</sup> <sup>td18</sup>
+12b. **A contributor with no email.** A contributor whose "Contributor
+    Type" is "Person" and whose email the file leaves out, or leaves
+    empty, is imported without one. The success text is then followed
+    by "Errors occured:" and "The author {name} does not have an
+    email.", {name} as in Rule 12's country line ("The author Ada does
+    not have an email."). On the copy's contributors list, that
+    contributor's "Edit" window refuses "Save" until an email is typed
+    ([Contributors and affiliations](U41-contributors-and-affiliations.md)).
+    An "Organization or group" or "Anonymous" contributor needs no
+    email and gets no such line, but a press and a preprint server do
+    not follow this yet for an organization: there one with no email
+    gets "The author {organization name} does not have an email.".
+    <sup>z</sup>
 13. **No file, or not an XML file.** "Import" pressed before any file
     is up adds no results tab and changes nothing. <sup>td5</sup> A file
     that is not XML at all ends as a failed import (Rule 11): its
@@ -324,9 +343,9 @@ Sync", "Error"), and a "Search" button. That "Search" narrows the list
     missing details.", "Press Settings" a link to Settings › Press
     [OMP2](#omp2). <sup>j</sup> <sup>td12</sup>
 20. **What the file carries.** Each submission's versions with their
-    metadata, contributors, galleys (publication formats on a press)
-    and files, apart from the files of Rule 16a, so that Rule 10 can
-    rebuild it elsewhere. A title's
+    metadata, contributors (Rule 20c), galleys (publication formats on
+    a press) and files, apart from the files of Rule 16a, so that Rule
+    10 can rebuild it elsewhere. A title's
     prefix comes back doubled: the imported copy of a submission whose
     "Prefix" (Publication › "Title & Abstract") is "The" is titled "The
     The …" ⚠ [A20](#a20). Which identifiers travel is described in
@@ -359,6 +378,16 @@ Sync", "Error"), and a "Search" button. That "Search" narrows the list
     the press's four ONIX details (Rule 19) are filled, the export of
     such a book fails the same way and writes no file ⚠ [OMP6](#omp6).
     <sup>y</sup>
+20c. **Contributors in the file.** Each contributor travels with its
+    "Contributor Type", and the imported copy has each with that type:
+    a "Person" with its names, email and ORCID iD; an "Organization or
+    group" with its name and country; an "Anonymous" contributor with
+    no name of its own (the file writes "ANONYMOUS" in its place). Only
+    a Person keeps the file's ORCID iD: an Anonymous contributor's is
+    dropped, and on a journal an organization's, with no results line;
+    a press and a preprint server, not following this yet, keep an
+    organization's. Their "Edit" window has no "ORCID iD" field, so
+    the copy's own export shows it kept or dropped. <sup>z</sup>
 
 **Users XML Plugin** {OJS OMP}
 
@@ -940,13 +969,20 @@ journal to another) with throwaway accounts. <sup>sc</sup>
    contributor, whose Country is empty, and one file, its three
    statements each reading "Okapi notes in the field, see PKP & more",
    with "notes" in bold, "in the field" in italics and "PKP" a link to
-   https://pkp.sfu.ca, B holding none, and, as files on the computer, a
-   Native XML file of an
+   https://pkp.sfu.ca, and a submitted submission "Puffin colony
+   notes" whose contributors are the "Person" Ada
+   Lovelace, with her email and the ORCID iD
+   https://orcid.org/0000-0002-1825-0097, the "Organization or group"
+   Puffin Trust, with the Country "Canada" and no email, and an
+   "Anonymous" contributor {OJS}, B holding none, and, as files on the
+   computer, a Native XML file of an
    article placed in an issue of volume 99, number 9, year 2099, which B
    lacks {OJS}, one of a monograph naming a series with the path "zzz"
-   and the title "Zed Series", which B lacks {OMP}, and one holding a
+   and the title "Zed Series", which B lacks {OMP}, one holding a
    submission "Wombat notes" followed by an element the format does not
-   know.
+   know, and one holding a submission "Kea notes" whose contributors are
+   the "Person" Kea Moana, with no email or Country, and the
+   "Organization or group" Kea Trust, with an ORCID iD {OJS}.
 
    - **A's file**: on A's "Native XML Plugin" page tick "Okapi field
      notes" on the export tab, press "Export Articles" ("Export
@@ -993,6 +1029,34 @@ journal to another) with throwaway accounts. <sup>sc</sup>
      Check below for errors/warnings.", then "Errors occured:" and
      "Validation errors:", each followed by lines. B's Dashboard has no
      "Wombat notes" (Rule 11).
+   - **Contributors of three types** {OJS}: on A's "Export Articles"
+     tab tick "Puffin colony notes" alone, press "Export Articles", then
+     "Download Exported File". On B's "Import" press "Change File",
+     choose that file and press "Import": another "Import Results" tab
+     opens with the success text of "Import" and the line ""{number}" -
+     "Puffin colony notes"". No line under it reads "The author Puffin
+     Trust does not have an email." (Rule 12b); its other lines are left
+     unread [A8](#a8). On the copy's workflow screen in B, open
+     "Contributors" under Publication
+     ([Contributors and affiliations](U41-contributors-and-affiliations.md))
+     and press "Edit" on each contributor in turn: each has the
+     "Contributor Type" it had in A: "Person" for Ada Lovelace, with her
+     given name, family name and email as in A; "Organization or group"
+     for Puffin Trust, with its name and the Country "Canada"; and
+     "Anonymous" for the one with no name of its own (Rule 20c).
+   - **A Person with no email** {OJS}: back on B's "Import", press
+     "Change File", choose the "Kea notes" file and press "Import":
+     another "Import Results" tab opens with the success text, the line
+     ""{number}" - "Kea notes"" and, among the lines under "Errors
+     occured:", "The author Kea does not have an email." On that copy's
+     "Contributors" press "Edit" on Kea Moana: the email box is empty.
+     Press "Save": it is refused with "This field is required." under
+     the email box (Rule 12b).
+   - **The copies exported** {OJS}: on B's "Export Articles" tab tick
+     "Puffin colony notes" and "Kea notes", press "Export Articles", then
+     "Download Exported File": the file holds Ada Lovelace's ORCID iD,
+     "ANONYMOUS" in place of the Anonymous contributor's name, and no
+     ORCID iD for Kea Trust (Rule 20c).
    - **Control**: A's Dashboard still lists "Okapi field notes",
      unchanged by the export (Side effects bullet 3). <sup>sc</sup>
 
@@ -1480,6 +1544,12 @@ Left out of the scenarios above, by reason:
     DOAJ "Articles" list's "Article Title" and "Authors" search
     finding an article typed in lower case; and its issue link opening
     the window headed with the issue's name {OJS} [report 2026-10-01]
+  - scenario 4's "Contributors of three types", "A Person with no
+    email" and "The copies exported" on a press and a preprint server,
+    where an "Organization or group" with no email gets "The author
+    {organization name} does not have an email." and keeps the file's
+    ORCID iD (Rules 10a, 12b, 20c): waits for OMP and OPS `main` to
+    take pkp-lib#11972 [upstream 2026-11-24]
 - **Nothing new to test**:
   - "Import" pressed with no file up, and with a file that is not XML
     (Rule 13)
@@ -1494,6 +1564,14 @@ Left out of the scenarios above, by reason:
     "Results" tab (Fields)
   - a Native XML file exported from a 3.5 installation, refused as
     scenario 4's file that does not match the format (Rule 11)
+  - a file whose "Person" contributor's email is left empty rather than
+    left out: the line of scenario 4's "A Person with no email" (Rule
+    12b)
+  - a file whose "Anonymous" contributor carries an ORCID iD, dropped
+    as Kea Trust's is in scenario 4 (Rule 20c)
+  - the country line of an "Organization or group" with no Country,
+    naming it by its name, and none for an "Anonymous" contributor: the
+    line scenario 4's contributor with no Country reads (Rule 12)
   - the DOAJ list past one page, and its "Items per page" (Rule 36)
   - the press's ONIX details all filled, with no reminder {OMP} (Rule
     19; Settings bullet 7)
@@ -3082,9 +3160,68 @@ file imported back ("The import completed successfully. The following
 items were imported:", "Submission", `-"21" - "{title}"`); OMP: note
 f-omp6. Kept script: `shared/playwright/checks/U63/H19/h19.js`.
 
+<a id="fn-z"></a>
+**z** — Rules 10a (the Anonymous contributor's line), 12, 12b and 20c.
+`NativeXmlPKPAuthorFilter` (lib/pkp `plugins/importexport/native/filter/`)
+sets the contributor's type from the `contributor_type` attribute; for
+an Anonymous contributor it skips `<givenname>`, `<affiliation>`,
+`<rorAffiliation>`, `<url>` and `<biography>`, and keeps `<orcid>`
+only for `ContributorType::getTypesWithOrcid()` (Person alone);
+`<email>` is stored for every type, an empty one as null. It then adds
+`plugins.importexport.common.error.missingEmail` for a Person with no
+email, `missingCountry` for any type but Anonymous, and
+`noContributorRole`, each naming `getLocalizedGivenName()`, else the
+organization name, else the file's `<author id>`: so an Anonymous
+contributor's role line carries that number. The export,
+`PKPAuthorNativeXmlFilter`, writes `contributor_type`, a Person's
+`<givenname>` and `<familyname>`, an Organization's name as
+`<givenname>`, an Anonymous contributor's `<givenname>` as "ANONYMOUS"
+in the journal's primary language, then `<country>`, `<email>`,
+`<url>` and `<orcid>` where the contributor has them (Rule 20c's
+reading of an organization's iD in the copy's export is this code,
+not driven). The Person-only
+email and ORCID iD came with pkp/pkp-lib#11972 (merged 2026-11-23,
+lib/pkp `d03b7729f6` and `73bb87216e`). OJS `main` has it; OMP and OPS
+`main` point lib/pkp at `3ea73a1a7e`, before it, where `missingEmail`
+covers every type but Anonymous and `<orcid>` is dropped for an
+Anonymous contributor alone. Live-probed 2026-11-24, OJS `6ce58ddbb2`
+(lib/pkp `8096e67cd2`), OMP `05c0fee47` and OPS `a80a5decc1` (lib/pkp
+`3ea73a1a7e`), two runs each, as a scratch manager on the "Import" tab
+and from the command line (note y), each file a scratch submission's
+export with its one contributor edited: a Person with no `<email>`,
+and one with `<email></email>`, imported (one submission added each)
+with the contributor and no email (OMP and OPS store the empty one as
+an empty text), "Errors occured:", "Submission", "The author Ada does
+not have an email." and the country line; an Organization with no
+`<email>`, and one with an `<orcid>`, on OJS with the country line
+("The author Imported Org does not have a country.") and no email
+line, the iD dropped, on OMP and OPS also "The author Imported Org does
+not have an email." and the iD kept; an Anonymous contributor with
+`<email>` and `<orcid>` and no `<country>`: no email or country line,
+the role line "The author '72' does not have any contributor role.
+Defaults to AUTHOR." (the file's `<author id="72">`), the iD dropped,
+the email kept; a Person's `<orcid>` kept. The imported Person's
+"Edit" window, "Save" pressed: "This field is required." under Email
+(and under Country), no request sent. A scratch submission with a
+Person (email, ORCID iD), an Organization ("Org Without Email",
+Country Canada, no email) and an Anonymous contributor, exported: the
+three `<author>` elements as above, the Organization's with
+`<country>CA</country>` and no `<email>`, the Anonymous one's
+`<givenname>ANONYMOUS</givenname>` alone; imported into a second
+journal, the copy held the three with their types, the Person's email
+and iD, the Organization's name and country, the Anonymous
+contributor's name empty; the results read the country line for "Ada",
+on OMP and OPS also "The author Org Without Email does not have an
+email.", and three role lines, the third "The author '78' …" (OJS).
+Kept scripts: `shared/playwright/checks/U63/S11972/s11972.js` and
+`shared/playwright/checks/sync/pkp-lib-13624/import.js`.
+
 <a id="fn-sc"></a>
 **sc** — Scenarios. Scenarios 1 to 4 run on OJS, OMP and OPS, 5, 6,
-11 and 12 on OJS and OMP, 7 to 10 on OJS. Scenario 2 reads `publicknowledge`
+11 and 12 on OJS and OMP, 7 to 10 on OJS; scenario 4's "Contributors
+of three types", "A Person with no email" and "The copies exported"
+run on OJS alone until OMP's and OPS's `lib/pkp` take
+pkp/pkp-lib#11972 (note z). Scenario 2 reads `publicknowledge`
 with the roster: `sectioneditor.ana`, `copyeditor.carla` (OPS
 `assistant.rita`, Editorial Board Member), `reviewer.julia` (OJS, OMP),
 `author.alex`, `reader.rosa`, and `manager.maya` for its control, each
@@ -3119,7 +3256,21 @@ since no submission key sets `dataAvailability` or `fundingStatement`; the three
 from A's export, the way `shared/playwright/checks/U63/K2/k2.js` writes
 them (an `<issue_identification>` of volume 99, number 9, year 2099; a
 `<series>` with path `zzz` and title "Zed Series"; an unknown element
-after the first submission). Scenario 5: `users[]` with the `author`
+after the first submission). Scenario 4 on OJS: "Puffin colony
+notes" a `POST scenarios/submission` submitted by a throwaway `author`
+named Ada Lovelace, with
+`author: {orcid: 'https://orcid.org/0000-0002-1825-0097', orcidIsVerified: false}`,
+its "Organization or group" (`contributorType: 'ORGANIZATION'`,
+`organizationName`, `country: 'CA'`, no email) and "Anonymous"
+(`contributorType: 'ANONYMOUS'`) contributors added through the
+contributors API as A's manager, the request the "Add Contributor"
+form sends, the way `shared/playwright/checks/U63/S11972/s11972.js`
+adds them, since `contributors[]` makes a Person alone; the "Kea notes"
+file written by the test from A's export of "Puffin colony notes", the
+way that script writes its variants: the title and the two names
+replaced, the Person's `<email>` removed, an `<orcid>` added to the
+organization's `<author>` and the Anonymous one's `<author>` removed.
+Scenario 5: `users[]` with the `author`
 "kiwi"; the two users files written the way `K3/k3.js` writes them, with
 `<user_groups>` defining each role named, `<date_registered>` and a
 `<masthead>` per role, which the import needs (A13), and wren's password
