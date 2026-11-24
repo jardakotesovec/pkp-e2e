@@ -4657,7 +4657,7 @@ pkp/omp#2565, pkp/ops#1496 on 3.5; pkp/ojs#6051 on `ore`). Before it
 built the first ticked kind's branch on a `1 = 0` query, so a journal
 missed galley DOIs, a press its books' own DOIs, and a preprint server
 every DOI (a 500 while only "Preprints" was ticked). Walked 2026-11-06
-at the PR heads and again WALKDATE at the merged tips (MERGEDTIPS), on
+at the PR heads and again 2026-11-24 at the merged tips (OJS `6ce58ddbb2`, OMP `05c0fee47a`, OPS `a80a5decc1` on `main`; `1c3c1eba08`, `20a9f79d18`, `227f0b49f8` on 3.5; OJS `3ef13cb7fb` on `ore`, loaded with `main`'s dataset), on
 fresh dataset fleets with `NEIGHBOUR=1`: A by its own DOI, B by its
 galley's or format's DOI, "10.1234/" both, the editorial dashboard's
 "Search submissions" A (on 3.5 through its `_submissions` request); a
