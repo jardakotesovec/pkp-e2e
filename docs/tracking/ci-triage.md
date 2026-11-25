@@ -1129,6 +1129,14 @@ trips.
   meeting" (the mail itself is not in the trace). The PR does not touch
   the delete or the job's "announcement was removed" guard, and the test
   ran green three times alone on the VM at the same merge. Not diagnosed.
+  Third sighting 2026-11-25 (OPS 1/3 serial, PHP 8.3 PostgreSQL, run
+  [45680689981](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45680689981),
+  the PR review of pkp-lib#13805 round 3, a PDF-header change in the
+  Body Text editor that touches no announcement or mail code): the same
+  "Call for papers" / "Cancelled meeting" at line 252, green on the
+  retry; the failed try's trace is in the run's artifact
+  `playwright-artifacts-ops-1`. The watch condition is met: the
+  diagnosis below is the housekeeping session's.
   **Watch condition**: a third sighting; then read the mail catcher's
   messages for the tag (which announcement id each carries) and the
   `jobs`/`failed_jobs` rows after the drain.

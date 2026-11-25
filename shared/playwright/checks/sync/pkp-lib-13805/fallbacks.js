@@ -6,6 +6,8 @@
 //   F3 a site administrator with no role in the journal (admin's Journal Manager membership removed): the preview's
 //      issue line on submission 9, and GET issues/2
 //   F4 the journal's publishing mode "none" (publishingMode 2), as dbarnes: the same
+//   F5 (round 3) submission 15 in French with no French title or abstract: the English title and abstract
+//   F6 (round 3) the French title and abstract put back: the French ones
 // Run: npm run fleet-prep -- --feature pr-13805 --dataset --reset --apps ojs
 //      PROBE_FEATURE=pr-13805 PROBE_AGENT=pr PROBE_RUN=<side> node bin/probe.js ojs <this file>
 const {forEachApp, launch, signIn, signOut, record, sql} = require('../../../probe');
@@ -73,6 +75,16 @@ forEachApp(async (app) => {
         const p16 = (await call(page, 'GET', 'submissions/15/publications/16')).json;
         fact('F2 publication 16', {locale: p16?.locale, keywords: p16?.keywords, authors: (p16?.authors || []).map((a) => ({given: a.givenName, aff: a.affiliations?.map((x) => x.name)}))});
         await header(15, 16, 'F2');
+
+        // F5 (round 3, ui-library fbeb74d1df): the same French submission with its French title removed, the
+        // English title and abstract only: both fall back to the journal's primary language (en)
+        sql(app, `delete from publication_settings where publication_id = 16 and locale = 'fr_CA' and setting_name in ('title', 'abstract', 'subtitle', 'prefix')`);
+        const p16b = (await call(page, 'GET', 'submissions/15/publications/16')).json;
+        fact('F5 publication 16', {locale: p16b?.locale, title: p16b?.title, fullTitle: p16b?.fullTitle, abstract: flat(JSON.stringify(p16b?.abstract), 300)});
+        await header(15, 16, 'F5');
+        // F6: an abstract in French and a title in French only: the French ones, no English mixed in
+        sql(app, `insert into publication_settings (publication_id, locale, setting_name, setting_value) values (16, 'fr_CA', 'title', 'Les maladies de l''igname'), (16, 'fr_CA', 'abstract', '<p>Résumé en français.</p>')`);
+        await header(15, 16, 'F6');
         await signOut(page);
 
         sql(app, `delete from user_user_groups where user_id = (select user_id from users where username = 'admin')
