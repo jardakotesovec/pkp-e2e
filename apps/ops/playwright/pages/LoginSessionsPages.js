@@ -255,7 +255,8 @@ exports.LoginAsDialog = class LoginAsDialog extends BasePage {
 
 /**
  * The Users & Roles "Current Users" table and its row menu (a headlessui
- * menu whose button is labelled by a raw locale key, `##userAccess.management.options##`):
+ * menu whose button is named "Options" since pkp/ui-library#1065, for
+ * pkp/pkp-lib#13527; before it the raw key `##userAccess.management.options##`):
  * the column headers, a row by its text, open a row's menu, read its items,
  * close it, or choose one.
  */
@@ -279,7 +280,7 @@ exports.UsersRolesTable = class UsersRolesTable extends BasePage {
 
     /** @param {import('@playwright/test').Locator} row */
     async openMenu(row) {
-        await row.getByRole('button', {name: /management.options|^More Actions$/i}).click();
+        await row.getByRole('button', {name: /^Options$|management.options|^More Actions$/i}).click();
         await expect(this.items.first()).toBeVisible();
     }
 
