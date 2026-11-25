@@ -116,13 +116,13 @@ class UsersAccessPage {
 
     /**
      * Open the user row's ellipsis menu and pick an action. The dropdown's
-     * accessible name currently renders as a raw locale token
-     * (##userAccess.management.options## — spec finding A7), so match either
-     * the raw token or the fixed translation, without asserting either.
+     * accessible name is "Options" since pkp/ui-library#1065
+     * (pkp/pkp-lib#13527; before it the raw ##userAccess.management.options##
+     * token, U53 A5, retired), so match either, without asserting either.
      */
     async userRowAction(rowText, actionLabel) {
         await this.userRow(rowText)
-            .getByRole('button', {name: /management[. ]options|^More Actions$/i})
+            .getByRole('button', {name: /^Options$|management[. ]options|^More Actions$/i})
             .click();
         await this.page.getByRole('menuitem', {name: actionLabel}).click();
     }

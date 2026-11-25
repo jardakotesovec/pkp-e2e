@@ -55,14 +55,15 @@ exports.UsersRolesPage = class UsersRolesPage extends BasePage {
     /**
      * Open a row's actions menu and click one item. Works for both tables:
      * the invitations menu button is named "Invitation management options",
-     * the users one renders the raw ##userAccess.management.options## token
-     * (register A7) — the regex matches both.
+     * the users one "Options" since pkp/ui-library#1065 (pkp/pkp-lib#13527;
+     * before it the raw ##userAccess.management.options## token, U53 A5,
+     * retired) — the regex matches all of them.
      *
      * @param {import('@playwright/test').Locator} row
      * @param {string|RegExp} itemLabel
      */
     async rowAction(row, itemLabel) {
-        await row.getByRole('button', {name: /management.options|^More Actions$/i}).click();
+        await row.getByRole('button', {name: /^Options$|management.options|^More Actions$/i}).click();
         await this.page.getByRole('menuitem', {name: itemLabel}).click();
     }
 
