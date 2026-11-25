@@ -1119,7 +1119,19 @@ trips.
   MySQL, run 43340246182, 2026-11-13; green on the retry). The
   manager's mail subject expected "Call for papers", received
   "Cancelled meeting" (`apps/ops/playwright/tests/serial/U12-announcements.spec.js:252`).
-  **Watch condition**: a second sighting.
+  Second sighting 2026-11-25 (OPS 1/3, PHP 8.3 PostgreSQL, run
+  [45672464499](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45672464499),
+  the PR review of pkp-lib#10128 at pkp-lib `pull/13248/merge`), red on
+  the first try and the retry. The retry's trace: "Board meeting",
+  "Call for papers" and "Cancelled meeting" posted as announcements 4, 5
+  and 6, then `DELETE announcements/6` answered 200, all before
+  `runJobs()`; the manager's newest mail with the tag was still "Cancelled
+  meeting" (the mail itself is not in the trace). The PR does not touch
+  the delete or the job's "announcement was removed" guard, and the test
+  ran green three times alone on the VM at the same merge. Not diagnosed.
+  **Watch condition**: a third sighting; then read the mail catcher's
+  messages for the tag (which announcement id each carries) and the
+  `jobs`/`failed_jobs` rows after the drain.
 
 - **OPS U35 S6 "Notify" message read before the template fills it**
   (OPS, PHP 8.3 MySQL, run 43340246182, 2026-11-13; green on the

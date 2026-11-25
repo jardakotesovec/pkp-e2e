@@ -1,0 +1,39 @@
+--- a/lib/pkp/classes/mail/mailables/AnnouncementNotify.php
++++ b/lib/pkp/classes/mail/mailables/AnnouncementNotify.php
+@@ -89,7 +89,8 @@
+                     $this->context->getData('urlPath'),
+                     'announcement',
+                     'view',
+-                    [$this->announcement->getAttribute('announcementId')]
++                    [$this->announcement->getAttribute('announcementId')],
++                    urlLocaleForPage: $locale
+                 ),
+             ]
+         );
+--- a/classes/mail/variables/IssueEmailVariable.php
++++ b/classes/mail/variables/IssueEmailVariable.php
+@@ -56,12 +56,12 @@
+         [
+             static::ISSUE_ID => $this->issue->getId(),
+             static::ISSUE_IDENTIFICATION => htmlspecialchars($this->issue->getIssueIdentification()),
+-            static::ISSUE_URL => $this->getIssueUrl(),
++            static::ISSUE_URL => $this->getIssueUrl($locale),
+             static::ISSUE_TOC => $this->getIssueToc(),
+         ];
+     }
+ 
+-    protected function getIssueUrl(): string
++    protected function getIssueUrl(?string $locale = null): string
+     {
+         return Application::get()->getDispatcher()->url(
+             Application::get()->getRequest(),
+@@ -69,7 +69,8 @@
+             $this->getContext()->getPath(),
+             'issue',
+             'view',
+-            [$this->issue->getBestIssueId()]
++            [$this->issue->getBestIssueId()],
++            urlLocaleForPage: $locale
+         );
+     }
+ 
