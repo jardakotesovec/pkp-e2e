@@ -13,7 +13,7 @@
  * agents seed (patterns.md parallel lesson 7).
  * Spec: docs/specs/U04-orcid-integration.md
  *
- * Not covered, by register ID: A2 🐞, A4 🐞, A5 🐞, A8 🐞, A11 🐞, A14 🐞,
+ * Not covered, by register ID: A4 🐞, A5 🐞, A8 🐞, A11 🐞, A14 🐞,
  * A15 🐞, A16 🐞, A17 🐞, A18 🐞, A21 🐞, A22 🐞, A23 🐞, OPS2 🐞, A3 ❓,
  * A6 ❓, A7 ❓, A19 ❓, A20 ❓, OPS1 ❓.
  *

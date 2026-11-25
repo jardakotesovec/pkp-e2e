@@ -10,7 +10,7 @@
  * agents seed (patterns.md parallel lesson 7).
  * Spec: docs/specs/U04-orcid-integration.md
  *
- * Deliberately NOT covered (register IDs): A1, A2, A3, A4, A5, A6, A7, A8,
+ * Deliberately NOT covered (register IDs): A1, A3, A4, A5, A6, A7, A8,
  * A11, A13, A14, A15, A16, A17, A18, A19, A20, A21, A22, A23, OJS1, OJS2.
  *
  * Every test seeds its own scratch journal via the scenario endpoints

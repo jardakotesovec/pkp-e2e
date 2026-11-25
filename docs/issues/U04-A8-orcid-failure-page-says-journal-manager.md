@@ -94,9 +94,9 @@ Your ORCID iD could not be verified. The link is no longer valid.
 Please contact the journal manager with your name, ORCID iD, and details of your submission.
 ```
 
-Step 8's page closes with the same sentence (its own failure line is a
-raw code,
-[its own report](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U04-A2-orcid-denied-page-raw-placeholder.md)).
+Step 8's page closes with the same sentence (its own failure line was a
+raw code until `pkp/pkp-lib#13862`, spec U04
+[A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U04-orcid-integration.md#a2), retired).
 On OJS, submission 8 and Elinor Ostrom, the same
 steps close with the same sentence, which fits a journal.
 
@@ -185,7 +185,7 @@ Small: one English string in lib/pkp, tried.
 
 - Kept script:
   [`shared/playwright/checks/issues/orcid-denied-page-raw-placeholder/walk.js`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/orcid-denied-page-raw-placeholder/walk.js),
-  shared with U04 A2 and run from this report's folder too
+  kept from U04 A2 (retired) and run from this report's folder too
   ([`walk.js`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/orcid-failure-page-says-journal-manager/walk.js)):
   `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/orcid-failure-page-says-journal-manager/walk.js`.
   It takes the Steps on the three apps loaded from the default dataset,

@@ -14,7 +14,7 @@
  * Spec: docs/specs/U04-orcid-integration.md
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A1, A2, A3, A4, A5, A6, A8, A13, A18, A19,
+ * of everything else left out): A1, A3, A4, A5, A6, A8, A13, A18, A19,
  * A20.
  *
  * Every test seeds its own scratch press via the scenario endpoints

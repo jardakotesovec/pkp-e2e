@@ -245,8 +245,8 @@ types and what the boxes do belong to
      offers it, is signed straight back in: its next tab press or page
      load opens as the account. One that signed in with the box unticked
      is signed out: a tab press on a Profile page still open there opens
-     nothing but an alert ⚠ [A26](#a26), and its next page load shows the
-     Login page.
+     nothing but the alert "You must be logged in to access this
+     operation.", and its next page load shows the Login page.
    - 6b. **The email.** One message, subject "Confirm account contact email
      change request", is sent to the account's **current** address, not the
      new one ⚠ [A8](#a8); a later request goes to whichever address is
@@ -413,8 +413,8 @@ types and what the boxes do belong to
       on a tab leaves the tab's content area as it last was there (empty
       for a tab not opened there before), with no message, and the page's
       own script fails ⚠ [A25](#a25). Every later press, on a tab or on
-      "Save", is refused with a browser alert reading
-      "##user.authorization.userRequired##" ⚠ [A26](#a26); after OK the
+      "Save", is refused with a browser alert reading "You must be logged
+      in to access this operation."; after OK the
       pressed tab is marked open, showing what it last showed there, and
       nothing is saved. No email is sent. The old
       password stops working immediately, and any outstanding password-reset
@@ -1098,10 +1098,9 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - after an email-change save, a tab press on the Profile page still
     open in another browser signed in with "Keep me logged in" unticked,
-    answered by a sentence saying the user has been signed out instead of
-    "##user.authorization.userRequired##" ([A26](#a26); Rule 6a): the
-    guard, once fixed as the issue report
-    (`docs/issues/U03-A26-session-ended-alert-raw-key.md`) proposes [other 2026-11-04]
+    answered by the alert "You must be logged in to access this
+    operation." (Rules 6a and 10b): the guard for A26, retired by
+    pkp/pkp-lib#13862 [report 2026-11-25]
   - text typed into "Signature" alone, then another tab pressed, asking
     "The data on this form has changed. Do you wish to continue without
     saving?", "Cancel" keeping the text ([A19](#a19); Rule 2c): the
@@ -1194,7 +1193,6 @@ Left out of the scenarios above, by reason:
   - A22 (the Password tab's boxes not named by their labels for a screen reader; Fields, Password tab)
   - A23 (the email-change message greeting by given and family name; Rule 4)
   - A25 (another browser's tab press failing after a password change; Rule 10b)
-  - A26 (a Profile page whose session ended elsewhere answering each tab press and "Save" with "##user.authorization.userRequired##"; Rules 6a and 10b)
   - A27 (an API request with a key that is not in the form of one refused with an unfilled "{$error}"; *Side effects*, "On deleting an API key")
 - **No seed**:
   - no API secret configured: the API Key tab without its button (Rule 12d; `api_key_secret`)
@@ -1236,7 +1234,6 @@ unless its Basis line says otherwise.
 | [A19](#a19) | Text typed only into "Signature", "Mailing Address" or "Bio Statement" is lost with no question when another tab is pressed or the page is reloaded | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | After a newcomer registers with an existing reviewing interest, accounts that save their Roles tab list it twice | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A25](#a25) | After a password change, a page left open in another browser drops its next save or tab press instead of going to the Login page | 🐞 | medium · crash: script | issues (claude), 2026-10-15 — re-verified |
-| [A26](#a26) | A Profile page whose session has ended answers each press with the alert "##user.authorization.userRequired##" | 🐞 | low | issues (claude), 2026-11-02 — re-verified |
 | [A27](#a27) | An API request with a malformed key is refused with "{$error}" where the reason should be | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS2](#ops2) | A preprint server sends the email-change message but its emails list has no "Change Email Address Invitation" row to edit | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | On a preprint server, saving the Profile's Roles tab erases the account's reviewing interests | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
@@ -1595,9 +1592,9 @@ or saves without a reload, and nothing says that the session has ended:
   spinner turning and the list does not change.
 
 What was typed in that first save is not stored; a reload shows the
-Login page. Later presses get alerts that do not say the session has
-ended either ([A26](#a26),
-[→ Login & sessions A16](U01-login-and-sessions.md#a16)).
+Login page. Later presses get the alert "You must be logged in to
+access this operation.", which does not say the session has ended
+either ([→ Login & sessions A16](U01-login-and-sessions.md#a16)).
 
 By the code, the longer forms do the same: the submission wizard's
 first autosave and a decision's "Record Decision" are taken as done, and
@@ -1605,29 +1602,6 @@ a reviewer's review form saves nothing. Every way an account's own
 password changes does this: on the Profile page, under Users & Roles,
 through "Reset Password" from the email, and at sign-in when asked to.
 Basis: probe, 2026-10-15. <sup>[f-a25](#fn-a25)</sup>
-
-<a id="a26"></a>
-**A26 — A Profile page whose session has ended answers each press with the alert "##user.authorization.userRequired##"** · 🐞 · low.
-When the account's session has ended while its Profile page is open in
-a browser, a press there on a tab or on "Save" raises a browser alert
-reading "##user.authorization.userRequired##", a code in every language,
-where a sentence should say that the user has been signed out.
-
-After "OK" the pressed tab becomes the selected one. Its area keeps what
-it showed earlier on this page, or stays empty for a tab not opened
-there yet. A "Save" stores nothing. Only a reload reaches the Login
-page, and what was typed is lost with it.
-
-A Site Administrator's "Expire User Sessions" brings the alert on every
-press. A password change made in another browser brings it on every
-press after the first; the first press fails in another way
-([A25](#a25)).
-An email change saved in another browser brings it on every press in a
-browser that signed in with "Keep me logged in" unticked
-(Rule 6a).
-By the code, a session that expired brings it too. No other page shows
-this code.
-Since: 2012-05-07 (14 years) · Basis: probe, 2026-11-02. <sup>[f-a26](#fn-a26)</sup>
 
 <a id="a27"></a>
 **A27 — An API request with a malformed key is refused with "{$error}" where the reason should be** · 🐞 · low.
@@ -1694,6 +1668,9 @@ lost is only what the person typed.
 Since: 2025-11-27 · Basis: probe, 2026-10-15. <sup>[f-ops3](#fn-ops3)</sup>
 
 ### Retired
+
+<a id="a26"></a>
+**A26 — A Profile page whose session has ended answers each press with the alert "##user.authorization.userRequired##"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13862).
 
 <a id="a24"></a>
 **A24 — The Profile page's Contact tab sometimes logged a script error** · ✅ · retired. Fixed upstream (`pkp/pkp-lib#13381`, for `pkp/pkp-lib#13180`).
@@ -2043,7 +2020,8 @@ alike. Live-probed 2026-10-15 (claim check), OJS, OMP and OPS on `main`
 and OJS and OMP on `stable-3_5_0`, two runs each (the kept script
 `shared/playwright/checks/U03/J15/j15.js`, mode `email`): the second
 browser's tab presses, the first included, each raised a browser alert
-reading "##user.authorization.userRequired##" (A26); after OK the tab
+reading "##user.authorization.userRequired##" (A26, since retired:
+f-a26); after OK the tab
 was marked open, showing the form it held there before (empty for a tab
 never opened there); a "Save" got the same alert and stored nothing. The
 save ends the other sessions by design (`invalidateOtherSessions()`
@@ -2065,7 +2043,7 @@ and OPS on `main`, `rvaca` on PKP's default dataset (the kept script
 after the first browser saved the email change, every press in the
 second browser (the tabs Roles, Contact, Public, Password,
 Notifications, API Key and Identity, then "Save") raised the alert
-"##user.authorization.userRequired##" (A26), and its reload landed on
+"##user.authorization.userRequired##" (A26, since retired), and its reload landed on
 the Login page; the control run, the box left as the page shows it
 (ticked), raised no alert on any press and its reload opened the
 profile. U03 scenario 4 passed on OJS, OMP and OPS
@@ -2575,8 +2553,9 @@ signed out in scenario 5 (its Login page continues to the Contact tab after
 the sign-in; the sign-in uses the username). Scenario 4's second context
 signs in on the Login page with "Keep me logged in" ticked as shown, and
 its third with the box unticked (`LoginPage.signInRemembered`); the third
-is only reloaded, never tab-pressed, since a press there raises A26's
-alert (PRINCIPLES M3). Scenario 5's control is
+is only reloaded, never tab-pressed: the alert a press there raises
+("You must be logged in to access this operation.") is a **Planned**
+guard (Left out), A26 having retired. Scenario 5's control is
 `count()` of the old address's inbox = 3 after the third message is found.
 Scenario 5's context is seeded like scenario 2's
 (`context.supportedLocales` and `context.supportedFormLocales` both
@@ -3201,8 +3180,18 @@ Login page with no alert in both modes. The first browser put the
 account back after each mode (password set back, pending request
 cancelled). The expired and signed-out-elsewhere sessions are read from
 the code: their next request arrives with no user and meets the same
-policy.
-Issue report: [pkp-e2e#990](https://github.com/jardakotesovec/pkp-e2e/issues/990) ([docs/issues/U03-A26-session-ended-alert-raw-key.md](../issues/U03-A26-session-ended-alert-raw-key.md)).
+policy. pkp/pkp-lib#13862 (for pkp/pkp-lib#13527) defines the key in
+`lib/pkp/locale/en/user.po` as "You must be logged in to access this
+operation." (English only; a locale without it still shows the code,
+since a missing key is not looked up in English). Driven 2026-11-25 at
+the PR head `73aae1d501` (merge ref `5beef30b06`), before its merge,
+OJS on `main` (the kept script
+`shared/playwright/checks/sync/pkp-lib-13527/walk.js`, step `userReq`):
+a signed-out `GET …/$$$call$$$/tab/user/profile-tab/identity` was
+answered 200
+`{"status":false,"content":"You must be logged in to access this operation."}`,
+where the base `8096e67cd2` answered
+`"content":"##user.authorization.userRequired##"`. A26 is retired.
 
 <a id="fn-a27"></a>
 **f-a27** — `PKP\middleware\DecodeApiTokenWithValidation::handle()`

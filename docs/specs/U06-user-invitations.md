@@ -1022,8 +1022,6 @@ appears on the journal masthead for the selected role." under a column named
 "Press Masthead" or "Server Masthead", and the "Invitation Unavailable" page
 closes with "Please contact the journal manager for further assistance.",
 where the role is "Press manager" or "Preprint Server manager".
-A screen reader hears "##userAccess.management.options##" for each Current
-Users row's menu button on Users & Roles.
 On an existing user's one-step accept page ("Review & create account"), and
 on one-step editorial decision pages such as "Decline Submission", Tab stops
 on two buttons nobody can see, with no focus outline: the step's own button,
@@ -2057,12 +2055,12 @@ search step's grammar, "GDPR polices" and the ORCID step's "If you chose to
 skip it now" in the apps' own files (pkp/ojs#5923, pkp/omp#2505,
 pkp/ops#1446), read corrected at the merged tips on OJS, OMP and OPS; the
 cancel question and the given-name help's "tha part" in pkp-lib#13497
-(`fff0dbf60d`), read at the merged `stable-3_5_0` tips and, on `main`, at the PR head `ce0cce167a` before its merge, on the three apps. The same pkp-lib change names the list of
+(`fff0dbf60d`), read at the merged `stable-3_5_0` tips and, on `main`, at the PR head `ce0cce167a` before its merge, on the three apps. The Users & Roles row button reads "Options" since pkp/ui-library#1065 (for pkp/pkp-lib#13527; U53 A5, retired), driven on OJS `main` at the PR head `1303f65ed3`, before its merge, 2026-11-25. The same pkp-lib change names the list of
 steps on both wizards "Complete the steps for this invitation" (the key
 `invitation.wizard.completeSteps` had no text in any file before); the
 collapsed toggle's hidden text "{$current}/{$total} steps" is left
 (pkp-e2e#543). Issue reports, one
-per cause: the wording slips (pkp-e2e#540, closed 2026-10-27); "as a Author" ([pkp-e2e#541](https://github.com/jardakotesovec/pkp-e2e/issues/541), [docs/issues/U06-A7-invitation-email-role-article.md](../issues/U06-A7-invitation-email-role-article.md)); the journal wording on OMP and OPS ([pkp-e2e#542](https://github.com/jardakotesovec/pkp-e2e/issues/542), [docs/issues/U06-A7-omp-ops-invitation-journal-wording.md](../issues/U06-A7-omp-ops-invitation-journal-wording.md)); the toggle's wrong text, once also the steps list's raw name ([pkp-e2e#543](https://github.com/jardakotesovec/pkp-e2e/issues/543), [docs/issues/U06-A7-invitation-steps-raw-labels.md](../issues/U06-A7-invitation-steps-raw-labels.md)); the invisible Tab stops ([pkp-e2e#544](https://github.com/jardakotesovec/pkp-e2e/issues/544), [docs/issues/U06-A7-accept-page-hidden-steps-button.md](../issues/U06-A7-accept-page-hidden-steps-button.md)). The Users & Roles row button's raw name joined [pkp-e2e#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) ([docs/issues/U53-A5-users-list-row-button-raw-key.md](../issues/U53-A5-users-list-row-button-raw-key.md)); "##common.help##" was U08 A1's, fixed 2026-11-10 by `pkp/ui-library#1046`.
+per cause: the wording slips (pkp-e2e#540, closed 2026-10-27); "as a Author" ([pkp-e2e#541](https://github.com/jardakotesovec/pkp-e2e/issues/541), [docs/issues/U06-A7-invitation-email-role-article.md](../issues/U06-A7-invitation-email-role-article.md)); the journal wording on OMP and OPS ([pkp-e2e#542](https://github.com/jardakotesovec/pkp-e2e/issues/542), [docs/issues/U06-A7-omp-ops-invitation-journal-wording.md](../issues/U06-A7-omp-ops-invitation-journal-wording.md)); the toggle's wrong text, once also the steps list's raw name ([pkp-e2e#543](https://github.com/jardakotesovec/pkp-e2e/issues/543), [docs/issues/U06-A7-invitation-steps-raw-labels.md](../issues/U06-A7-invitation-steps-raw-labels.md)); the invisible Tab stops ([pkp-e2e#544](https://github.com/jardakotesovec/pkp-e2e/issues/544), [docs/issues/U06-A7-accept-page-hidden-steps-button.md](../issues/U06-A7-accept-page-hidden-steps-button.md)). The Users & Roles row button's raw name joined pkp-e2e#459 (U53 A5); "##common.help##" was U08 A1's, fixed 2026-11-10 by `pkp/ui-library#1046`.
 
 <a id="fn-a8"></a>
 **f-a8** — Every added row in `UserInvitationUserGroupsTable.vue` renders
