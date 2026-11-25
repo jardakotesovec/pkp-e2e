@@ -72,7 +72,7 @@ account:
 | "Roles" | — | Each role the user has in this journal with no end date, one per line, a role whose start date is still to come included ⚠ [A18](#a18). A role with an end date is not shown, even while that date is still to come (Rule 3a), and roles in other journals never are <sup>b</sup> |
 | "Start Date" | — | The date each of those roles began or will begin, on the role's line; empty for a role that carries no start date, such as the manager role a journal gives the Site Administrator when it is created (the user's roles page reads "---" there) <sup>b</sup> |
 | "Affiliation" | — | The account's affiliation <sup>b</sup> |
-| The "…" button at the row's end | — | Opens the row's actions (Rule 7) ⚠ [A5](#a5) <sup>q</sup> |
+| The "…" button at the row's end | — | Opens the row's actions (Rule 7); a screen reader names it "Options" <sup>q</sup> |
 
 The "Email" window (Rule 9):
 
@@ -183,8 +183,8 @@ The Site Administrator's "Add User" (step 1) and "Edit User" windows
    - 6c. When nothing matches, the heading reads "Current Users (0)",
      the list's only line reads "No Items", and the line under it
      "Showing 0 to 0 of 0". <sup>td3</sup>
-7. **The row menu.** The "…" button at the end of a row opens its
-   actions [A5](#a5). A row offers: <sup>q</sup>
+7. **The row menu.** The "…" button at the end of a row, named
+   "Options" for a screen reader, opens its actions. A row offers: <sup>q</sup>
 
    | Action | Offered on |
    |---|---|
@@ -862,9 +862,8 @@ Left out of the scenarios above, by reason:
     `docs/issues/U53-A4-user-search-example-journal-role.md`): on a press
     and a preprint server, searching the users box's own example lists at
     least one user [report 2026-10-02]
-  - the guard for A5 (issue report
-    `docs/issues/U53-A5-users-list-row-button-raw-key.md`): every row's "…"
-    button on the users list has an accessible name with no "##" [report 2026-10-02]
+  - the guard for A5, retired by pkp/ui-library#1065: every row's "…"
+    button on the users list is named "Options" (Fields; Rule 7) [report 2026-11-25]
 - **Nothing new to test**:
   - a "Username" outside the characters the Fields section allows, on
     "Add User", whose refusal the Fields section does not quote (Fields
@@ -960,7 +959,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | "Disable User" and "Enable User" are offered on rows the manager may not administer, and refused only inside the window | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | "Remove User" on the Site Administrator's row ends in "An unexpected error has occurred…" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A4](#a4) | On a press or preprint server, the users search box suggests searching for "Journal editor", which finds nobody | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A5](#a5) | Users & Roles: screen readers announce every user row's "…" button as "##userAccess.management.options##" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | Users & Roles: the "Disable User" window names roles the user no longer holds | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | Users & Roles: the reason typed when enabling a user is shown to them when disabled again | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | Merging a section editor's account silently drops them from their sections instead of moving them | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -1026,17 +1024,6 @@ the "Press editor", and a preprint server's editorial role is the
 "Current Users (0)". The wrong example shows in English and, read in the
 code, in French (France), on both presses and preprint servers. Basis:
 probe, 2026-10-02. <sup>f-a4</sup>
-
-<a id="a5"></a>
-**A5 — Users & Roles: screen readers announce every user row's "…" button as "##userAccess.management.options##"** · 🐞 · low.
-A screen reader announces the "…" button at the end of every row in
-Settings › Users & Roles › "Current Users" as
-"##userAccess.management.options##" instead of a word such as "More
-Actions". The button shows only three dots, so this raw translation key
-is all a blind manager hears. Nothing is lost: the button works, and the
-menu it opens reads normally. The raw key is the same in every language
-the journal, press or server offers, English included. Basis: probe,
-2026-10-02. <sup>f-a5</sup>
 
 <a id="a6"></a>
 **A6 — Users & Roles: the "Disable User" window names roles the user no longer holds** · 🐞 · low.
@@ -1255,6 +1242,9 @@ roles, where a journal and a press print French role names.
 Basis: probe, 2026-10-01. <sup>f-ops1</sup>
 
 ### Retired
+
+<a id="a5"></a>
+**A5 — Users & Roles: screen readers announce every user row's "…" button as "##userAccess.management.options##"** · ✅ · retired. Fixed upstream (pkp/ui-library#1065).
 
 <a id="a11"></a>
 **A11 — In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels** · ✅ · retired. Overturned: a missing translation is no finding.
@@ -1933,10 +1923,17 @@ gave "Current Users (0)", the one line "No Items", and "Showing 0 to 0 of
 <a id="fn-q"></a>
 **q** — `UserAccessManagerCellActions.vue`: `DropdownActions` with
 `button-variant="ellipsis"` and
-`:label="t('userAccess.management.options')"`; the key exists in no `.po`
-file of lib/pkp or the apps, so `t()` returns it wrapped in `##`. Items
+`:label="t('common.options')"` since pkp/ui-library#1065 (for
+pkp/pkp-lib#13527; before it `userAccess.management.options`, a key no
+`.po` file defined, so the button was named
+`##userAccess.management.options##`, A5, retired). Driven 2026-11-25 at
+the PR head `1303f65ed3` with lib/pkp at the merge ref `5beef30b06` of
+pkp/pkp-lib#13862, before its merge, OJS on `main` (the kept script
+`shared/playwright/checks/sync/pkp-lib-13527/walk.js`, step `users`):
+Users & Roles' "…" buttons were each named "Options" (3 of 3), no raw
+key on the page. Items
 and guards: `useUserAccessManagerConfig::getItemActions()` (notes f, g, c,
-i, o). Live-probed 2026-09-25 (Rule 7; A5): every level's menus read on
+i, o). Live-probed 2026-09-25 (Rule 7): every level's menus read on
 every kind of row, exactly the table's offers, in the order "Edit, Email,
 Login As, Remove User, Disable User, Merge user".
 Since ui-library#1006 (pkp/pkp-lib#12647, `main` only) `DropdownActions`
@@ -1957,7 +1954,8 @@ button at the head and the table cell at the base; the items' text is
 <a id="fn-u"></a>
 **u** — The list's labels come from lib/pkp's locale files:
 `userAccess.search` and `invitation.header` have no `fr_CA` entry in
-lib/pkp, and `userAccess.management.options` has none in any language. OPS
+lib/pkp (the row button's `common.options` reads "Options" in English;
+note q). OPS
 `locale/fr_CA/default.po` carries `default.groups.name.manager` and
 `default.groups.name.sectionEditor` with empty `msgstr`, so a preprint
 server installed with French stores those raw keys as the French role
@@ -2099,13 +2097,6 @@ editor"; OPS installs no editor group. Live-probed 2026-09-25: the same
 text on all three apps; the press's roles include "Press editor", the
 preprint server's no editor.
 Issue report: [pkp-e2e#458](https://github.com/jardakotesovec/pkp-e2e/issues/458) ([docs/issues/U53-A4-user-search-example-journal-role.md](../issues/U53-A4-user-search-example-journal-role.md)).
-
-<a id="fn-f-a5"></a>
-**f-a5** — Live-probed 2026-09-25, all three apps, English interface:
-every row's "…" button is named `##userAccess.management.options##` (25 of
-25 on the seeded journal's first page), and the menu reads normally. Seen
-first on 2026-09-05 on OPS (review-stage claim check). Mechanism: note q.
-Issue report: [pkp-e2e#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) ([docs/issues/U53-A5-users-list-row-button-raw-key.md](../issues/U53-A5-users-list-row-button-raw-key.md)).
 
 <a id="fn-f-a6"></a>
 **f-a6** — Live-probed 2026-09-25, all three apps: a throwaway Author

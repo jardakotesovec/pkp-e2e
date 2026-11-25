@@ -34,9 +34,10 @@
  *
  * DOM facts the locators rely on (U53 claim check, 2026-09-25, three apps;
  * `.reports/U53/screen-notes.md`):
- * - the row's "…" button is named `##userAccess.management.options##`
- *   (register A5; "More Actions" once its fix lands, and the locator takes
- *   either); the menu is a headlessui menu portalled to the page,
+ * - the row's "…" button is named "Options" since pkp/ui-library#1065
+ *   (`common.options`; before it the raw `##userAccess.management.options##`,
+ *   U53 A5, retired), and the locator takes either; the menu is a headlessui
+ *   menu portalled to the page,
  *   and Escape does not reliably close it: its own button is pressed again;
  * - a closed legacy side window leaves its shell until the next navigation,
  *   and the modal slot is kept ~450 ms after a close, so an opener pressed
@@ -229,9 +230,9 @@ exports.UsersListPage = class UsersListPage extends BasePage {
         return answer;
     }
 
-    /** A row's "…" button (named by the raw code of register A5). */
+    /** A row's "…" button: "Options", or the raw code of retired U53 A5 before pkp/ui-library#1065. */
     menuButton(row) {
-        return row.getByRole('button', {name: /management\.options|^More Actions$/i});
+        return row.getByRole('button', {name: /management\.options|^Options$|^More Actions$/i});
     }
 
     /** Open a row's menu and wait for its items. */

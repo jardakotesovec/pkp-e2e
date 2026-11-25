@@ -217,8 +217,8 @@ Fields "Email"). <sup>e</sup>
      submission." <sup>o</sup>
    - A stale or tampered link: "Your ORCID iD could not be verified. The
      link is no longer valid." <sup>f</sup>
-   - A visitor who pressed Deny at ORCID: ⚠ [A2](#a2) a raw placeholder
-     where the explanation should be. <sup>f</sup>
+   - A visitor who pressed Deny at ORCID: "You denied access to your
+     ORCID record." <sup>f</sup>
 
    Every failure closes with "Please contact the journal manager with your
    name, ORCID iD, and details of your submission." ⚠ [A8](#a8) that line
@@ -757,7 +757,7 @@ Left out of the scenarios above, by reason:
 
 - **Planned**:
   - the guard for A4 (issue report `docs/issues/U04-A4-what-is-orcid-link-opens-sign-in.md`): once fixed, Scenario 2 presses "What is ORCID?" on the profile Identity tab and the registration page and expects the "What is ORCID?" page (scenario 2's "What is ORCID?" bullet, which no suite asserts while A4 stands). [report 2026-10-03]
-  - the guard for A2 (issue report `docs/issues/U04-A2-orcid-denied-page-raw-placeholder.md`): once fixed, a contributor who denies access at ORCID lands on the "ORCID Authorization" page and reads "You denied access to your ORCID record.", no raw key. [report 2026-10-03]
+  - the guard for A2, retired by pkp/pkp-lib#13862: a contributor who denies access at ORCID lands on the "ORCID Authorization" page and reads "You denied access to your ORCID record." (Rule 9). [report 2026-11-25]
   - the guard for A11 (issue report `docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md`): once fixed, in French (Canada), both ORCID tabs (the site's and the journal's) read "ORCID". [report 2026-10-03]
   - the guard for A14 (issue report `docs/issues/U04-A14-orcid-reauthorization-link-blank-page.md`): once fixed, a contributor verified under the public API follows "Requesting updated ORCID record access" after the journal moved to the member API and lands on the "ORCID Authorization" page, not a blank page. [report 2026-10-07]
   - the guard for A15 (issue report `docs/issues/U04-A15-orcid-pages-tab-no-page-name.md`): once fixed, the "What is ORCID?" and "ORCID Authorization" pages' browser tab reads "What is ORCID? | {journal name}" and "ORCID Authorization | {journal name}". [report 2026-10-07]
@@ -783,7 +783,6 @@ Left out of the scenarios above, by reason:
   - A1 (a press's Site Administrator, Press Manager and Series Editor offered "Send Review To ORCID"; Actors row 8)
   - A4 ("What is ORCID?" beside the button opening the popup; Rule 6a; scenario 2 marks it)
   - A3 (the registration sign-in filling the form, the iD landing unauthenticated; Rule 7)
-  - A2 (the landing after Deny showing a raw placeholder; Rule 9)
   - A8 (the failure line saying "journal manager" on presses and preprint servers; Rule 9; scenario 6 marks it)
   - A1 (the action offered before the review is complete; Rule 12; scenario 9 marks it)
   - A6 (the toggle's label misdescribing when it fires; Rule 13)
@@ -850,7 +849,6 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | "Send Review To ORCID" is offered before the review is complete, and confirms in silence | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
-| [A2](#a2) | A contributor who presses "Deny" at ORCID lands on a page showing "##orcid.authDenied##" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | "What is ORCID?" beside the ORCID button opens ORCID's sign-in instead of the explanation page | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | A contributor's ORCID iD field shows a refused verification request as sent, and a refused delete as done | 🐞 | medium | issues (claude), 2026-11-27 — re-verified |
 | [A8](#a8) | A press's or preprint server's ORCID verification failure page says to contact "the journal manager" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -895,21 +893,6 @@ on the member API with both set queues the review, or first emails the
 reviewer a request for permission, also without a word to the editor
 (Rule 12).
 Basis: probe, 2026-10-03. <sup>[f-a1](#fn-a1)</sup>
-
-<a id="a2"></a>
-**A2 — A contributor who presses "Deny" at ORCID lands on a page showing "##orcid.authDenied##"** · 🐞 · low.
-A contributor who follows the emailed ORCID verification link and
-presses "Deny" on ORCID's consent screen comes back to the "ORCID
-Authorization" page. Where it should explain that they refused access,
-the page shows the raw code `##orcid.authDenied##`. The refusal itself
-is recorded correctly; only the explanation is missing, and the fix is
-to render the sentence the translations already hold. The setup is any
-journal, press or preprint server with ORCID turned on. The verification
-email goes out when an editor presses "Request verification" on a
-contributor, or when a submission is accepted with the ORCID setting
-"Send e-mail to request ORCID authorization from authors when an article
-is accepted" ticked.
-Basis: probe, 2026-10-03. <sup>[f-a2](#fn-a2)</sup>
 
 <a id="a3"></a>
 **A3 — Registration-connected iD arrives unverified** · ❓ · minor.
@@ -1343,6 +1326,9 @@ Basis: probe, issue report walk, 2026-10-02. <sup>[f-ops2](#fn-ops2)</sup>
 
 ### Retired
 
+<a id="a2"></a>
+**A2 — A contributor who presses "Deny" at ORCID lands on a page showing "##orcid.authDenied##"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13862).
+
 <a id="a9"></a>
 **A9 — Site ORCID tab on a single-journal install** · ✅ · retired. Settled upstream (pkp/pkp-lib#13493).
 
@@ -1652,7 +1638,8 @@ ORCID record during publication.". Template
 + 10-second JS redirect (`orcid.verify.success.redirect`); failure
 `orcid.verify.failure`, `orcid.verify.duplicateOrcid` (rendered
 2026-10-16, note o), `orcid.invalidClient`,
-`orcid.authFailure`, missing `orcid.authDenied` (finding A2); tail
+`orcid.authFailure`, denied `orcid.verify.denied` (until
+pkp/pkp-lib#13862 the missing `orcid.authDenied`, A2, retired: f-a2); tail
 `orcid.failure.contact`. `updateScope` serves the re-authorization
 links (`OrcidDepositType` work or review) and, for a work, finds no
 contributor: the emailed link carries no `state`, which
@@ -2208,7 +2195,18 @@ console error; a denial carrying a token no contributor holds showed the
 generic "could not be verified" failure instead. ORCID's consent screen
 itself was not driven (orcid.org is unreachable through the dead-port
 `[proxy]`, and the placeholder client would be refused).
-Issue report: [pkp-e2e#737](https://github.com/jardakotesovec/pkp-e2e/issues/737) ([docs/issues/U04-A2-orcid-denied-page-raw-placeholder.md](../issues/U04-A2-orcid-denied-page-raw-placeholder.md)).
+pkp/pkp-lib#13862 (for pkp/pkp-lib#13527) points the branch at the
+defined key, `{translate key="orcid.verify.denied"}`. Driven 2026-11-25
+at the PR head `73aae1d501` (merge ref `5beef30b06`), before its merge,
+OJS on `main`, signed out (the kept script
+`shared/playwright/checks/sync/pkp-lib-13527/walk.js`, step `orcid`: a
+scratch contributor's `orcidEmailToken` set, then
+`orcid/verify?state=…&token=…&error=access_denied&error_description=probe`):
+under "ORCID Authorization" the page read "You denied access to your
+ORCID record." then "Please contact the journal manager with your name,
+ORCID iD, and details of your submission.", no raw key on the page; at
+the base `8096e67cd2` the same walk read `##orcid.authDenied##`. A2 is
+retired.
 
 <a id="fn-a3"></a>
 **f-a3** — Read from the code, not seen running (note p): `AuthorizeUserData` case `register` only fills form

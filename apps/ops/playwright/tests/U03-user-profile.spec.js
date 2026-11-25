@@ -22,7 +22,7 @@
  * Not asserted here, by register ID (a 🐞 is never asserted as the contract,
  * a ❓ is parked; the spec's Coverage section records the rest): A2, A4, A5,
  * A6, A7, A8, A9, A10, A11, A12, A14, A17, A18, A19, A20, A21, A22, A23,
- * A25, A26, A27, OPS2, OPS3. A13 and A16 are passed by S12, which reads the first
+ * A25, A27, OPS2, OPS3. A13 and A16 are passed by S12, which reads the first
  * contributor's name and ORCID field as today's screen shows them.
  *
  * Isolation: every account that changes is a throwaway user in a scratch
@@ -708,8 +708,8 @@ test.describe('user profile', () => {
             await expect(otherProfile.usernameText()).toContainText(username);
 
             // The third browser, signed in with the box unticked: a full
-            // reload, never a tab press (that raises A26's alert, PRINCIPLES
-            // M3), lands on the Login page; the save signed it out (Rule
+            // reload, never a tab press (its alert is a Planned guard in the
+            // spec), lands on the Login page; the save signed it out (Rule
             // 6a). The profile and the user menu it showed before the save
             // are the positive control for their absence now.
             await third.page.reload();

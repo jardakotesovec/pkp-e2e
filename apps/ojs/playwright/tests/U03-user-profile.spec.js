@@ -10,8 +10,8 @@
  *
  * Deliberately NOT covered, by register ID (a 🐞 is never asserted as the
  * contract, a ❓ is parked, not a gap): A2, A4, A5, A6, A7, A8, A9, A10,
- * A11, A12, A13, A14, A16, A17, A18, A19, A20, A21, A22, A23, A25,
- * A26. The spec's Coverage section is the record of the rest.
+ * A11, A12, A13, A14, A16, A17, A18, A19, A20, A21, A22, A23, A25.
+ * The spec's Coverage section is the record of the rest.
  *
  * Isolation: every account that changes is a throwaway user in a scratch
  * journal seeded through the scenario endpoint (unique tags); the roster
@@ -715,8 +715,8 @@ test.describe('user profile', () => {
 
             // The third browser, signed in with the box unticked: a full
             // reload lands on the Login page; the save signed it out (Rule
-            // 6a). Only reloaded, never tab-pressed: a press there raises
-            // A26's alert, which no test asserts (PRINCIPLES M3). The
+            // 6a). Only reloaded, never tab-pressed: the alert a press there
+            // raises is a Planned guard in the spec (Left out). The
             // second browser's open profile above is the control that the
             // account itself still opens it.
             const thirdLogin = new LoginPage(third.page);
