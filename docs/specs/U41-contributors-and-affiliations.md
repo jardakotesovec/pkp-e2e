@@ -1689,6 +1689,7 @@ and programs that follow the API's own schema, which marks the affiliations as r
 On a published version the institutions disappear from the public
 page too.
 Basis: probe, 2026-10-21. <sup>f-a30</sup>
+Upstream: `pkp/pkp-lib#13877` (open; filed by the maintainer 2026-11-25), fix in PR `pkp/pkp-lib#13878` (`stable-3_5_0` only so far), walked fixed at its head `2448d0c37a` on 3.5 with `checks/sync/pkp-lib-13877/put-without-affiliations.js` (daily sync, 2026-11-25).
 
 <a id="a31"></a>
 **A31 — A program that edits a contributor through the REST API without the contributor type empties it; an organization's edit fails and the submission's workflow no longer opens, and a journal refuses a person's edit on the email** · 🐞 · medium · crash: server.

@@ -9,7 +9,7 @@
   - 3.4: none (code; the affiliation is a text field the edit keeps)
   - 3.3: none (code; no contributor edit in the REST API)
 - **Introduced** `pkp/pkp-lib#10880` for `pkp/pkp-lib#7135` · [d7c67a46fe](https://github.com/pkp/pkp-lib/commit/d7c67a46fee724dfc003eb4b650021b5edb8e915) · 2025-01-31 · Bozana Bokan (bozana), the PR's author; the commit's author is GaziYucel
-- **Upstream** none found (2026-10-21)
+- **Upstream** `pkp/pkp-lib#13877` (open, fix in PR `pkp/pkp-lib#13878`, not yet in main), the PR covering `stable-3_5_0` only so far
 - **Tracked in** spec U41 [A30](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U41-contributors-and-affiliations.md#a30)
 - **Checked** 2026-10-21, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
