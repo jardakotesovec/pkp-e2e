@@ -17,7 +17,7 @@
  *
  * Deliberately NOT covered (register IDs; the spec's Coverage section
  * records everything else left out): A1, A3, A5, A7, A9, A10, A12, A14, A20,
- * A22, A24, A25, A26, A27, A28, A29, A30, A31, A32, A33, OPS2 (🐞, never
+ * A22, A24, A25, A26, A27, A28, A29, A32, A33, OPS2 (🐞, never
  * asserted either way); A2, A4, A6, A8, A11, A13, A16, A19 (❓, only
  * the scenario's own sentence); OMP1, OMP2 (no OPS surface).
  *
@@ -1803,7 +1803,7 @@ test.describe('Contributors & affiliations (U41)', () => {
         await screen.saveForm(panel);
 
         /** The contributor's "Edit" after a reload: its email and country. */
-        const expectEditShows = async (name, {email, institutionShown}) => {
+        const expectEditShows = async (name, {email, institutionShown, type}) => {
             await screen.reload();
             await expect(screen.row(name)).toBeVisible({timeout: 30_000});
             const editPanel = await screen.openEditPanel(name);
@@ -1812,6 +1812,9 @@ test.describe('Contributors & affiliations (U41)', () => {
             await expect(screen.input('country').locator('option:checked')).toHaveText('Canada');
             if (institutionShown) {
                 await expect(screen.affiliationRow(editPanel, institution)).toBeVisible();
+            }
+            if (type) {
+                await expect(screen.typeRadio(editPanel, type)).toBeChecked();
             }
             await screen.closePanel(editPanel);
         };
@@ -1835,14 +1838,14 @@ test.describe('Contributors & affiliations (U41)', () => {
 
         // "An edit of the given name alone": the type PERSON and only "Kim"
         // as the given name: after a reload the row reads "Kim Okafor", and
-        // its "Edit" still shows the email and "Canada"; the institution is
-        // not read (A30) (Rule 4a).
+        // its "Edit" still shows the email, "Canada" and the institution
+        // (Rule 4a "Fields left out").
         answer = await screen.editContributorThroughApi(address, {
             contributorType: 'PERSON',
             givenName: {en: 'Kim'},
         });
         expect(answer.status()).toBe(200);
-        await expectEditShows('Kim Okafor', {email: 'robin@example.test', institutionShown: false});
+        await expectEditShows('Kim Okafor', {email: 'robin@example.test', institutionShown: true});
         await expect(screen.row('Dana Okafor')).toHaveCount(0);
 
         // "The type sent empty": the contributor type empty and
@@ -1866,7 +1869,19 @@ test.describe('Contributors & affiliations (U41)', () => {
             email: 'kim@example.test',
         });
         expect(answer.status()).toBe(200);
-        await expectEditShows('Kim Okafor', {email: 'kim@example.test', institutionShown: false});
+        await expectEditShows('Kim Okafor', {email: 'kim@example.test', institutionShown: true});
+
+        // "The type left out": only "Lee" as the given name, no type: the
+        // answer is a success; after a reload the row reads "Lee Okafor",
+        // and its "Edit" still shows "Person" chosen, "kim@example.test",
+        // "Canada" and the institution (Rule 4a "The contributor type left
+        // out").
+        answer = await screen.editContributorThroughApi(address, {
+            givenName: {en: 'Lee'},
+        });
+        expect(answer.status()).toBe(200);
+        await expectEditShows('Lee Okafor', {email: 'kim@example.test', institutionShown: true, type: 'Person'});
+        await expect(screen.row('Kim Okafor')).toHaveCount(0);
         await expect(screen.rows()).toHaveCount(2);
     });
 

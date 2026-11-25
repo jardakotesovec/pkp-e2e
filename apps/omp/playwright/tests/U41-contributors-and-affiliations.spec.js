@@ -41,7 +41,8 @@
  *   scenario states them, never the question.
  * - A22 🐞: S13 reloads before reopening "Edit Role".
  * - A25 🐞: S1 reaches the CRediT drop-downs by row position.
- * - A30, A31, A32, A33 🐞: S12 resends the affiliations and names the type.
+ * - A32, A33 🐞: S12 never sends a record back as read, nor a type no
+ *   type has.
  * - A11 🐞: S4 reopens "Edit" before each registry failure, never
  *   reading that suggestions stay off after the error window.
  * - A4, A8, A13, A14, A19, A20, A24, A26, A27, A28, A29, OPS1,
@@ -2186,7 +2187,7 @@ test.describe('Contributors & affiliations (U41)', () => {
         await screen.savePanel(dialog);
 
         /** Reload, then read the row's "Edit": email, country, and close. */
-        async function readEdit(name, {email, institution = false}) {
+        async function readEdit(name, {email, institution = false, type = null}) {
             await screen.reload();
             await expect(screen.row(name)).toBeVisible();
             const edit = await screen.openRowEdit(name);
@@ -2198,6 +2199,9 @@ test.describe('Contributors & affiliations (U41)', () => {
             ).toHaveText('Canada');
             if (institution) {
                 await expect(screen.affiliationRow(edit, inst)).toBeVisible();
+            }
+            if (type) {
+                await expect(screen.typeRadio(edit, type)).toBeChecked();
             }
             await screen.closePanel(edit);
         }
@@ -2221,14 +2225,13 @@ test.describe('Contributors & affiliations (U41)', () => {
 
         // An edit of the given name alone: the type `PERSON` and "Kim";
         // after a reload the row reads "Kim Okafor", its "Edit" still the
-        // email and "Canada" (the institution not read: an edit that
-        // leaves the affiliations out removes them, A30) (Rule 4a).
+        // email, "Canada" and the institution (Rule 4a "Fields left out").
         answer = await apiInSession(page, 'PUT', contributor, {
             contributorType: 'PERSON',
             givenName: {en: 'Kim'},
         });
         expect(answer.status(), `the given-name edit answered ${await answer.text()}`).toBe(200);
-        await readEdit('Kim Okafor', {email: 'robin@example.test'});
+        await readEdit('Kim Okafor', {email: 'robin@example.test', institution: true});
         await expect(screen.row('Dana Okafor')).toHaveCount(0);
 
         // The type sent empty, with "kim@example.test" as the email: the
@@ -2252,6 +2255,17 @@ test.describe('Contributors & affiliations (U41)', () => {
         });
         expect(answer.status(), `the control edit answered ${await answer.text()}`).toBe(200);
         await readEdit('Kim Okafor', {email: 'kim@example.test'});
+
+        // The type left out: "Lee" as the given name alone, no type; the
+        // answer is a success; after a reload the row reads "Lee Okafor",
+        // its "Edit" still "Person" chosen, "kim@example.test", "Canada"
+        // and the institution (Rule 4a "The contributor type left out").
+        answer = await apiInSession(page, 'PUT', contributor, {
+            givenName: {en: 'Lee'},
+        });
+        expect(answer.status(), `the untyped edit answered ${await answer.text()}`).toBe(200);
+        await readEdit('Lee Okafor', {email: 'kim@example.test', institution: true, type: 'Person'});
+        await expect(screen.row('Kim Okafor')).toHaveCount(0);
     });
 
     test("S13: role names in the reader's language", async ({asUser, ompApi, page}, testInfo) => {

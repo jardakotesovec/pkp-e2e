@@ -11,8 +11,7 @@
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
  * - A1 🐞, A3 🐞, A5 🐞, A7 🐞, A9 🐞, A10 🐞, A12 🐞, A14 🐞, A20 🐞, A22 🐞,
- *   A24 🐞, A25 🐞, A26 🐞, A27 🐞, A28 🐞, A29 🐞, A30 🐞, A31 🐞, A32 🐞,
- *   A33 🐞.
+ *   A24 🐞, A25 🐞, A26 🐞, A27 🐞, A28 🐞, A29 🐞, A32 🐞, A33 🐞.
  * - A2 ❓, A4 ❓, A6 ❓, A8 ❓, A11 ❓, A13 ❓, A16 ❓, A19 ❓, A21 ❓.
  * - OMP1, OMP2, OPS1 and OPS2 are the other apps'.
  *
@@ -1923,7 +1922,7 @@ test.describe('contributors and affiliations', () => {
         await panel.savePanel(dialog);
 
         /** A reload of "Contributors", then the row's "Edit" read and closed. */
-        const readAfterReload = async (rowName, {email, institution}) => {
+        const readAfterReload = async (rowName, {email, institution, type}) => {
             panel = await openContributors(page, JOURNAL, submissionId);
             await expect(panel.row(rowName)).toBeVisible({timeout: 30_000});
             await expect(panel.rows()).toHaveCount(2);
@@ -1932,6 +1931,9 @@ test.describe('contributors and affiliations', () => {
             await expect(panel.control(dialog, 'country').locator('option:checked')).toHaveText('Canada');
             if (institution) {
                 await expect(panel.affiliationRow(dialog, institution)).toBeVisible();
+            }
+            if (type) {
+                await expect(panel.typeRadio(dialog, type)).toBeChecked();
             }
             await panel.closePanel(dialog);
         };
@@ -1955,14 +1957,14 @@ test.describe('contributors and affiliations', () => {
         await expect(panel.row('Robin Okafor')).toHaveCount(0);
 
         // An edit of the given name alone: the type PERSON and "Kim": the
-        // row reads "Kim Okafor", its "Edit" still shows the email and the
-        // country (the institution is not read: A30) (Rule 4a).
+        // row reads "Kim Okafor", its "Edit" still shows the email, the
+        // country and "Probe Institute" (Rule 4a "Fields left out").
         answer = await requestInSession(page, 'PUT', contributorPath, {
             contributorType: 'PERSON',
             givenName: {en: 'Kim'},
         });
         expect(answer.status()).toBe(200);
-        await readAfterReload('Kim Okafor', {email: 'robin@example.test'});
+        await readAfterReload('Kim Okafor', {email: 'robin@example.test', institution: instName});
 
         // The email sent empty {OJS}: the type PERSON with an empty email:
         // the answer refuses it with "This field is required." for the
@@ -1998,6 +2000,16 @@ test.describe('contributors and affiliations', () => {
         });
         expect(answer.status()).toBe(200);
         await readAfterReload('Kim Okafor', {email: 'kim@example.test'});
+
+        // The type left out: "Lee" as the given name alone, no type: the
+        // answer is a success; the row reads "Lee Okafor", its "Edit" still
+        // shows "Person" chosen, "kim@example.test", "Canada" and "Probe
+        // Institute" (Rule 4a "The contributor type left out").
+        answer = await requestInSession(page, 'PUT', contributorPath, {
+            givenName: {en: 'Lee'},
+        });
+        expect(answer.status()).toBe(200);
+        await readAfterReload('Lee Okafor', {email: 'kim@example.test', institution: instName, type: 'Person'});
     });
 
     test('S13: role names in the reader\'s language', async ({asUser, ojsApi, browser}, testInfo) => {
