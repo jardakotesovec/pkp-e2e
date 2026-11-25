@@ -72,12 +72,7 @@ field clears that field's message alone. The server can also refuse a
 save the form itself let through. The same foot then counts the
 server's reasons, its screen-reader list names them the same way, and
 the page shows "The form was not saved because {n} error(s) were
-encountered. Please correct these errors and try again." Where a
-"Forms" language is not a metadata language (Settings that modify
-behavior), the reasons can name fields the chosen type lacks, for a
-Person "Go to Organization Name: This language is not accepted.", which
-nothing typed into its own fields clears, so Save stays disabled
-⚠ [A20](#a20). <sup>c</sup> <sup>n</sup>
+encountered. Please correct these errors and try again." <sup>c</sup> <sup>n</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
@@ -421,12 +416,9 @@ screen, Rule 12): <sup>e</sup>
   "Metadata" in "Submission Languages"
   ([Languages & locales](U57-languages-and-locales.md#form-languages);
   install default: the primary language alone in both). Such a language
-  adds no box to the contributor form, yet on a submission with no text
-  in that language the workflow's "Add Contributor" is refused. Nothing
-  on screen points to the way round: pick another contributor type, type
-  into the field the refusal names, switch back and save ([A20](#a20)).
-  Ticking the language under "Submissions" in "Submission Languages", which ticks
-  "Metadata" too, ends the refusal.
+  adds no box to the contributor form, and the workflow's "Add
+  Contributor" saves every contributor type ("Person", "Organization or
+  group", "Anonymous") as on any other journal. <sup>c</sup>
 - **A language unticked under "Metadata" after institutions were named
   in it.** A language ticked under "Metadata" in the same "Submission
   Languages" table can be unticked there later
@@ -1078,6 +1070,10 @@ Left out of the scenarios above, by reason:
     Required" and the person's email sent empty by a program (Fields
     "Email", "Contributor Type"; Rule 4a): waits for OMP and OPS
     `main` to take pkp-lib#11972 [upstream 2026-11-24]
+  - the guard for A20: on a journal with a language ticked under
+    "Forms" but not under "Metadata", the workflow's "Add Contributor"
+    saves a Person, an Organization and an Anonymous contributor, each
+    listed after a reload (Settings) [report 2026-11-25]
 - **Nothing new to test**:
   - a fresh hand-entered institution's status on a journal with English
     alone under "Metadata", "All translations available" (Fields
@@ -1127,8 +1123,6 @@ Left out of the scenarios above, by reason:
     refused until one is chosen; Fields)
   - A19 (the email field labeled "Email" or "Email address" by the
     install; Fields)
-  - A20 (the workflow's "Add Contributor" refused where a "Forms"
-    language is not a metadata language; Fields; Settings)
   - A21 (a new journal's contributor roles arriving named in the
     primary language only; Rule 11)
   - A22 (a role name closed without saving shown on the row and in the
@@ -1203,7 +1197,6 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A3](#a3) | Journal and preprint server listings still name contributors unticked from "Publication Lists" | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | A registry pick the server cannot cache raises an error dialog, then saves and publishes with no name until the install's registry copy gains it | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | With a single contributor role, as on an upgraded preprint server, saving any contributor fails with an error | 🐞 | medium · crash: server | issues (claude), 2026-10-15 — re-verified |
-| [A20](#a20) | "Add Contributor" never saves when a "Forms" language is not a metadata language | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A22](#a22) | A role name changed in "Edit Role" and closed without saving shows on the row, and the role's next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A24](#a24) | A refused "Add Contributor" still saves the contributor, so correcting it lists the person twice | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A28](#a28) | Once a journal stops taking a language for metadata, a contributor whose institution is named in it cannot be saved, and the form shows no reason | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
@@ -1492,23 +1485,6 @@ Lean: a wording call either way; the defect is that the install, not the
 product, decides.
 Since: 2023-02-16 (3½ years) · Basis: test run. <sup>f-a19</sup>
 
-<a id="a20"></a>
-**A20 — "Add Contributor" never saves when a "Forms" language is not a metadata language** · 🐞 · medium.
-A journal can tick a language under "Forms" in Settings › Website ›
-"Setup" › "Languages" without ticking it under "Metadata" in the
-"Submission Languages" table. On such a journal, "Add Contributor" ›
-"Save" in a submission's workflow is refused for every contributor
-type, on every submission that holds no text in that language. The
-panel stays open. Its foot lists fields the chosen type does not show,
-each as "Go to {Field}: This language is not accepted." (for a person,
-"Organization Name"), so nothing on the form can be corrected and
-"Save" stays disabled.
-
-The way round is hidden: choose another contributor type, type into
-the field the error names, switch back and save. Editing an existing
-contributor and adding one in the submission wizard still save.
-Since: 2025-11-11 (10½ months) · Basis: probe, 2026-10-03. <sup>f-a20</sup>
-
 <a id="a21"></a>
 **A21 — A new journal's contributor roles arrive named in the primary language only** · ❓ · minor.
 A new journal's contributor roles arrive named in its primary language
@@ -1768,6 +1744,9 @@ Basis: probe + code reading, 2026-11-23. <sup>f-ops2</sup>
 <a id="a18"></a>
 **A18 — Anonymous's required markers on Email and Country do not bind** · ✅ · retired. Fixed upstream (pkp/pkp-lib#11972).
 
+<a id="a20"></a>
+**A20 — "Add Contributor" never saves when a "Forms" language is not a metadata language** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13879).
+
 <a id="a23"></a>
 **A23 — A CRediT role's degree prints as a raw code on a French landing page** · ✅ · retired. Overturned: not a bug.
 
@@ -1923,8 +1902,10 @@ OJS/OMP/OPS, three runs): the add endpoint's 400 put each refused field
 in the foot as "Go to {Field}: {message}" with "Please correct {n}
 errors." and "Jump to next error", the page notice "The form was not
 saved because {n} error(s) were encountered. Please correct these errors
-and try again." showed, and Save stayed disabled; a refused field the
-chosen type hides is never cleared (A20, fn f-a20). ORCID writes via
+and try again." showed, and Save stayed disabled. That probe's
+refusals were A20's (retired): on a context with `fr_CA` under "Forms"
+but not "Metadata" they named fields the chosen type hides, so nothing
+typed cleared them. ORCID writes via
 these endpoints are refused outright
 (`api.orcid.403.cannotUpdateAuthorOrcid`) — the ORCID flows run through
 their own endpoints (U04). Type switching:
@@ -2019,6 +2000,34 @@ Organization → Person; a saved organization's "Edit" switched to
 Person showed Given Name empty; "u41s-not-a-ror-id" typed as an
 organization and saved as a Person was stored and back under "ROR ID"
 on switching to Organization (A4).
+
+A "Forms" language not under "Metadata" (Settings that modify
+behavior), driven 2026-11-25 at the PR head `8f429d1760` of
+pkp/pkp-lib#13879, before its merge, on PKP's default test dataset with
+French unticked under "Metadata" and still under "Forms", as `rvaca`
+(kept script
+`shared/playwright/checks/issues/add-contributor-refused-hidden-fields/walk.js`).
+The PR's `removeIrrelevantContributorTypeData()` nulls the other types'
+fields in the submission's publication languages
+(`$submission->getPublicationLanguages($context->getSupportedSubmissionMetadataLocales())`),
+the list `Repo::author()->validate()` accepts, instead of the context's
+form languages. At the base `8096e67cd2` on OJS, "Add Contributor" ›
+"Person" › Save got 400 `{"organizationName":{"fr_CA":["This language is not accepted."]}}`
+and the foot "Please correct one error. Go to Organization Name: This
+language is not accepted. Jump to next error Save" with Save disabled,
+and the Organization and Anonymous adds the same on their hidden
+fields; no row after a reload. At the head, on OJS, OMP and OPS, each
+of the three adds answered 200 and closed the panel, and after a reload
+the list read the dataset's contributor, "Ada u41i", "u41i Org" and
+"Anonymous". `MODE=neighbour` at the head, French still under
+"Metadata": an organization's "Edit" switched to "Person" saved, and
+the stored record held only `givenName|en|Ada` and `familyName|en|u41i`,
+no organization name. Through the programming interface, on a scratch
+journal with `fr_CA` under "Forms" alone, a person's and an
+organization's `POST`, a person's `PUT` with only a given name and an
+organization's `PUT` with only an email all answered 200, with nothing
+in the server log (kept script
+`shared/playwright/checks/sync/pkp-lib-13879/form-only-language.js`).
 
 <a id="fn-d"></a>
 **d — affiliations.** Model `PKP\affiliation\*` + `author_affiliations`
@@ -3075,53 +3084,6 @@ part `form`): the field read "Email address * Required" everywhere, and
 "Go to Email address: …" in the error list; the "Email" label was not
 met. Settled by the same form read on an install that shows "Email",
 as CI's fresh box did.
-
-<a id="fn-f-a20"></a>
-**f-a20 — A20 evidence.** Live-probed 2026-09-28 (Fields preamble;
-Settings that modify behavior; A20), three runs on each of OJS, OMP
-and OPS, on a scratch context with `supportedFormLocales` [en, fr_CA]
-and `supportedSubmissionLocales` / `supportedSubmissionMetadataLocales`
-[en] (the contributor form showed no language button). As the Journal
-Manager, as the assigned Section Editor / Series editor / Moderator,
-and on OPS as the submitting author on their own preprint's workflow
-list: "Add Contributor" › Save posted `POST
-…/submissions/{id}/publications/{id}/contributors` and got 400, Person
-`{"organizationName":{"fr_CA":["This language is not accepted."]}}`,
-Organization the same for `givenName`, `familyName`,
-`preferredPublicName`, Anonymous for those three plus `biography` and
-`organizationName`. The request carried English values only. Read 1.5 s
-and 10 s after the press: panel open, foot and notice as quoted, Save
-disabled, "Saving" never shown. From runs 2 and 3: "Jump to next error"
-and the first "Go to …" left the focus on the foot's "Jump to next
-error" button; typing into Given Name, Organization Name or (Anonymous)
-Email and leaving it cleared nothing; "Close" closed the panel with no
-confirmation, and the list was unchanged on the page and after a
-reload. No response of 500 or more and no page error; the console
-logged only the 400. Mechanism:
-`PKPSubmissionController::removeIrrelevantContributorTypeData()` sets
-every unselected type's multilingual field that the request omits to
-null in each of the context's form locales
-(`getSupportedFormLocales()`);
-`PKP\author\Repository::validate()` then applies
-`ValidatorFactory::allowedLocales()` with the submission's
-`getPublicationLanguages()` over the context's
-`getSupportedSubmissionMetadataLocales()`, which refuses `fr_CA`. The
-wizard's step and a row's "Edit" post every field under `[en]`, empty
-ones included, so the nulling adds no `fr_CA` key: on the same context
-the author's wizard add and an "Edit" save (Country picked first, A16)
-answered 200 and listed the row after a reload. Control: a second
-context with `fr_CA` also a submission (hence metadata) language saved a
-Person and an Organization, listed after a reload. A language ticked
-under "Metadata" alone is accepted by that code; not driven. Introduced
-by pkp-lib `52d3a0f8e7` (2025-11-11, "Contributor Roles and Type").
-Walked 2026-10-03 for the issue report on `main`, OJS, OMP and OPS (kept
-script `shared/playwright/checks/issues/add-contributor-refused-hidden-fields/walk.js`,
-PKP's default test dataset with French unticked under "Metadata"): the
-refusal hit submissions holding no French text (by the code, one that
-holds French text saves; the dataset has none). On OJS, as the Section
-Editor, an add that got an Organization Name typed under "Organization
-or group" before switching back to "Person" saved.
-Issue report: [pkp-e2e#751](https://github.com/jardakotesovec/pkp-e2e/issues/751) ([docs/issues/U41-A20-add-contributor-refused-hidden-fields.md](../issues/U41-A20-add-contributor-refused-hidden-fields.md)).
 
 <a id="fn-f-a21"></a>
 **f-a21 — A21 evidence.** Live-probed 2026-09-29 (OJS, OMP, OPS; two

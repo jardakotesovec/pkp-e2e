@@ -10,7 +10,7 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 🐞, A3 🐞, A5 🐞, A7 🐞, A9 🐞, A10 🐞, A12 🐞, A14 🐞, A20 🐞, A22 🐞,
+ * - A1 🐞, A3 🐞, A5 🐞, A7 🐞, A9 🐞, A10 🐞, A12 🐞, A14 🐞, A22 🐞,
  *   A24 🐞, A25 🐞, A26 🐞, A27 🐞, A28 🐞, A29 🐞, A32 🐞, A33 🐞.
  * - A2 ❓, A4 ❓, A6 ❓, A8 ❓, A11 ❓, A13 ❓, A16 ❓, A19 ❓, A21 ❓.
  * - OMP1, OMP2, OPS1 and OPS2 are the other apps'.

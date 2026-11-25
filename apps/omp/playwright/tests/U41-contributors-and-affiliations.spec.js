@@ -45,7 +45,7 @@
  *   type has.
  * - A11 🐞: S4 reopens "Edit" before each registry failure, never
  *   reading that suggestions stay off after the error window.
- * - A4, A8, A13, A14, A19, A20, A24, A26, A27, A28, A29, OPS1,
+ * - A4, A8, A13, A14, A19, A24, A26, A27, A28, A29, OPS1,
  *   OPS2: not read.
  *
  * Seeding: scenario endpoints only. S2, S9 and S12 run on the seeded
