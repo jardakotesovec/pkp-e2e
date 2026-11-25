@@ -1,0 +1,15 @@
+--- a/lib/pkp/classes/submission/maps/Schema.php
++++ b/lib/pkp/classes/submission/maps/Schema.php
+@@ -742,9 +742,9 @@
+ 
+         $roles = $stages[$stageId]['currentUserAssignedRoles'];
+ 
+-        // only managers, sub-editors, or site admins at THIS stage can see
+-        // the declined/cancelled assignments for that stage
+-        if (array_intersect($roles, [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_SITE_ADMIN])) {
++        // managers, sub-editors, site admins and assistants at THIS stage can see
++        // the declined/cancelled assignments for that stage, as in the reviewers grid before
++        if (array_intersect($roles, [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_ASSISTANT])) {
+             return true;
+         }
+ 

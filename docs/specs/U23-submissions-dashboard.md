@@ -1048,10 +1048,10 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
 | [A17](#a17) | With strict mode on, every search from the sidebar's "Search submissions" box fails and shows "Search Results (0)" | 🐞 | low · crash: server | — |
 | [A1](#a1) | Section Editors and assistants have no "Declined" view, so a declined submission they are assigned to drops out of every view; in the 3.5 release nothing on the dashboard brings it back | 🐞 | medium | upstream sync (claude), 2026-10-28 — regression report |
+| [A7](#a7) | Declined and cancelled reviewers show no activity indicator at all to assigned assistants | 🐞 | medium | user request (claude), 2026-11-25 — regression report |
 | [A19](#a19) | On the submissions dashboard a screen reader hears "Loaded" before the list arrives, and nothing on a reload | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A2](#a2) | Editors are offered "Complete submission" on other people's incomplete submissions, landing them in the author's wizard | ❓ | minor | — |
 | [A3](#a3) | The author/reviewer conflict notice always says "as a Journal Manager", whoever is looking, on presses and preprint servers too | ❓ | minor | — |
-| [A7](#a7) | Declined and cancelled reviewers show no activity indicator at all to assigned assistants | ❓ | minor | — |
 | [A8](#a8) | The profile's opt-out for the monthly outstanding-tasks email is labelled "Weekly email of outstanding tasks", and a preprint server, which sends no such email, offers it too | ❓ | minor | — |
 | [A9](#a9) | A Site Administrator without Journal Manager in the journal is let in but listed by their journal role: with Reader or Reviewer only, an "Error" dialog over an empty list; with Author only, an empty list and no message | ❓ | minor | — |
 | [A18](#a18) | An address with a search phrase but no view, or a view the account lacks, opens "Assigned to me" with the phrase and filters dropped | ❓ | minor | — |
@@ -1102,7 +1102,7 @@ app-level rewording; harmless, but it reads wrong outside OJS.
 Basis: probe + code. <sup>a3</sup>
 
 <a id="a7"></a>
-**A7 — Declined and cancelled reviewers vanish for assistants** · ❓ · minor.
+**A7 — Declined and cancelled reviewers vanish for assistants** · 🐞 · user-visible.
 On the same submission at the same moment, a Journal Manager's row and an
 assigned Section Editor's show an indicator for every reviewer on the
 round, declined and cancelled ones included. An assigned assistant sees
@@ -1110,12 +1110,12 @@ indicators only for the others, and nothing marks the omission. On a
 round whose only reviewer declined or was cancelled, the assistant's cell
 reads "All reviews are confirmed and a decision is needed." with nothing
 beneath it ([A20](#a20)). The popovers they do
-get carry the editor's full working buttons.
-Question: is the reduced indicator set for assistants intended? Lean: an
-omission. The list an assistant receives leaves declined and cancelled
-reviewers out, while every other part of the cell matches the Section
-Editor's.
-Basis: probe. <sup>a7</sup>
+get carry the editor's full working buttons. Until 3.4 the assistant's
+reviewers grid listed every reviewer, and `pkp/pkp-lib#10076` gave the
+declined and cancelled ones back to editors only: regression, not choice
+(it was a ❓ leaning "omission" until 2026-11-25). One cause with
+the reviewer management feature's A6, the workflow's "Reviewers" table; the fix is one role list.
+Basis: probe + code. <sup>a7</sup>
 
 <a id="a8"></a>
 **A8 — The outstanding-tasks opt-out says "Weekly"** · ❓ · minor.
@@ -2322,6 +2322,16 @@ whose single reviewer was cancelled 1); the Funding Coordinator's carried
 decision is needed." alone (A20). Both got the editor's popover buttons.
 The Section Editor's list comes from the same assigned-user request
 (fn-c), so the omission follows the assistant's role (code not re-read).
+Re-walked 2026-11-25 on PKP's default dataset, `main` and `stable-3_5_0`,
+OJS and OMP, with a Funding coordinator: `dbarnes`'s row carried
+"Review request cancelled by editor" and "Review Request declined on
+…", the Funding coordinator's none. Cause: the role list of
+`Schema::canSeeAllReviewAssignments()` (`pkp/pkp-lib#10076`); 3.4's grid
+listed every assignment to assistants. Kept check
+`shared/playwright/checks/sync/pkp-lib-10076/walk.js`, fix `fix.diff` in
+the same folder. Tracked in ci-triage "Open regressions". Written up
+for the team in `docs/reports/2026-11-25-pkp-lib-10076.md` (a temporary
+report, deleted once acted on; git history keeps it).
 
 <a id="fn-a8"></a>
 **a8 — A8 evidence.** Live-probed 2026-08-26 (OJS seeded, an editor's

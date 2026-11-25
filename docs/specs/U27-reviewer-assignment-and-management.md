@@ -1754,8 +1754,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A54](#a54) | From the second date window opened on a page, screen readers cannot reach the date calendar | 🐞 | medium | issues (claude), 2026-11-19 — re-verified |
 | [A55](#a55) | On a review with answers saved on a review form, both PDF entries of "Download Review Form" open an "Error" window and no file | 🐞 | medium · crash: server | issues (claude), 2026-11-23 — re-verified |
 | [A57](#a57) | A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports | 🐞 | user-visible | — |
+| [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | 🐞 | medium | user request (claude), 2026-11-25 — regression report |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
-| [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
 | [A23](#a23) | {OJS} The Review Details window shows the recommendation twice, under two different labels | ❓ | minor | — |
 | [A28](#a28) | With the "Reviews completed" slider enabled, a name search for a reviewer never assigned answers "No items found." | ❓ | minor | — |
@@ -1817,19 +1817,20 @@ another) + code reading (the note is stored on the user account, not the
 assignment). <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a6"></a>
-**A6 — Assistant-level participants see a shorter reviewers table** · ❓ ·
-minor.
+**A6 — Assistant-level participants see a shorter reviewers table** · 🐞 ·
+user-visible.
 For a review manager the table keeps declined and cancelled rows visible,
 with their tooltips and the resend and reinstate entries. An assistant-level
 participant assigned to the stage gets the same table with those rows
-silently omitted. Nothing indicates rows are missing, so two people looking
-at "the same" round see different reviewer counts.
-Question: is hiding declined and cancelled history from assistants intended?
-Lean: intended as written, because the visibility rule names exactly the
-manager roles, but the silence is worth a product look.
-Basis: live probe (a manager control saw all three row kinds where the
-assistant's table showed one; the assistant's row menu also lacked "Login
-As" and "Editorial Notes") + code reading.
+silently omitted ("No Items" when every reviewer declined or was
+cancelled), while "Add Reviewer" stays. Nothing indicates rows are
+missing, so two people looking at "the same" round see different
+reviewer counts. Until 3.4 the reviewers grid listed every assignment to
+assistants and gave them every row action but creating and enrolling
+reviewers; `pkp/pkp-lib#10076` gave the rows back to editors only:
+regression, not choice (it was a ❓ leaning "intended" until
+2026-11-25). One cause with the submissions dashboard's A7; the fix is one role list.
+Basis: probe + code.
 <sup>[f-a6](#fn-a6)</sup>
 
 <a id="a7"></a>
@@ -3699,6 +3700,17 @@ Live-probed 2026-08-02 (OJS + OMP): the manager control saw active,
 declined and cancelled rows; the assistant-level participant's table showed
 only the active row, and its row menu lacked "Login As" and "Editorial
 Notes".
+Re-walked 2026-11-25 on PKP's default dataset, `main` and `stable-3_5_0`,
+OJS and OMP, with a Funding coordinator: `dbarnes` saw "Request
+Cancelled" and "Request Declined" rows, the Funding coordinator "No
+Items"; with the role added to `canSeeAllReviewAssignments()` she saw
+both rows with "More Actions" and the author's view stayed the same.
+3.4 and 3.3 (code): `PKPReviewerGridHandler::loadData()` lists every
+assignment, and the constructor authorizes `ROLE_ID_ASSISTANT`. Kept
+check `shared/playwright/checks/sync/pkp-lib-10076/walk.js`, fix
+`fix.diff` in the same folder. Tracked in ci-triage "Open regressions".
+Written up for the team in `docs/reports/2026-11-25-pkp-lib-10076.md` (a
+temporary report, deleted once acted on; git history keeps it).
 
 <a id="fn-a7"></a>
 **f-a7** — Live-probed 2026-08-02 (OJS + OMP): every fresh invitation's
