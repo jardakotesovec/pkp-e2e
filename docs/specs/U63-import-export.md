@@ -679,7 +679,7 @@ Sync", "Error"), and a "Search" button. That "Search" narrows the list
     Administration › "View Failed Jobs", as for any refused deposit.
     Until pkp/pkp-lib#13591's DOAJ fix (pkp/ojs#6047) is merged, the row
     keeps reading "Submitted" instead, never "Failed", and the "Error"
-    status lists nothing ⚠ [OJS9](#ojs9). <sup>u</sup> <sup>z</sup>
+    status lists nothing ⚠ [OJS9](#ojs9). <sup>u</sup> <sup>z1</sup>
 43. **Automatic deposit.** Once a day (no screen starts it; run by
     hand <sup>s</sup>), for a journal with "DOAJ Plugin" ticked, an API
     key saved and the automatic-deposit box ticked, the installation
@@ -3145,8 +3145,8 @@ such an article is unpublished (OJS12): `handlePublicationPublishing()`
 and `handlePublicationUnpublishing()` take `registered` exactly as
 they take `markedRegistered`, which was driven (note t).
 
-<a id="fn-z"></a>
-**z** — Walked 2026-11-09 (Rule 42; OJS9) at the PR heads of
+<a id="fn-z1"></a>
+**z1** — Walked 2026-11-09 (Rule 42; OJS9) at the PR heads of
 pkp/pkp-lib#13591's DOAJ fix, before their merge: pkp/ojs#6047
 `acc4948fa2` (`main`, merged locally onto OJS `407246bb8e`) and #6045
 `79a80bbaa7` (`ore`, onto `8e022b2591`), with
