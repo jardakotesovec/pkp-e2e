@@ -37,6 +37,7 @@
 // `fix-anonymous-affiliations.diff` applied on the head (PROBE_RUN=fix) no step logs anything and the
 // switch still removes "Beta College".
 // Round 2 head `5d08697c48` (the same `?? []`, PROBE_RUN=head2): every step reads fixed, no log line.
+// Round 3 head `8f429d1760` (A20's fix added, PROBE_RUN=head3): the same.
 //
 // Facts: edit-without-type-<run>-<app>.json.
 const {forEachApp, launch, signIn, idle, record, apiAs, sql, tag, serverLog} = require('../../../probe');

@@ -3131,6 +3131,7 @@ refusal hit submissions holding no French text (by the code, one that
 holds French text saves; the dataset has none). On OJS, as the Section
 Editor, an add that got an Organization Name typed under "Organization
 or group" before switching back to "Person" saved.
+Upstream: fixed in PR `pkp/pkp-lib#13879` (round 3, `8f429d1760`, issue `pkp/pkp-lib#13877`), walked fixed at that head on OJS, OMP and OPS with the kept script (PR review, 2026-11-25; companion `13877-main` retires A20 at the merge).
 Issue report: [pkp-e2e#751](https://github.com/jardakotesovec/pkp-e2e/issues/751) ([docs/issues/U41-A20-add-contributor-refused-hidden-fields.md](../issues/U41-A20-add-contributor-refused-hidden-fields.md)).
 
 <a id="fn-f-a21"></a>
