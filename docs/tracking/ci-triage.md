@@ -1159,7 +1159,12 @@ trips.
   the list); the error context was not read. No earlier sighting at that
   line. **Watch condition**: a second sighting; then read its error
   context for which term the option holds and the lookup requests'
-  order.
+  order. **Second sighting 2026-11-25** (tripped): dispatch run
+  [45587854592](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45587854592)
+  (`main`, the PR review of pkp/pkp-lib#13766, whose PRs touch only the
+  Crossref XML and the recommendation labels), OJS shard 2/3, the same
+  "expected 0, received 1" at the same line, green on its retry; its
+  error context is not read yet.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
