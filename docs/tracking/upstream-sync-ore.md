@@ -39,6 +39,10 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
 
 ## Read log
 
+- **2026-11-26 (daily session, VM s1) — ojs `ore` `3ef13cb7fb`, pkp-lib `ore` `663955ef34`, ui-library `ore` `1358f5e2`: no commits since the baselines (`fetch-apps --update` with `PKP_E2E_LINE=ore`, `origin/ore` fetched in the submodules). Baselines stay.**
+  - Runs (step 0): the pkp/ojs `ore` hook [45323352439](https://github.com/pkp/ojs/actions/runs/45323352439) green at `3ef13cb7fb`; the nightly `ojs-ore` job of [45748859940](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45748859940) 3/3 green at the same tip (pkp-e2e `aa70550f`; `main` has since changed only check scripts under `checks/sync/pkp-lib-13860/`), so no dispatch.
+  - Carried from `main`: no regression confirmed today; `main`'s one commit (pkp/ojs#6107, DataCite) has no `ore` port. Open regression rows: no code moved; none re-run.
+  - Security: none routed.
 - **2026-11-25 (daily session, VM s1) — ojs `ore` `3ef13cb7fb`, pkp-lib `ore` `663955ef34`, ui-library `ore` `1358f5e2`: no commits since the baselines (`git ls-remote` against pkp). Baselines stay.**
   - Runs: pkp/ojs `ore` hook [45323352439](https://github.com/pkp/ojs/actions/runs/45323352439) at `3ef13cb7fb` green; nightly `ojs-ore` in [45540076047](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45540076047) (pkp-e2e `0e953f46`) 3/3 green. pkp-e2e `main` has since changed only check scripts and docs (no `lines/ore/`, harness or workflow file), so no dispatch.
   - Carried findings: no regression confirmed on `main` today. Security: none routed.
@@ -98,15 +102,6 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
   - All four `=main` (same patch-ids): ojs `1fedf73275` = `7fc2376322`, pkp-lib `9ca248495e` = `8959bca71c`, ui-library `3f904483` = `51f9eaa1` (pkp/ui-library#1014; pkp/pkp-lib#13468) and `940b25cf` = `f2a4757a` (pkp/ui-library#981). `main`'s verdicts carry over (`upstream-sync.md` 2026-11-12): regression none, security none.
   - Carried: main's `c3cf0165` (U14 A6 retired) by hand as `0c23991f` (ore's U14 is the pre-revision text; a fold agent, `.reports/ore1112/` in the worktree; dead links to the deleted A6, A17 and A18 reports replaced; the suites' headers drop A6). The A6 walk (copied from `main` for the run, removed after) on a fresh ore dataset fleet, OJS `1fedf73275`: both panels link the unverified iD to `https://orcid.org/0000-0001-5109-3700`; neighbour reads unchanged. main's `f3b63203` (U30 and U26 follow #981), its spec, suite-comment and kept-check parts, as `918eeb34`; one conflict (U30's Left-out list) resolved to ore's text plus the new item, its date tag dropped for ore's lint.
   - Gate: pkp-e2e `ore` push run [43211539187](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43211539187) at `918eeb34`: 3/3 green.
-  - Carried over: today's `main` sync confirmed no regression. Open regression rows: no row's code moved.
-  - Security: none routed.
-- **2026-11-11 (daily session, VM s0, the ore worktree) — ojs `ore` `aa4b02810f..81b4b1f5fc` (2 pointer bumps + 2 merges: pkp/ojs#6034, #6059); pkp-lib `ore` `6722bea1ed..5c3c5f9505` (1); ui-library `ore` `b1577b9c2c..ebf241be` (3). Read in full; baselines advanced; pkp-e2e `ore` `d351b5d0..34731c21`.**
-  - Runs (step 0): the pkp/ojs `ore` hook at `81b4b1f5fc` ([42870112875](https://github.com/pkp/ojs/actions/runs/42870112875), 2026-11-10 17:56, after pkp-e2e `ore` `d351b5d0`): green; the earlier run at `2ced3ae781` was cancelled by it.
-  - pkp-lib `5c3c5f9505` (pkp/pkp-lib#13773 for #13180, `=main e2078ce20e`, same patch-id) → the `main` read carries over. OJS `ore`'s committed `js/pkp.min.js` is still the 2026-08-27 build, as on `main`.
-  - ui-library `b94ea735` (pkp/ui-library#1047, a 19-file change under the same issue) reverted by `f479ed79` (#1051), then `ebf241be` (#1052, `=main 55ec62ee`): the range's net diff is `55ec62ee`'s two files. Regression none, security none.
-  - Pointer bumps `4816d8eb38` + merge `2ced3ae781` (ui-library to `ebf241be`), `4f47db453b` + merge `81b4b1f5fc` (pkp-lib to `5c3c5f9505`).
-  - Carried: main's `9058e21d` (U08 A1) cherry-picked as `10500323`, conflicts resolved to ore's text (ore keeps a Retired summary row, its lint's rule); main's `296f5da0` (U03 A24) applied by hand as `34731c21` (ore's entry has its earlier form, no report, no suite-header mention). Walks on fresh ore dataset fleets (OJS): `help-icon-raw-key-name/walk.js` "Help"/"Aide"; `profile-contact-save-script-error/walk.js` (copied from `main` for the run, not committed) 0 page errors, the marker right.
-  - Gate: pkp-e2e `ore` push run [43012651437](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43012651437) at `34731c21`: 3/3 green.
   - Carried over: today's `main` sync confirmed no regression. Open regression rows: no row's code moved.
   - Security: none routed.
 - **2026-11-10 (merge step asked in the thread by bozana, VM s1, the ore worktree) — pkp-lib#12899's `ore` port: pkp-lib `ore` `5598f13905..6722bea1ed` (pkp/pkp-lib#13771, bozana, `5f40e69aa9`, merged 13:33 UTC), ojs `ore` `8e022b2591..aa4b02810f` (pkp/ojs#6058, the pointer bump to `5f40e69aa9`). Not PR-reviewed before the merge; it is `main`'s reviewed patch. Baselines advanced; pkp-e2e `ore` `6c860586..d351b5d0`.**

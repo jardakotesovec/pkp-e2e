@@ -1094,7 +1094,11 @@ trips.
   (serial, PHP 8.2 MariaDB, `DELETE FROM journal_settings` /
   `press_settings`) and, outside a serial file and now on MySQL too, OJS
   U64 S11 (`seedJournal`, PHP 8.2 MySQL) and OJS U65 S1 (PHP 8.3 MySQL),
-  both on `UPDATE journals SET seq`. The run's "Database log" step holds both sides of each
+  both on `UPDATE journals SET seq`; again in the configurations run
+  [45731670607](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45731670607)
+  (2026-11-26, PHP 8.2 MariaDB, both green on the retry): OJS U04 S11
+  (serial, `DELETE FROM journal_settings`) and OPS U16 S5 (serial,
+  `DELETE FROM server_settings`). The run's "Database log" step holds both sides of each
   deadlock. **Watch condition**: a red on both tries, or a sighting on
   the usual configuration.
 
@@ -1154,6 +1158,17 @@ trips.
   `ContributorsScreen.saveForm`'s `waitForResponse` for the POST to
   `/contributors` timed out (`apps/ops/playwright/pages/ContributorPages.js:425`,
   from the spec's line 1327). **Watch condition**: a second sighting.
+
+- **OMP U41 S6's contributor list "Order" button not found** (OMP, PHP 8.2
+  MariaDB, configurations run
+  [45731670607](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45731670607),
+  2026-11-26, omp 2/3; green on the retry). `locator.click` on
+  `.contributorsListPanel` › button "Order" timed out at 2 s on every
+  pass of the 120 s `toPass` (`U41-contributors-and-affiliations.spec.js:1532`,
+  "S6: readers see the contributors", the helper at its line 232). Not
+  diagnosed; the "Contributor reorder under load" class above is S2's
+  arrow press, not the button's absence. **Watch condition**: a second
+  sighting; then read its error context for what the panel shows.
 
 - **OMP U53 S6's Site Administrator row reads "Production editor"** (OMP,
   once, pkp-e2e branch `rev-2026-11-19` run
