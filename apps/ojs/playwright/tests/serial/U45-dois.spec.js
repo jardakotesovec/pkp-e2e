@@ -72,6 +72,7 @@ const GALLEYS = 'Article galleys, such as a published PDF';
 const DATACITE_KINDS = ['Articles', 'Issues', GALLEYS];
 const TO_PRODUCTION = ['skipExternalReview', 'sendToProduction'];
 const CROSSREF_CURL = 'cURL error 7: Failed to connect to api.crossref.org port 443';
+const DATACITE_TEST_CURL = 'cURL error 7: Failed to connect to mds.test.datacite.org port 443';
 const DEPOSITOR = {depositorName: 'Public Knowledge Project', depositorEmail: 'doi@mail.test'};
 const VERSIONING_YES = 'Yes, assign a unique DOI to every version of an article.';
 const VERSIONING_NO = 'No, all versions of an article should have the same DOI.';
@@ -688,12 +689,11 @@ test.describe('DOIs (serial)', () => {
         await dois.expand(row, axolotl.submissionId);
         await expect(dois.doiBadge(row, ARTICLE)).toHaveText('Submitted');
 
-        // The background deposit run: the "Article" row "Error" with "View
-        // Error", the DataCite box with "Deposit DOI(s)" (Rules 17, 30, 33);
-        // the row's "View Error" opens the window with DataCite's preamble
-        // (Rule 33). The box's "View Error" and the window's connection
-        // error are not asserted: the job tool keeps no DataCite message
-        // (Rule 33a, ⚠ A31).
+        // The background deposit run, by the job tool: the "Article" row
+        // "Error" with "View Error", the DataCite box with "Deposit DOI(s)"
+        // and "View Error" (Rules 17, 30, 33, 33a); the row's and the box's
+        // "View Error" open the same window over the connection error to
+        // DataCite's test system ("Testing" is ticked; Rule 33).
         runJobs();
         await dois.reload();
         await dois.expand(row, axolotl.submissionId);
@@ -701,9 +701,16 @@ test.describe('DOIs (serial)', () => {
         await expect(dois.rowViewError(row, ARTICLE)).toBeVisible();
         await expect(dois.agencyName(row)).toHaveText('DataCite');
         await expect(dois.agencySentence(row)).toHaveText(TEXT.notSubmitted('DataCite'));
-        await expect(dois.agencyButtons(row).filter({hasText: 'Deposit DOI(s)'})).toHaveCount(1);
-        const window = await dois.openErrorMessage(dois.rowViewError(row, ARTICLE));
+        await expect(dois.agencyButtons(row)).toHaveText(['Deposit DOI(s)', TEXT.viewError]);
+        let window = await dois.openErrorMessage(dois.rowViewError(row, ARTICLE));
         await expect(window).toContainText(TEXT.depositFailed('DataCite'));
+        await expect(window).toContainText(DATACITE_TEST_CURL);
+        const message = (await window.innerText()).replace(/\s+/g, ' ').trim();
+        await dois.closeErrorMessage();
+        window = await dois.openErrorMessage(dois.agencyViewError(row));
+        await expect(window).toContainText(TEXT.depositFailed('DataCite'));
+        await expect(window).toContainText(DATACITE_TEST_CURL);
+        expect((await window.innerText()).replace(/\s+/g, ' ').trim(), 'the box\'s window is the row\'s').toBe(message);
         await dois.closeErrorMessage();
 
         // An article registered before galley DOIs: "Mark DOIs Registered"

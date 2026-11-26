@@ -797,11 +797,11 @@ links under the list. <sup>g</sup>
     its command-line job tool, as a worker or a cron job its host sets up
     (Settings bullet 15); the test installs use the tool. Run by the tool,
     a deposit that cannot reach the agency still reads "Error" and "Has
-    Error" lists it. With Crossref on a journal, "View Error" shows the
-    connection error as Rule 33 says. With Crossref on a preprint server,
-    and with DataCite, the message is lost: the row's "View Error" opens
-    the window with its first sentence and nothing under it, and the
-    agency panel has no "View Error" ⚠ [A31](#a31).
+    Error" lists it. With Crossref on a journal, and with DataCite, both
+    "View Error"s show the connection error as Rule 33 says. With
+    Crossref on a preprint server the message is lost: the row's "View
+    Error" opens the window with its first sentence and nothing under
+    it, and the agency panel has no "View Error" ⚠ [A31](#a31).
     <sup>q53</sup> <sup>f-a31</sup>
 
 33b. **Addresses in a deposit run by the job tool** {OJS OPS}. Each
@@ -1237,8 +1237,8 @@ differs. <sup>z1</sup>
 15. **How background jobs run** (the install's configuration file, no
     screen; at the end of page loads). Run by the command-line job tool
     instead, as a worker or a cron job: a deposit is sent at the tool's
-    next run; with Crossref on a preprint server or with DataCite a
-    deposit that fails keeps no message (Rule 33a [A31](#a31)); and on
+    next run; with Crossref on a preprint server a deposit that fails
+    keeps no message (Rule 33a [A31](#a31)); and on
     a preprint server a Crossref deposit gives each preprint the site's
     address (Rule 33b [OPS8](#ops8)). <sup>q53</sup> <sup>f-ops8</sup>
 
@@ -2111,10 +2111,13 @@ throwaway accounts, scenario 13 also with the Site Administrator.
       how), and reload "DOIs": "Axolotl limb memory"'s "Article" row reads
       "Error" with a "View Error" link, and its DataCite box reads "The
       metadata for this item has not been submitted to DataCite.", with
-      "Deposit DOI(s)" but no "View Error" [A31](#a31) (Rules 17, 30,
-      33a). Press the row's "View Error": the window "Registration Error
-      Message" opens with "The deposit to DataCite failed. The details
-      below explain the cause of the error:" (Rule 33).
+      "Deposit DOI(s)" and "View Error" (Rules 17, 30, 33a). Press the
+      row's "View Error": the window "Registration Error Message" opens
+      with "The deposit to DataCite failed. The details below explain the
+      cause of the error:" over "cURL error 7: Failed to connect to
+      mds.test.datacite.org port 443 …" (the journal deposits with
+      "Testing" ticked). Close it and press the box's "View Error": the
+      same window (Rule 33).
     - **An article registered before galley DOIs**: tick "Tardigrade
       desiccation" and run "Mark DOIs Registered": "Items successfully
       marked registered", and its "Article" row reads "Registered"
@@ -2565,7 +2568,7 @@ Left out of the scenarios above, by reason:
   - OJS12 ("DOI Versioning" "Yes" saved while Crossref's "Update Policy DOI" is empty; Rule 38)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
-  - A31 (a failed deposit run by the job tool keeping no message, with Crossref on a preprint server and with DataCite; Rule 33a; scenarios 13 and 16 pass it)
+  - A31 (a failed deposit run by the job tool keeping no message, with Crossref on a preprint server; Rule 33a; scenario 13 passes it)
   - OPS8 (a preprint server's Crossref deposit run by the job tool giving each preprint the site's address; Rule 33b)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
   - OPS2 ("Automatic Deposit" on a preprint server; Rule 41)
@@ -2609,7 +2612,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | The DOIs page's "Bulk Actions" menu stays open over the list when an action is confirmed at once | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A24](#a24) | The DOIs page's rows show a title's italic word as `<i>…</i>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A29](#a29) | A journal upgraded from 3.3 can come out with an old leftover DOI prefix, and new DOIs are made with it | 🐞 | user-visible | — |
-| [A31](#a31) | A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref and a journal's DataCite | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
+| [A31](#a31) | A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered" | 🐞 | low | issues (claude), 2026-11-23 — re-verified |
 | [OJS5](#ojs5) | DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI | 🐞 | medium · crash: server | issues (claude), 2026-11-23 — re-verified |
@@ -2986,28 +2989,26 @@ stops on such an install with a database error instead.
 Since: 2026-10-09 (pkp/pkp-lib#13481; on 3.5 pkp/pkp-lib#12082) · Basis: probe, 2026-10-09. <sup>f-a29</sup>
 
 <a id="a31"></a>
-**A31 — A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref and a journal's DataCite** · 🐞 · medium.
-A preprint server deposits a DOI with Crossref, or a journal deposits
-one with DataCite, and the deposit fails. The DOI reads "Error" and "Has
-Error" lists it. The manager expects "View Error" to say what went wrong.
+**A31 — A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref** · 🐞 · medium.
+A preprint server deposits a DOI with Crossref, and the deposit fails.
+The DOI reads "Error" and "Has Error" lists it. The manager expects "View Error" to say what went wrong.
 Instead, the row's "View Error" opens "Registration Error Message" with
-its first sentence and nothing under it. The agency's box under the item
-(the "Crossref" or "DataCite" box) offers "Deposit DOI(s)" without "View
-Error".
+its first sentence and nothing under it. The "Crossref" box under the
+item offers "Deposit DOI(s)" without "View Error".
 
 No screen tells the manager why the deposit failed. An outage at the
 agency cannot be told from a record the agency refused, and a refused
-record cannot be corrected, because the agency's reason is not kept. On
-a preprint server, a Crossref deposit that succeeds keeps no record of
-the agency's answer either.
+record cannot be corrected, because the agency's reason is not kept. A
+Crossref deposit that succeeds keeps no record of the agency's answer
+either.
 
 It happens on every failed deposit when the install runs its background
 jobs with the command-line job tool, as a worker or a cron job. On the
 default setting, where jobs run at the end of page loads, it happens when
-the deposit runs at the end of a page outside that journal or server,
-such as a site administration page. A journal's Crossref deposit keeps
-its message on `main`.
-Basis: test run + walk, 2026-11-23. <sup>f-a31</sup>
+the deposit runs at the end of a page outside that server, such as a
+site administration page. A journal keeps the message, with Crossref
+and, since pkp/ojs#6107, with DataCite.
+Basis: test run + walk, 2026-11-23; PR heads and merge, 2026-11-26. <sup>f-a31</sup>
 
 
 ### OJS
@@ -4861,8 +4862,8 @@ catch the `TransferException` and call `updateDepositStatus()` with
 error). The dataset fleets run `[queues] job_runner = On`, so the
 deposit ran on the reload; the test installs run `job_runner = Off`, so
 there it runs only when the queue is run by hand (the suites' `runJobs()`),
-and there a preprint server's Crossref and a journal's DataCite keep no
-message (A31, note f-a31).
+and there a preprint server's Crossref keeps no message (A31, note
+f-a31).
 
 <a id="fn-s"></a>
 **s** — `isPluginConfigured()`: OJS `CrossrefPlugin` (the schema's
@@ -5537,8 +5538,8 @@ Scenarios 13 and 16 run the site's background jobs once, after their
 deposits, with `runJobs()` (`shared/playwright/support/jobs.js`, which
 runs `php lib/pkp/tools/jobs.php run` and waits for the queue to empty;
 the serial project only), and read "Error" after it (Rule 33, note
-q53), OPS's Crossref and OJS's DataCite with no message (Rule 33a, note
-f-a31); every other deposit in the scenarios is read before any run,
+q53), OPS's Crossref with no message and OJS's DataCite with its
+message (Rule 33a, note f-a31); every other deposit in the scenarios is read before any run,
 "Submitted". Scenario 13's Site Administrator is the installer's
 `admin` (`docs/process/users.md`); "Failed Jobs" lists every job of the
 fleet, other tests' included. Scenarios 1–11 run on all three apps,
@@ -5929,10 +5930,29 @@ the message is kept (note q53), unless the job runs at the end of a
 request outside the journal or server, such as a site administration
 page: walked 2026-11-23 on OJS `main`, DataCite then kept no message
 (the issue report's Steps). Scenario 16's journal deposits with
-"Testing" ticked, so once its message is kept the window should name
-DataCite's test address, `mds.test.datacite.org`
-(`DataciteExportPlugin::depositXML()` posts to `DATACITE_API_URL_TEST`
-when `isTestMode()`), code-read, not seen.
+"Testing" ticked, so its window names DataCite's test address,
+`mds.test.datacite.org` (`DataciteExportPlugin::depositXML()` posts to
+`DATACITE_API_URL_TEST` when `isTestMode()`).
+
+The fix, pkp/pkp-lib#13860, driven 2026-11-26 at the PR heads before
+their merge: OJS `main` `6ce58ddbb2` with pkp/ojs#6107's
+`DatacitePlugin.php` (`d308f26514`), OPS `main` `a80a5decc1` with the
+crossref plugin at pkp/crossref-ops#82's head `a55cf9261b` (kept
+script `shared/playwright/checks/sync/pkp-lib-13860/cli-deposit.js`,
+with `cli-deposit.php`; a scratch journal per agency and a scratch
+preprint server, `[queues] job_runner = Off`, the "Deposit DOIs" job
+queued and run by `php lib/pkp/tools/jobs.php work`): each DOI read
+status 4 with its message, `crossrefplugin_failedMsg` "cURL error 7:
+Failed to connect to api.crossref.org port 443 …" (journal and
+preprint server) and `dataciteplugin_failedMsg` "cURL error 7: Failed
+to connect to mds.datacite.org port 443 …". The PRs add the
+`Schema::get::doi` hook in `register()` whatever the context. Merged
+2026-11-26: OJS `main` at `019bc614eb` (scenario 16's windows read with
+the message, OJS serial S16), and in the plugin, pkp/crossref-ops
+`f4bd0f177d` (#82; 3.5 `8738fc17ca`, #81). OPS's pointer still names
+the old plugin, `0bcf460` on `main` and `e72c479` on 3.5, so a
+preprint server keeps no message until it moves.
+Upstream: `pkp/pkp-lib#13860` (open), merged for OJS (`main` pkp/ojs#6107, 3.5 pkp/ojs#6106 and #6124) and in pkp/crossref-ops (#82, #81); OPS's `plugins/generic/crossref` pointer to move with `pkp/pkp-lib#13778` (the developer, in the review thread, 2026-11-26); 3.4 fixed for OJS and OPS (pkp/ojs#6123, pkp/ops#1528). When OPS's pointer passes `a55cf9261b` (`main`), retire A31: scenario 13's OPS sentence and Rule 33a, and OPS serial S13 asserts the box's "View Error" and the connection error (as companion `i13860-main` round 1, `d7d7920c`, did).
 
 Issue report: [pkp-e2e#1107](https://github.com/jardakotesovec/pkp-e2e/issues/1107) ([docs/issues/U45-A31-job-tool-deposit-error-no-message.md](../issues/U45-A31-job-tool-deposit-error-no-message.md)).
 
