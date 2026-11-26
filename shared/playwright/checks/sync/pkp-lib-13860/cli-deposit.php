@@ -4,6 +4,16 @@
  * run by the command-line job worker. Run from the app root with the fleet's config:
  *   PKP_CONFIG_FILE=$PWD/config.test.inc.php php <this file> dispatch <contextPath> <submissionId>
  *   PKP_CONFIG_FILE=$PWD/config.test.inc.php php <this file> read <contextPath> <submissionId>
+ *   PKP_CONFIG_FILE=$PWD/config.test.inc.php php <this file> setup <contextPath> <agency> <n>
+ * `setup` (for the lines without the `_test` API, 3.4, on PKP's dataset) does in PHP what the scratch context of
+ * cli-deposit.js does through the API: DOIs on for publications with the prefix 10.1234, the agency plugin enabled
+ * with test credentials and chosen as the Registration Agency; it prints the id of the context's n-th published
+ * submission (0-based, by id) as `submissionId`.
+ *   PKP_CONFIG_FILE=… php <this file> stub <contextPath> <submissionId> <httpStatus>
+ * `stub` is `dispatch` with the job run in this process instead of queued: a command-line tool, so the plugins are
+ * registered with no context as in `jobs.php`, and the agency's answer is stubbed (the Guzzle client the app hands
+ * out while PKPContainer says unit tests run: a 3.4/3.5 seam) with <httpStatus> and a short body. On 3.4 only an
+ * answer with a response reaches the message (a connection error is not caught there).
  * `dispatch` queues the job the DOI manager's "Deposit DOIs" queues (PKPDoiController::depositSubmissions():
  * DepositSubmission with the context's configured agency, then markSubmitted), publishing the work and creating its DOIs first
  * when it has none (an OJS article goes into the journal's seeded issue). The caller then runs `php lib/pkp/tools/jobs.php work --stop-when-empty` (job_runner Off in
@@ -21,11 +31,34 @@ class CliDepositDriver extends \PKP\cliTool\CommandLineTool
 {
     public function execute(): void
     {
-        [$mode, $path, $submissionId] = $this->argv;
-        $submissionId = (int) $submissionId;
+        [$mode, $path] = $this->argv;
+        $submissionId = $mode === 'setup' ? 0 : (int) $this->argv[2];
         $context = \APP\core\Application::getContextDAO()->getByPath($path);
         $out = ['mode' => $mode, 'contextId' => $context->getId()];
-        if ($mode === 'dispatch') {
+        if ($mode === 'setup') {
+            $agencyName = $this->argv[2];
+            $n = (int) ($this->argv[3] ?? 0);
+            $plugin = \PKP\plugins\PluginRegistry::getPlugin('generic', $agencyName);
+            $settings = $agencyName === 'crossrefplugin'
+                ? ['depositorName' => 'Dep Depositor', 'depositorEmail' => 'dep.depositor@mail.test', 'username' => 'dep-user', 'password' => 'dep-pass']
+                : ['username' => 'DEP.USER', 'password' => 'dep-pass'];
+            $plugin->updateSetting($context->getId(), 'enabled', true);
+            foreach ($settings as $name => $value) {
+                $plugin->updateSetting($context->getId(), $name, $value);
+            }
+            $contextDao = \APP\core\Application::getContextDAO();
+            foreach (['enableDois' => true, 'doiPrefix' => '10.1234', 'enabledDoiTypes' => ['publication'], 'registrationAgency' => $agencyName] as $name => $value) {
+                $context->setData($name, $value);
+            }
+            $contextDao->updateObject($context);
+            $ids = Repo::submission()->getCollector()->filterByContextIds([$context->getId()])
+                ->filterByStatus([\PKP\submission\PKPSubmission::STATUS_PUBLISHED])->getIds()->sort()->values()->all();
+            $out['submissionId'] = $ids[$n] ?? null;
+            $out['agencyNow'] = \APP\core\Application::getContextDAO()->getById($context->getId())->getData('registrationAgency');
+            echo json_encode($out, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), "\n";
+            return;
+        }
+        if ($mode === 'dispatch' || $mode === 'stub') {
             $submission = Repo::submission()->get($submissionId);
             if ($submission->getData('status') !== \PKP\submission\PKPSubmission::STATUS_PUBLISHED) {
                 // Published here, not by the seed: the 3.5 seed's publish step fails on OPS, and an OJS article
@@ -45,8 +78,25 @@ class CliDepositDriver extends \PKP\cliTool\CommandLineTool
             }
             $agency = $context->getConfiguredDoiAgency();
             $out['agency'] = $agency ? $agency->getName() : null;
-            dispatch(new DepositSubmission($submissionId, $context, $agency));
-            Repo::doi()->markSubmitted(Repo::doi()->getDoisForSubmission($submissionId));
+            if ($mode === 'stub') {
+                Repo::doi()->markSubmitted(Repo::doi()->getDoisForSubmission($submissionId));
+                $status = (int) ($this->argv[3] ?? 403);
+                \PKP\core\PKPContainer::getInstance()->setRunningUnitTests();
+                \PKP\core\Registry::set('GuzzleClient', new \GuzzleHttp\Client(['handler' => \GuzzleHttp\HandlerStack::create(
+                    new \GuzzleHttp\Handler\MockHandler(array_fill(0, 4, new \GuzzleHttp\Psr7\Response($status, [], "Stubbed agency answer {$status}: credentials refused")))
+                )]));
+                $out['contextInRequest'] = \APP\core\Application::get()->getRequest()->getContext()?->getId();
+                $out['schemaHasFailedMsg'] = isset((class_exists(\APP\core\Services::class) ? \APP\core\Services::get('schema') : app()->get('schema'))->get('doi')->properties->{$agency->getName() . '_failedMsg'});
+                try {
+                    (new DepositSubmission($submissionId, $context, $agency))->handle();
+                    $out['handled'] = true;
+                } catch (\Throwable $e) {
+                    $out['handled'] = get_class($e) . ': ' . substr($e->getMessage(), 0, 300);
+                }
+            } else {
+                dispatch(new DepositSubmission($submissionId, $context, $agency));
+                Repo::doi()->markSubmitted(Repo::doi()->getDoisForSubmission($submissionId));
+            }
             $out['queued'] = DB::table('jobs')->count();
         }
         $doiIds = Repo::doi()->getDoisForSubmission($submissionId);

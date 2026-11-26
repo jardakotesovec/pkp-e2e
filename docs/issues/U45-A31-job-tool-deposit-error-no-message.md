@@ -9,7 +9,7 @@
   - 3.4: OJS, OPS (code; only for a deposit the agency answers with an error)
   - 3.3: none (code; no job queue)
 - **Introduced** not traced; present since at least [2eaf4ccc25](https://github.com/pkp/ojs/commit/2eaf4ccc25c3462a4ca6eb86912189e720dc5bb2) (2025-07-28) for DataCite, and in Crossref on a preprint server since [bda7549](https://github.com/pkp/crossref-ops/commit/bda7549f5ca0ecae9d7c4fe95d7bdc1d56dcc6b8) (2022-01-14)
-- **Upstream** `pkp/pkp-lib#13860` (open; fix in PRs `pkp/crossref-ops#82` and `pkp/ojs#6107` for main, `pkp/crossref-ops#81`, `pkp/ojs#6106` and `pkp/crossref-ojs#124` for 3.5, not yet in main)
+- **Upstream** `pkp/pkp-lib#13860` (open). Merged 2026-11-26: `pkp/ojs#6107` (OJS `main` carries the DataCite fix), `pkp/ojs#6106` (OJS 3.5, DataCite), `pkp/crossref-ojs#124`, `pkp/crossref-ops#81` and `#82` (in the plugins only: OJS 3.5's crossref pointer moves with `pkp/ojs#6124`, open; no PR moves OPS's on `main` or 3.5). 3.4: `pkp/crossref-ojs#126`, `pkp/ojs#6123`, `pkp/crossref-ops#83`, `pkp/ops#1528`, open
 - **Tracked in** spec U45 [A31](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U45-dois.md#a31)
 - **Checked** 2026-11-23, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
