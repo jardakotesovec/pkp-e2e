@@ -245,8 +245,7 @@ types and what the boxes do belong to
      offers it, is signed straight back in: its next tab press or page
      load opens as the account. One that signed in with the box unticked
      is signed out: a tab press on a Profile page still open there opens
-     nothing but the alert "You must be logged in to access this
-     operation.", and its next page load shows the Login page.
+     nothing but the alert "Login required.", and its next page load shows the Login page.
    - 6b. **The email.** One message, subject "Confirm account contact email
      change request", is sent to the account's **current** address, not the
      new one ⚠ [A8](#a8); a later request goes to whichever address is
@@ -413,8 +412,7 @@ types and what the boxes do belong to
       on a tab leaves the tab's content area as it last was there (empty
       for a tab not opened there before), with no message, and the page's
       own script fails ⚠ [A25](#a25). Every later press, on a tab or on
-      "Save", is refused with a browser alert reading "You must be logged
-      in to access this operation."; after OK the
+      "Save", is refused with a browser alert reading "Login required."; after OK the
       pressed tab is marked open, showing what it last showed there, and
       nothing is saved. No email is sent. The old
       password stops working immediately, and any outstanding password-reset
@@ -1098,8 +1096,7 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - after an email-change save, a tab press on the Profile page still
     open in another browser signed in with "Keep me logged in" unticked,
-    answered by the alert "You must be logged in to access this
-    operation." (Rules 6a and 10b): the guard for A26, retired by
+    answered by the alert "Login required." (Rules 6a and 10b): the guard for A26, retired by
     pkp/pkp-lib#13862 [report 2026-11-25]
   - text typed into "Signature" alone, then another tab pressed, asking
     "The data on this form has changed. Do you wish to continue without
@@ -1592,8 +1589,7 @@ or saves without a reload, and nothing says that the session has ended:
   spinner turning and the list does not change.
 
 What was typed in that first save is not stored; a reload shows the
-Login page. Later presses get the alert "You must be logged in to
-access this operation.", which does not say the session has ended
+Login page. Later presses get the alert "Login required.", which does not say the session has ended
 either ([→ Login & sessions A16](U01-login-and-sessions.md#a16)).
 
 By the code, the longer forms do the same: the submission wizard's
@@ -2554,7 +2550,7 @@ the sign-in; the sign-in uses the username). Scenario 4's second context
 signs in on the Login page with "Keep me logged in" ticked as shown, and
 its third with the box unticked (`LoginPage.signInRemembered`); the third
 is only reloaded, never tab-pressed: the alert a press there raises
-("You must be logged in to access this operation.") is a **Planned**
+("Login required.") is a **Planned**
 guard (Left out), A26 having retired. Scenario 5's control is
 `count()` of the old address's inbox = 3 after the third message is found.
 Scenario 5's context is seeded like scenario 2's
@@ -3180,17 +3176,17 @@ Login page with no alert in both modes. The first browser put the
 account back after each mode (password set back, pending request
 cancelled). The expired and signed-out-elsewhere sessions are read from
 the code: their next request arrives with no user and meets the same
-policy. pkp/pkp-lib#13862 (for pkp/pkp-lib#13527) defines the key in
-`lib/pkp/locale/en/user.po` as "You must be logged in to access this
-operation." (English only; a locale without it still shows the code,
-since a missing key is not looked up in English). Driven 2026-11-25 at
-the PR head `73aae1d501` (merge ref `5beef30b06`), before its merge,
-OJS on `main` (the kept script
+policy. pkp/pkp-lib#13862 (for pkp/pkp-lib#13527) points
+`UserRequiredPolicy`'s default message at the existing
+`user.authorization.loginRequired` ("Login required.", the default of
+`PKPSiteAccessPolicy`, translated in 55 of 71 lib/pkp locales; a missing
+key is not looked up in English, so a new key would have stayed a code
+in the others). Driven 2026-11-26 at the PR head `f5878bb94c` (merge ref
+`a32bdde19f`), before its merge, OJS on `main` (the kept script
 `shared/playwright/checks/sync/pkp-lib-13527/walk.js`, step `userReq`):
 a signed-out `GET …/$$$call$$$/tab/user/profile-tab/identity` was
-answered 200
-`{"status":false,"content":"You must be logged in to access this operation."}`,
-where the base `8096e67cd2` answered
+answered 200 `{"status":false,"content":"Login required."}`, where the
+base `8096e67cd2` answered
 `"content":"##user.authorization.userRequired##"`. A26 is retired.
 
 <a id="fn-a27"></a>
