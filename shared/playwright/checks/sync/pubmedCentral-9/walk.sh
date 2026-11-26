@@ -16,7 +16,11 @@ node bin/try-fix.js apply "$PLUGIN_DIFF" ojs | cut -c1-80
 trap 'node "$ROOT/bin/try-fix.js" revert "$PLUGIN_DIFF" ojs' EXIT
 npm run reset:ojs -- --dataset 1 | tail -1
 cd checkouts/ojs; export PKP_CONFIG_FILE=$PWD/config.test.ds1.inc.php; D="php $K/driver.php"
-$D setup; php tools/importExport.php PubmedCentralExportPlugin importHistory publicknowledge "$K/history.csv" | tail -1
+$D setup
+echo "## D. before the import: a history row with the DOI in capitals (dry run)"
+printf 'doi,package_prefix,version,last_revision,file_stem,in_pmc\n10.9999/PMC9.1,jpk-1-jpk.1-17,1,0,jpk-1-1001,Y\n' > "$OUT/upper.csv"
+php tools/importExport.php PubmedCentralExportPlugin importHistory publicknowledge "$OUT/upper.csv" --dry-run | tail -4
+php tools/importExport.php PubmedCentralExportPlugin importHistory publicknowledge "$K/history.csv" | tail -1
 echo "## A. the imported 1.0 (pub 18) deposited over SFTP, twice"; for i in 1 2; do $D deposit 18 >/dev/null; $D job 18 | grep "job:\|pub 18 "; done
 echo "## B. the new 2.0 (pub 22) delivered by hand and marked registered, then deposited over SFTP"
 $D mark 22 | grep "pub 22 "; $D deposit 22 >/dev/null; $D job 22 | grep "job:\|pub 22 "
