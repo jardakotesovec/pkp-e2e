@@ -30,8 +30,6 @@
  * - A8 🐞: the rows' tick boxes' names.
  * - A14 🐞: the "stale" sentence of "Mark DOIs Needs Sync" (S9).
  * - A17 🐞: 1.0's block after a major version is posted (S11, S22).
- * - A31 🐞: the agency box's "View Error" and the message after a deposit
- *   the job tool runs (S13, in tests/serial/U45-dois.spec.js).
  * - OPS5 ❓: a draft listed or not (S4, S20 read "DOI Assigned" alone).
  * - OPS6 🐞: what a deposit sends.
  *

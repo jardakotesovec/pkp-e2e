@@ -727,7 +727,7 @@ links under the list. <sup>g</sup>
     | The item | Sentence | Buttons |
     |----------|----------|---------|
     | not published | "This item cannot be deposited until it has been published." | none |
-    | published, "Unregistered", "Needs Sync" or "Error" | "The metadata for this item has not been submitted to {agency}.", for a "Needs Sync" item too, although it was deposited or registered before ⚠ [A16](#a16) | "Deposit DOI(s)", which opens "Deposit DOIs" for this item alone; "View Error" too while "Error" (Rule 33 [A31](#a31)) |
+    | published, "Unregistered", "Needs Sync" or "Error" | "The metadata for this item has not been submitted to {agency}.", for a "Needs Sync" item too, although it was deposited or registered before ⚠ [A16](#a16) | "Deposit DOI(s)", which opens "Deposit DOIs" for this item alone; "View Error" too while "Error" (Rule 33) |
     | "Registered" through the agency | "The metadata for this item has been submitted to {agency}." | "View Record" once the agency's answer (Rule 32) is stored |
     | "Registered" by "Mark DOIs Registered" | "This item has been manually registered with a registration agency." | none |
 
@@ -785,8 +785,7 @@ links under the list. <sup>g</sup>
     connection, from Crossref "cURL error 7: Failed to connect to
     api.crossref.org port 443 …", from DataCite "cURL error 7: Failed to
     connect to mds.datacite.org port 443 …"; with a proxy whose name does
-    not resolve, from Crossref "cURL error 5: …". Rule 33a says where the
-    message is lost. "Has Error" lists the item, and Administration ›
+    not resolve, from Crossref "cURL error 5: …". "Has Error" lists the item, and Administration ›
     "Failed Jobs" gains no entry. The test installs reach no agency and
     run no background deposit by themselves: a deposit there reads
     "Submitted" until its background deposit is run, and "Error" after it.
@@ -796,12 +795,12 @@ links under the list. <sup>g</sup>
     jobs, deposits included, at the end of page loads by default, or with
     its command-line job tool, as a worker or a cron job its host sets up
     (Settings bullet 15); the test installs use the tool. Run by the tool,
-    a deposit that cannot reach the agency still reads "Error" and "Has
-    Error" lists it. With Crossref on a journal, and with DataCite, both
-    "View Error"s show the connection error as Rule 33 says. With
-    Crossref on a preprint server the message is lost: the row's "View
-    Error" opens the window with its first sentence and nothing under
-    it, and the agency panel has no "View Error" ⚠ [A31](#a31).
+    a deposit that cannot reach the agency reads "Error", "Has Error"
+    lists it, and every agency keeps its message: Crossref on a journal
+    and on a preprint server, and DataCite. The row's "View Error" and
+    the agency panel's "View Error" show the connection error as Rule 33
+    says. A deposit run at the end of a site administration page keeps
+    its message the same way.
     <sup>q53</sup> <sup>f-a31</sup>
 
 33b. **Addresses in a deposit run by the job tool** {OJS OPS}. Each
@@ -1237,9 +1236,8 @@ differs. <sup>z1</sup>
 15. **How background jobs run** (the install's configuration file, no
     screen; at the end of page loads). Run by the command-line job tool
     instead, as a worker or a cron job: a deposit is sent at the tool's
-    next run; with Crossref on a preprint server a deposit that fails
-    keeps no message (Rule 33a [A31](#a31)); and on
-    a preprint server a Crossref deposit gives each preprint the site's
+    next run, and a deposit that fails keeps its message as on a page
+    load (Rule 33a); and on a preprint server a Crossref deposit gives each preprint the site's
     address (Rule 33b [OPS8](#ops8)). <sup>q53</sup> <sup>f-ops8</sup>
 
 ## Cross-feature interactions
@@ -1990,10 +1988,8 @@ throwaway accounts, scenario 13 also with the Site Administrator.
       reads "The deposit to Crossref failed. The details below explain
       the cause of the error:" over "cURL error 7: Failed to connect to
       api.crossref.org port 443 …". Close it and press the box's "View
-      Error": the same window (Rule 33). On a preprint server the box
-      offers "Deposit DOI(s)" alone, so there is no second window to
-      open, and the row's window shows nothing under its first sentence
-      [A31](#a31) (Rule 33a).
+      Error": the same window (Rule 33). On a preprint server too
+      (Rule 33a).
     - **"Has Error"**: press "Has Error": "Axolotl limb memory" and "Coral
       spawning" are listed, and "Tardigrade desiccation" and "Moss
       regrowth" are not; press "Has Error" again to lift it (Rules 22,
@@ -2568,7 +2564,6 @@ Left out of the scenarios above, by reason:
   - OJS12 ("DOI Versioning" "Yes" saved while Crossref's "Update Policy DOI" is empty; Rule 38)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
-  - A31 (a failed deposit run by the job tool keeping no message, with Crossref on a preprint server; Rule 33a; scenario 13 passes it)
   - OPS8 (a preprint server's Crossref deposit run by the job tool giving each preprint the site's address; Rule 33b)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
   - OPS2 ("Automatic Deposit" on a preprint server; Rule 41)
@@ -2612,7 +2607,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | The DOIs page's "Bulk Actions" menu stays open over the list when an action is confirmed at once | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A24](#a24) | The DOIs page's rows show a title's italic word as `<i>…</i>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A29](#a29) | A journal upgraded from 3.3 can come out with an old leftover DOI prefix, and new DOIs are made with it | 🐞 | user-visible | — |
-| [A31](#a31) | A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered" | 🐞 | low | issues (claude), 2026-11-23 — re-verified |
 | [OJS5](#ojs5) | DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI | 🐞 | medium · crash: server | issues (claude), 2026-11-23 — re-verified |
@@ -2708,6 +2702,7 @@ hits every deposit of an item until an agency has registered its DOI
 once: the first, and any made again after an "Error". An item deposited
 again after an agency registered it reads the right sentence.
 Basis: probe + walk, 2026-11-23. <sup>f-a4</sup>
+Report: refresh owed — pkp/pkp-lib#13860 (OJS pkp/ojs#6107, OPS `plugins/generic/crossref` `f4bd0f177d` by pkp/ops#1501, merged 2026-11-26) retired [A31](#a31): the report's step 8 says OPS's Crossref and OJS's DataCite boxes offer "Deposit DOI(s)" alone because the job tool's run keeps no message, and links the A31 report, now deleted (pkp-e2e#1107 closed); with the fix both boxes offer "View Error" too; it touches `DatacitePlugin::register()` and the OPS `CrossrefPlugin::register()`, which the report does not name (2026-11-27)
 
 <a id="a5"></a>
 **A5 — The Registration tab keeps a new agency even when its fields are refused** · ❓ · minor.
@@ -2988,29 +2983,6 @@ That is `main`, and 3.5 since 3.5.0-2. An upgrade from 3.3 to 3.4
 stops on such an install with a database error instead.
 Since: 2026-10-09 (pkp/pkp-lib#13481; on 3.5 pkp/pkp-lib#12082) · Basis: probe, 2026-10-09. <sup>f-a29</sup>
 
-<a id="a31"></a>
-**A31 — A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref** · 🐞 · medium.
-A preprint server deposits a DOI with Crossref, and the deposit fails.
-The DOI reads "Error" and "Has Error" lists it. The manager expects "View Error" to say what went wrong.
-Instead, the row's "View Error" opens "Registration Error Message" with
-its first sentence and nothing under it. The "Crossref" box under the
-item offers "Deposit DOI(s)" without "View Error".
-
-No screen tells the manager why the deposit failed. An outage at the
-agency cannot be told from a record the agency refused, and a refused
-record cannot be corrected, because the agency's reason is not kept. A
-Crossref deposit that succeeds keeps no record of the agency's answer
-either.
-
-It happens on every failed deposit when the install runs its background
-jobs with the command-line job tool, as a worker or a cron job. On the
-default setting, where jobs run at the end of page loads, it happens when
-the deposit runs at the end of a page outside that server, such as a
-site administration page. A journal keeps the message, with Crossref
-and, since pkp/ojs#6107, with DataCite.
-Basis: test run + walk, 2026-11-23; PR heads and merge, 2026-11-26. <sup>f-a31</sup>
-
-
 ### OJS
 
 <a id="ojs1"></a>
@@ -3097,6 +3069,7 @@ also leaves galley DOIs unsent when the article's DOI is already
 "Registered" (galley DOIs turned on after the articles were registered)
 and when "Articles" is unticked.
 Basis: probe + walk, 2026-11-23. <sup>f-ojs5</sup>
+Report: refresh owed — pkp/pkp-lib#13860 (pkp/ojs#6107, merged 2026-11-26) retired [A31](#a31): the report's Expected says the job tool loses the message and links the A31 report, now deleted (pkp-e2e#1107 closed); DataCite now keeps it, so the PDF's "View Error" names the failed connection under the job tool too; it touches `DatacitePlugin::register()`, which the report does not name (2026-11-27)
 
 <a id="ojs7"></a>
 **OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ✅ · minor.
@@ -3424,6 +3397,9 @@ Basis: probe + walk, 2026-11-23. <sup>f-ops8</sup>
 
 <a id="a30"></a>
 **A30 — Crossref receives a title or subtitle typed with "&" or an italic word as the codes `&amp;` and `<i>…</i>`** · ✅ · retired. Fixed upstream (pkp/crossref-ojs#121, pkp/crossref-ops#78, for pkp/pkp-lib#13807).
+
+<a id="a31"></a>
+**A31 — A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref and a journal's DataCite** · ✅ · retired. Fixed upstream (pkp/ojs#6107, pkp/crossref-ops#82, for pkp/pkp-lib#13860).
 
 <a id="ojs2"></a>
 **OJS2 — On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it** · ✅ · retired. Fixed upstream (pkp/ojs#5935, for pkp/pkp-lib#13519).
@@ -4862,8 +4838,7 @@ catch the `TransferException` and call `updateDepositStatus()` with
 error). The dataset fleets run `[queues] job_runner = On`, so the
 deposit ran on the reload; the test installs run `job_runner = Off`, so
 there it runs only when the queue is run by hand (the suites' `runJobs()`),
-and there a preprint server's Crossref keeps no message (A31, note
-f-a31).
+and there every agency keeps its message too (Rule 33a, note f-a31).
 
 <a id="fn-s"></a>
 **s** — `isPluginConfigured()`: OJS `CrossrefPlugin` (the schema's
@@ -5538,9 +5513,8 @@ Scenarios 13 and 16 run the site's background jobs once, after their
 deposits, with `runJobs()` (`shared/playwright/support/jobs.js`, which
 runs `php lib/pkp/tools/jobs.php run` and waits for the queue to empty;
 the serial project only), and read "Error" after it (Rule 33, note
-q53), OPS's Crossref with no message and OJS's DataCite with its
-message (Rule 33a, note f-a31); every other deposit in the scenarios is read before any run,
-"Submitted". Scenario 13's Site Administrator is the installer's
+q53), each with its message (Rule 33a, note f-a31); every other
+deposit in the scenarios is read before any run, "Submitted". Scenario 13's Site Administrator is the installer's
 `admin` (`docs/process/users.md`); "Failed Jobs" lists every job of the
 fleet, other tests' included. Scenarios 1–11 run on all three apps,
 12 and 13 on OJS and OPS, 14–18 on OJS, 19 on OMP, 20 and 21 on all three, 22 on OJS and OPS and
@@ -5893,68 +5867,39 @@ Written up for the team in
 (the PR review of pkp/pkp-lib#13481, posted in the channel on 2026-10-09).
 
 <a id="fn-f-a31"></a>
-**f-a31** — Test runs 2026-11-20 (Rule 33a; scenarios 13 and 16), the
-deposits run with `runJobs()` (`php lib/pkp/tools/jobs.php run`; the
-test installs run `[queues] job_runner = Off`). OPS `main` `69d3cf6bad`
-(crossref plugin `0bcf460`), two runs, a probe on a one-preprint server
-and scenario 13's: both deposited preprints and their "Preprint" rows
-read "Error" with "View Error", "Has Error" listed them alone and
-"Failed Jobs" gained no entry, but the Crossref box's buttons were
-"Deposit DOI(s)" alone and the row's window read "Registration Error
-Message", "The deposit to Crossref failed. The details below explain
-the cause of the error:", "OK" and nothing else; `doi_settings` held no
-row for those DOIs (status 4), and a command-line read of the DOI
-schema (`app()->get('schema')->get('doi')`) had no
-`crossrefplugin_failedMsg`. OJS `main` `1e1d3fc49b`, scenario 16, one
-run: "Axolotl limb memory" read "Error" with "View Error" in its
-"Article" row, its DataCite box "Deposit DOI(s)" alone; its DataCite DOI
-read status 4 with no `dataciteplugin_failedMsg`, while scenario 13's
-Crossref DOIs on the same install, run the same way, kept
-`crossrefplugin_failedMsg` "cURL error 7: Failed to connect to
-api.crossref.org port 443 …" and showed it in both windows. Cause,
-code-read: OPS `CrossrefPlugin::register()` and OJS
-`DatacitePlugin::register()` add their `Schema::get::doi` hook
-(`addToSchema()`, which adds the message settings to the DOI schema) only
-in `_pluginInitialization()`, run only when `getEnabled($mainContextId)`
-holds, and the job tool runs with no context. DataCite's fallback in
-`_getExportPlugin()`, which would initialise the plugin from the command
-line, never runs, because `register()` has already put the export plugin
-in the registry. So `updateDepositStatus()` passes the message to
-`Repo::doi()->edit()`, which keeps the status and drops the setting the
-schema lacks. OJS `CrossrefPlugin::register()` adds the hook whatever the
-context, so a journal's Crossref keeps its message. Also code-read: on
-OPS the Crossref batch ID and success message are dropped the same way,
-and so is any message an agency's refusal brings, on both. Where jobs
-run on web requests (`job_runner = On`), the hooks are registered and
-the message is kept (note q53), unless the job runs at the end of a
-request outside the journal or server, such as a site administration
-page: walked 2026-11-23 on OJS `main`, DataCite then kept no message
-(the issue report's Steps). Scenario 16's journal deposits with
-"Testing" ticked, so its window names DataCite's test address,
-`mds.test.datacite.org` (`DataciteExportPlugin::depositXML()` posts to
-`DATACITE_API_URL_TEST` when `isTestMode()`).
-
-The fix, pkp/pkp-lib#13860, driven 2026-11-26 at the PR heads before
-their merge: OJS `main` `6ce58ddbb2` with pkp/ojs#6107's
-`DatacitePlugin.php` (`d308f26514`), OPS `main` `a80a5decc1` with the
-crossref plugin at pkp/crossref-ops#82's head `a55cf9261b` (kept
-script `shared/playwright/checks/sync/pkp-lib-13860/cli-deposit.js`,
-with `cli-deposit.php`; a scratch journal per agency and a scratch
+**f-a31** — Rule 33a, driven 2026-11-26 at the PR heads of
+pkp/pkp-lib#13860, before their merge: OJS `main` `6ce58ddbb2` with
+pkp/ojs#6107's `DatacitePlugin.php` (`d308f26514`), OPS `main`
+`a80a5decc1` with the crossref plugin at pkp/crossref-ops#82's head
+`a55cf9261b` (kept script
+`shared/playwright/checks/sync/pkp-lib-13860/cli-deposit.js`, with
+`cli-deposit.php`). On a scratch journal per agency and a scratch
 preprint server, `[queues] job_runner = Off`, the "Deposit DOIs" job
-queued and run by `php lib/pkp/tools/jobs.php work`): each DOI read
+queued and run by `php lib/pkp/tools/jobs.php work`: each DOI read
 status 4 with its message, `crossrefplugin_failedMsg` "cURL error 7:
 Failed to connect to api.crossref.org port 443 …" (journal and
 preprint server) and `dataciteplugin_failedMsg` "cURL error 7: Failed
-to connect to mds.datacite.org port 443 …". The PRs add the
-`Schema::get::doi` hook in `register()` whatever the context. Merged
-2026-11-26: OJS `main` at `019bc614eb` (scenario 16's windows read with
-the message, OJS serial S16), and in the plugin, pkp/crossref-ops
-`f4bd0f177d` (#82; 3.5 `8738fc17ca`, #81). OPS's pointer still names
-the old plugin, `0bcf460` on `main` and `e72c479` on 3.5, so a
-preprint server keeps no message until it moves.
-Upstream: `pkp/pkp-lib#13860` (open), merged for OJS (`main` pkp/ojs#6107, 3.5 pkp/ojs#6106 and #6124) and in pkp/crossref-ops (#82, #81); OPS's `plugins/generic/crossref` pointer to move with `pkp/pkp-lib#13778` (the developer, in the review thread, 2026-11-26); 3.4 fixed for OJS and OPS (pkp/ojs#6123, pkp/ops#1528). When OPS's pointer passes `a55cf9261b` (`main`), retire A31: scenario 13's OPS sentence and Rule 33a, and OPS serial S13 asserts the box's "View Error" and the connection error (the patch `shared/playwright/checks/sync/pkp-lib-13860/ops-s13-a31-retire.diff`, from the round-1 companion).
+to connect to mds.datacite.org port 443 …", and no failed job. At the
+tips (crossref plugin `0bcf460` on OPS) the same run left OJS's
+DataCite and OPS's Crossref DOIs with no row, OJS's Crossref with its
+message. The PRs add the `Schema::get::doi` hook (`addToSchema()`, the
+message settings in the DOI schema) in `register()` whatever the
+context, where it was added only in `_pluginInitialization()`, run only
+when `getEnabled($mainContextId)` holds, as OJS's Crossref plugin
+already did; the job tool runs with no context. The same move covers a
+job run at the end of a site administration page (code-read, not
+driven) and, on OPS, the Crossref batch ID and success message. The
+scenarios' windows (13 on OPS, 16 on OJS) read at the PR heads by the
+serial suites. The defect's evidence (test runs 2026-11-20 and the walk
+of 2026-11-23) is in the issue report and git. Merged 2026-11-26: OJS
+`main` `019bc614eb`; OPS `main` moved `plugins/generic/crossref` to
+`f4bd0f177d` with pkp/ops#1501 (`ae2f3c5026`, for pkp/pkp-lib#13778),
+and 3.5 to `8738fc17ca` (pkp/ops#1500, `ac52b25153`). Re-run 2026-11-27
+at those tips, the same kept script on a preprint server: status 4 with
+`crossrefplugin_failedMsg` "cURL error 7: Failed to connect to
+api.crossref.org port 443 …", no failed job, on `main` and on 3.5.
 
-Issue report: [pkp-e2e#1107](https://github.com/jardakotesovec/pkp-e2e/issues/1107) ([docs/issues/U45-A31-job-tool-deposit-error-no-message.md](../issues/U45-A31-job-tool-deposit-error-no-message.md)).
+Issue report: [pkp-e2e#1107](https://github.com/jardakotesovec/pkp-e2e/issues/1107) (closed 2026-11-27, fixed by `pkp/pkp-lib#13860`); the report was deleted then (git history keeps it).
 
 <a id="fn-f-a25"></a>
 **f-a25** — At the PR heads of `pkp/pkp-lib#13460` (`246e5387f6`, with
