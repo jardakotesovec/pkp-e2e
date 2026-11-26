@@ -1,0 +1,51 @@
+diff --git a/PubmedCentralExportPlugin.php b/PubmedCentralExportPlugin.php
+index 897e08d..98a9920 100755
+--- a/PubmedCentralExportPlugin.php
++++ b/PubmedCentralExportPlugin.php
+@@ -16,6 +16,7 @@ namespace APP\plugins\generic\pubmedCentral;
+ 
+ use APP\core\Application;
+ use APP\facades\Repo;
++use APP\issue\Issue;
+ use APP\notification\NotificationManager;
+ use APP\plugins\generic\pubmedCentral\classes\DeliveryHistoryImporter;
+ use APP\plugins\generic\pubmedCentral\classes\form\PubmedCentralSettingsForm;
+@@ -317,6 +318,38 @@ class PubmedCentralExportPlugin extends PubObjectsExportPlugin implements HasTas
+         }
+     }
+ 
++    /**
++     * @copydoc PubObjectsExportPlugin::markRegistered()
++     *
++     * A package downloaded with Export and delivered by hand is then marked registered,
++     * so record the revision it was delivered as, as a deposit from OJS does.
++     */
++    public function markRegistered($objects)
++    {
++        foreach ($objects as $object) {
++            if ($this->continuesHistory($object)) {
++                $submission = $this->submissionOf($object);
++                $context = Application::getContextDAO()->getById($submission->getData('contextId'));
++                $this->recordDelivery($object, $this->packageNames($object, $context, $submission)['revision']);
++            }
++        }
++        parent::markRegistered($objects);
++    }
++
++    /**
++     * @copydoc PubObjectsExportPlugin::updateObject()
++     *
++     * Repo's edit() saves every setting of the object it is given and removes the ones it
++     * lacks, so keep the object in step: a later save from it would otherwise undo this one.
++     */
++    protected function updateObject(Submission|Publication|Issue|Galley $object, ?array $editParams = [])
++    {
++        parent::updateObject($object, $editParams);
++        foreach ($editParams ?? [] as $name => $value) {
++            $object->setData($name, $value);
++        }
++    }
++
+     /**
+      * Whether a publication's packages continue the names of an imported history, the only
+      * names that count revisions.
