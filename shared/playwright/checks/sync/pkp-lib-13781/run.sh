@@ -4,7 +4,14 @@
 # renames (fr_FR -> fr) after an upgrade from 3.3 or 3.4, and the repair of
 # a database already upgraded without the fix.
 #
-#   run.sh <app> <line: main|stable-3_5_0> <from: 3_3|3_3en|3_4> <n> [--repair [--proposed]]
+#   run.sh <app> <line: main|stable-3_5_0> <from: 3_3|3_3en|3_4|3_4fp> <n> [--repair [--proposed] | --repair-only]
+#
+# Round 3 (Editorial Board Member names, OMP highlight link texts): 3_4fp is the
+# 3.4 dataset whose context's primary locale is fr_FR (I10620 then stores the
+# bare key as the group's name); OMP variants get two planted spotlights (a
+# series, the published book) for I9262 to turn into highlights.
+# --repair-only skips the load and repairs the database fleet <n> already holds
+# (upgraded at the base, the checkout now at the head).
 #
 # Loads PKP's <from> dataset with every fr_CA replaced by fr_FR (3_3en: the
 # 3.3 dataset whose config says `locale = en` instead of `en_US`) into
@@ -23,22 +30,26 @@ repo=$(cd "$here/../../../../.." && pwd)
 cd "$repo"
 slot=$(grep -E '^PKP_E2E_SLOT=' .env | cut -d= -f2 || true)
 variant="s${slot:-0}-pr13778-$from-frFR"
-src="checkouts/datasets/$app/stable-${from%en}_0/pgsql"
+base=${from:0:3}
+src="checkouts/datasets/$app/stable-${base}_0/pgsql"
 dst="checkouts/datasets/$app/$variant/pgsql"
-mkdir -p "$dst"
-cp -r "$src/files" "$src/public" "$src/config.inc.php" "$dst/"
-sed 's/fr_CA/fr_FR/g' "$src/database.sql" > "$dst/database.sql"
-[ "$from" = 3_3en ] && sed -i 's/^locale = en_US/locale = en/' "$dst/config.inc.php"
 lineEnv=(); root="checkouts/$app"; db="${app}_test"
 [ -n "$slot" ] && [ "$slot" != 0 ] && db="${db}_s$slot"
 if [ "$line" != main ]; then lineEnv=(PKP_E2E_LINE="$line"); root="checkouts/$line/$app"; db="${db}_3_5"; fi
 db="${db}_ds$n"
+if [ "${1:-}" != --repair-only ]; then
+mkdir -p "$dst"
+cp -r "$src/files" "$src/public" "$src/config.inc.php" "$dst/"
+sed 's/fr_CA/fr_FR/g' "$src/database.sql" > "$dst/database.sql"
+[ "$from" = 3_3en ] && sed -i 's/^locale = en_US/locale = en/' "$dst/config.inc.php"
+"$here/plant.sh" "$app" "$from" "$dst/database.sql"
 env "${lineEnv[@]}" PKP_E2E_DATASET_BRANCH="$variant" npm run "reset:$app" -- --dataset "$n" 2>&1 | grep -E 'upgraded|rror'
 rm -rf "checkouts/datasets/$app/$variant"
 echo "upgrade log: $(ls -t .reports/datasets/upgrade-*-$app-ds$n.log | head -1) ($(grep -c 'Invalid/unsupported locale' "$(ls -t .reports/datasets/upgrade-*-$app-ds$n.log | head -1)") 'Invalid/unsupported locale' warnings)"
 mkdir -p .reports/pr-review-13778
 "$here/inspect.sh" "$db" "$app" ".reports/pr-review-13778/$app-$line-$from-ds$n-upgraded"
-if [ "${1:-}" = --repair ]; then
+fi
+if [ "${1:-}" = --repair ] || [ "${1:-}" = --repair-only ]; then
     (cd "$root" && PKP_CONFIG_FILE="$PWD/config.test.ds$n.inc.php" php "$here/repair-driver.php" "${2:-}" 2>&1 | grep 'ran in')
     "$here/inspect.sh" "$db" "$app" ".reports/pr-review-13778/$app-$line-$from-ds$n-repaired"
 fi

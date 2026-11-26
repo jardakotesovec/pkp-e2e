@@ -20,3 +20,10 @@ echo "checklist $L: $(q "SELECT string_agg($id||':'||left(setting_value,90), ' |
 q "SELECT email_key, name, md5(coalesce(subject,'')||'|'||coalesce(body,'')) FROM email_templates_default_data WHERE locale='$L' ORDER BY email_key" > $out.etdd.tsv
 q "SELECT $id, setting_name, md5(setting_value) FROM $t WHERE locale='$L' ORDER BY 1,2" > $out.ctx.tsv
 q "SELECT $id, setting_name, setting_value FROM $t WHERE locale='$L' AND (setting_name LIKE '%Help' OR setting_name='submissionChecklist') ORDER BY 1,2" > $out.help.tsv
+# Round 3: the Editorial Board Member group's name and abbreviation (I10620), and OMP's highlight link texts (I9262)
+echo "editorialBoardMember $L/en: $(q "SELECT string_agg(g.context_id||':'||coalesce((SELECT string_agg(setting_name||'['||locale||']='||setting_value, ', ' ORDER BY setting_name, locale) FROM user_group_settings s WHERE s.user_group_id=g.user_group_id AND s.setting_name IN ('name','abbrev') AND s.locale IN ('en','$L')),'none'), ' | ' ORDER BY g.context_id) FROM user_groups g JOIN user_group_settings k ON k.user_group_id=g.user_group_id AND k.setting_name='nameLocaleKey' AND k.setting_value='default.groups.name.editorialBoardMember'")"
+case $app in ojs) ct=journals;; omp) ct=presses;; ops) ct=servers;; esac
+echo "primary_locale: $(q "SELECT string_agg(path||'='||primary_locale, ',') FROM $ct")"
+if [ "$(q "SELECT to_regclass('public.highlight_settings') IS NOT NULL")" = t ]; then
+  echo "highlights urlText/title: $(q "SELECT coalesce(string_agg(highlight_id||':'||setting_name||'['||locale||']='||setting_value, ', ' ORDER BY highlight_id, setting_name, locale),'none') FROM highlight_settings WHERE setting_name IN ('urlText','title')")"
+else echo "highlights: no table"; fi
