@@ -1,0 +1,60 @@
+diff --git a/apps/ops/playwright/tests/U45-dois.spec.js b/apps/ops/playwright/tests/U45-dois.spec.js
+index 71808516..3002be7d 100644
+--- a/apps/ops/playwright/tests/U45-dois.spec.js
++++ b/apps/ops/playwright/tests/U45-dois.spec.js
+@@ -30,8 +30,6 @@
+  * - A8 🐞: the rows' tick boxes' names.
+  * - A14 🐞: the "stale" sentence of "Mark DOIs Needs Sync" (S9).
+  * - A17 🐞: 1.0's block after a major version is posted (S11, S22).
+- * - A31 🐞: the agency box's "View Error" and the message after a deposit
+- *   the job tool runs (S13, in tests/serial/U45-dois.spec.js).
+  * - OPS5 ❓: a draft listed or not (S4, S20 read "DOI Assigned" alone).
+  * - OPS6 🐞: what a deposit sends.
+  *
+diff --git a/apps/ops/playwright/tests/serial/U45-dois.spec.js b/apps/ops/playwright/tests/serial/U45-dois.spec.js
+index 50fa829b..81adbedd 100644
+--- a/apps/ops/playwright/tests/serial/U45-dois.spec.js
++++ b/apps/ops/playwright/tests/serial/U45-dois.spec.js
+@@ -36,6 +36,7 @@ const AXOLOTL = 'Axolotl limb memory';
+ const TARDIGRADE = 'Tardigrade desiccation';
+ const CORAL = 'Coral spawning';
+ const MOSS = 'Moss regrowth';
++const CROSSREF_CURL = 'cURL error 7: Failed to connect to api.crossref.org port 443';
+ const DEPOSITOR = {depositorName: 'Public Knowledge Project', depositorEmail: 'doi@mail.test'};
+ 
+ /** Unique per-run tag: single alphanumeric token, feature + scenario + app + worker. */
+@@ -250,11 +251,10 @@ test.describe('DOIs (serial)', () => {
+ 
+         // "Error" after the run: both deposited preprints and their
+         // "Preprint" rows, each row with "View Error" (Rules 17, 31, 33);
+-        // the Crossref box's sentence (Rule 30); the row's "View Error"
+-        // opens "Registration Error Message" with Crossref's preamble (Rule
+-        // 33). The box's own "View Error" and the connection error under
+-        // the preamble are not asserted: a deposit run by the job tool
+-        // stores no message on a preprint server (Rule 33a, ⚠ A31).
++        // the Crossref box with "Deposit DOI(s)" and "View Error" (Rule
++        // 30); the row's and the box's "View Error" open the same window
++        // over the connection error, kept though the job tool ran the
++        // deposit (Rules 33, 33a).
+         await dois.reload();
+         await expect(dois.rowBadge(axRow)).toHaveText('Error');
+         await expect(dois.rowBadge(coRow)).toHaveText('Error');
+@@ -266,9 +266,16 @@ test.describe('DOIs (serial)', () => {
+         await expect(dois.rowViewError(axRow, PREPRINT)).toBeVisible();
+         await expect(dois.agencyName(axRow)).toHaveText('Crossref');
+         await expect(dois.agencySentence(axRow)).toHaveText(TEXT.notSubmitted('Crossref'));
+-        await expect(dois.agencyButtons(axRow).filter({hasText: 'Deposit DOI(s)'})).toHaveCount(1);
+-        const window = await dois.openErrorMessage(dois.rowViewError(axRow, PREPRINT));
++        await expect(dois.agencyButtons(axRow)).toHaveText(['Deposit DOI(s)', TEXT.viewError]);
++        let window = await dois.openErrorMessage(dois.rowViewError(axRow, PREPRINT));
+         await expect(window).toContainText(TEXT.depositFailed('Crossref'));
++        await expect(window).toContainText(CROSSREF_CURL);
++        const message = (await window.innerText()).replace(/\s+/g, ' ').trim();
++        await dois.closeErrorMessage();
++        window = await dois.openErrorMessage(dois.agencyViewError(axRow));
++        await expect(window).toContainText(TEXT.depositFailed('Crossref'));
++        await expect(window).toContainText(CROSSREF_CURL);
++        expect((await window.innerText()).replace(/\s+/g, ' ').trim(), 'the box\'s window is the row\'s').toBe(message);
+         await dois.closeErrorMessage();
+ 
+         // "Has Error": the two deposited preprints and no other; pressed

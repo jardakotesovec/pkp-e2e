@@ -1,41 +1,40 @@
-# A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref and a journal's DataCite
+# A failed DOI deposit run by the job tool or at a site page's end reads "Error" with no message, for a preprint server's Crossref
 
 - **Severity** medium
 - **Effort** medium
 - **Kind** defect
 - **Affects**
-  - main: OJS (DataCite), OPS
-  - 3.5: OJS (DataCite and Crossref), OPS
-  - 3.4: OJS, OPS (code; only for a deposit the agency answers with an error)
+  - main: OPS (OJS fixed by `pkp/ojs#6107`, 2026-11-26)
+  - 3.5: OPS (OJS fixed by `pkp/ojs#6106` and `#6124`, 2026-11-26)
+  - 3.4: none since 2026-11-26 (`pkp/ojs#6123`, `pkp/ops#1528`; before, OJS and OPS for a deposit the agency answers with an error)
   - 3.3: none (code; no job queue)
 - **Introduced** not traced; present since at least [2eaf4ccc25](https://github.com/pkp/ojs/commit/2eaf4ccc25c3462a4ca6eb86912189e720dc5bb2) (2025-07-28) for DataCite, and in Crossref on a preprint server since [bda7549](https://github.com/pkp/crossref-ops/commit/bda7549f5ca0ecae9d7c4fe95d7bdc1d56dcc6b8) (2022-01-14)
-- **Upstream** `pkp/pkp-lib#13860` (open). Merged 2026-11-26: `pkp/ojs#6107` (OJS `main` carries the DataCite fix), `pkp/ojs#6106` (OJS 3.5, DataCite), `pkp/crossref-ojs#124`, `pkp/crossref-ops#81` and `#82` (in the plugins only: OJS 3.5's crossref pointer moves with `pkp/ojs#6124`, open; no PR moves OPS's on `main` or 3.5). 3.4: `pkp/crossref-ojs#126`, `pkp/ojs#6123`, `pkp/crossref-ops#83`, `pkp/ops#1528`, open
+- **Upstream** `pkp/pkp-lib#13860` (open). Merged 2026-11-26 on every branch: the plugins (`pkp/crossref-ops#82`, `#81`, `#83`; `pkp/crossref-ojs#124`, `#126`), OJS (`pkp/ojs#6107`, `#6106`, `#6124`, `#6123`) and OPS 3.4 (`pkp/ops#1528`). OPS `main` and 3.5 still point `plugins/generic/crossref` at the old commit; the developer moves them with `pkp/pkp-lib#13778`
 - **Tracked in** spec U45 [A31](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U45-dois.md#a31)
-- **Checked** 2026-11-23, each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-23, each branch's tip (the commits in Evidence); 2026-11-26 at the fix PRs' heads (PR review of pkp-lib#13860)
 - **Model** claude-opus-5-5
 
 ## Summary
 
-A preprint server deposits a DOI with Crossref, or a journal deposits
-one with DataCite, and the deposit fails. The DOI reads "Error" and "Has
-Error" lists it. The manager expects "View Error" to say what went wrong.
-Instead, the row's "View Error" opens "Registration Error Message" with
-its first sentence and nothing under it. The agency's box under the item
-(the "Crossref" or "DataCite" box) offers "Deposit DOI(s)" without "View
-Error".
+A preprint server deposits a DOI with Crossref, and the deposit fails.
+The DOI reads "Error" and "Has Error" lists it. The manager expects
+"View Error" to say what went wrong. Instead, the row's "View Error"
+opens "Registration Error Message" with its first sentence and nothing
+under it. The "Crossref" box under the item offers "Deposit DOI(s)"
+without "View Error".
 
 No screen tells the manager why the deposit failed. An outage at the
 agency cannot be told from a record the agency refused, and a refused
-record cannot be corrected, because the agency's reason is not kept. On
-a preprint server, a Crossref deposit that succeeds keeps no record of
-the agency's answer either.
+record cannot be corrected, because the agency's reason is not kept. A
+Crossref deposit that succeeds keeps no record of the agency's answer
+either.
 
 It happens on every failed deposit when the install runs its background
 jobs with the command-line job tool, as a worker or a cron job. On the
 default setting, where jobs run at the end of page loads, it happens when
-the deposit runs at the end of a page outside that journal or server,
-such as a site administration page. A journal's Crossref deposit keeps
-its message on `main`.
+the deposit runs at the end of a page outside that server, such as a
+site administration page. A journal keeps the message, with Crossref
+and, since pkp/ojs#6107, with DataCite.
 
 ## Impact
 

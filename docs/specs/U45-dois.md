@@ -5952,7 +5952,7 @@ the message, OJS serial S16), and in the plugin, pkp/crossref-ops
 `f4bd0f177d` (#82; 3.5 `8738fc17ca`, #81). OPS's pointer still names
 the old plugin, `0bcf460` on `main` and `e72c479` on 3.5, so a
 preprint server keeps no message until it moves.
-Upstream: `pkp/pkp-lib#13860` (open), merged for OJS (`main` pkp/ojs#6107, 3.5 pkp/ojs#6106 and #6124) and in pkp/crossref-ops (#82, #81); OPS's `plugins/generic/crossref` pointer to move with `pkp/pkp-lib#13778` (the developer, in the review thread, 2026-11-26); 3.4 fixed for OJS and OPS (pkp/ojs#6123, pkp/ops#1528). When OPS's pointer passes `a55cf9261b` (`main`), retire A31: scenario 13's OPS sentence and Rule 33a, and OPS serial S13 asserts the box's "View Error" and the connection error (as companion `i13860-main` round 1, `d7d7920c`, did).
+Upstream: `pkp/pkp-lib#13860` (open), merged for OJS (`main` pkp/ojs#6107, 3.5 pkp/ojs#6106 and #6124) and in pkp/crossref-ops (#82, #81); OPS's `plugins/generic/crossref` pointer to move with `pkp/pkp-lib#13778` (the developer, in the review thread, 2026-11-26); 3.4 fixed for OJS and OPS (pkp/ojs#6123, pkp/ops#1528). When OPS's pointer passes `a55cf9261b` (`main`), retire A31: scenario 13's OPS sentence and Rule 33a, and OPS serial S13 asserts the box's "View Error" and the connection error (the patch `shared/playwright/checks/sync/pkp-lib-13860/ops-s13-a31-retire.diff`, from the round-1 companion).
 
 Issue report: [pkp-e2e#1107](https://github.com/jardakotesovec/pkp-e2e/issues/1107) ([docs/issues/U45-A31-job-tool-deposit-error-no-message.md](../issues/U45-A31-job-tool-deposit-error-no-message.md)).
 
