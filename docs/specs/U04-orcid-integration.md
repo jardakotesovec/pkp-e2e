@@ -2549,7 +2549,7 @@ were unchanged and nothing was queued or delivered. On OMP and OPS the
 same save answered 200, stored the Organization or Anonymous row with
 `orcidEmailToken` and `orcidVerificationRequested=1`, and "Submission
 ORCID" was delivered to it.
-Issue report: docs/issues/U04-A26-orcid-request-blocks-organization-save.md
+Issue report: [pkp-e2e#1115](https://github.com/jardakotesovec/pkp-e2e/issues/1115) ([docs/issues/U04-A26-orcid-request-blocks-organization-save.md](../issues/U04-A26-orcid-request-blocks-organization-save.md)).
 
 <a id="fn-a27"></a>
 **f-a27** — Live-probed 2026-11-24 (the installs and script of note
