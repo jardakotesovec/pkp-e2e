@@ -51,6 +51,7 @@
  */
 const {expect} = require('@playwright/test');
 const {waitForJQueryIdle} = require('../support/legacy.js');
+const {termSuggestionsApplied} = require('../../../../shared/playwright/support/term-suggestions.js');
 
 /**
  * Wait for a publications API write to answer OK (PUT rides POST via
@@ -394,10 +395,12 @@ exports.PublicationScreen = class PublicationScreen {
      * Type a term into an empty Metadata term field without pressing Enter
      * and wait for the suggestion lookup the typing sends
      * (`GET …/vocabs?…&term={term}`, fetched a quarter of a second after
-     * typing stops); returns that answer, the bound of every "not offered"
-     * read that follows. The list itself is filled a further quarter of a
-     * second after the answer, so a caller reads it with an auto-waited
-     * locator assertion.
+     * typing stops), then for the page to apply that answer to the list (a
+     * further quarter of a second, `termSuggestionsApplied`); returns the
+     * answer, the bound of every "not offered" read that follows. Emptying
+     * the field before the answer is applied gets the whole answer back as
+     * a list under the empty field (an app defect, flake diagnosis
+     * 2026-11-27 u40s2), so `clearTypedTerm()` relies on this wait.
      *
      * @param {import('@playwright/test').Locator} field the term field's input
      * @param {string} term
@@ -418,10 +421,15 @@ exports.PublicationScreen = class PublicationScreen {
         await field.fill(term);
         const response = await answered;
         expect(response.ok()).toBe(true);
+        await termSuggestionsApplied(this.page);
         return response;
     }
 
-    /** Empty a term field's typed text (no chip added) and wait for its list to close. */
+    /**
+     * Empty a term field's typed text (no chip added) and wait for its list
+     * to close; called after `typeTermForSuggestions()`, whose answer is
+     * then applied, so the list stays closed.
+     */
     async clearTypedTerm(field) {
         await field.fill('');
         await expect(field).toHaveValue('');

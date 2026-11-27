@@ -225,7 +225,8 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
      is offered the same list in the submission wizard's "Details"
      step. The list is fetched as you type, so a term is offered on
      other submissions as soon as the version carrying it is published,
-     without reloading the page. <sup>e</sup>
+     without reloading the page. Emptying the field closes the list
+     ⚠ [A23](#a23). <sup>e</sup>
 8. **A published version warns editors, and stays editable.** On every
    Publication page of a published version, an editorial role sees the
    banner "Warning: This version has been published. Editing it may
@@ -1005,6 +1006,8 @@ Left out of the scenarios above, by reason:
     and Default Chapter License URL; Fields)
   - A22 (a title typed into the language panel's Title box before the
     box has finished loading, lost on a slow link; Rule 13b)
+  - A23 (a term field emptied before its suggestions show, the list
+    opening again under it; Rule 7b)
   - OMP5 (the press's "License" link that leads nowhere with terms and no
     license; Rule 15; scenario 5 marks it)
   - OPS3 (a preprint server in French: the Author's "posted" banner and
@@ -1041,7 +1044,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-28; A16, A17 and the
-retirement of A4 2026-09-09; the retirement of A16 2026-09-14; A10 settled 2026-09-18; OJS2 and the retirement of A10 2026-09-21; A18–A20 2026-09-28; OPS3 and the correction of A15's press face 2026-09-30; A22 and the rewriting of OJS1 and A5 2026-10-07), unreviewed unless an entry notes otherwise;
+retirement of A4 2026-09-09; the retirement of A16 2026-09-14; A10 settled 2026-09-18; OJS2 and the retirement of A10 2026-09-21; A18–A20 2026-09-28; OPS3 and the correction of A15's press face 2026-09-30; A22 and the rewriting of OJS1 and A5 2026-10-07; A23 2026-11-27), unreviewed unless an entry notes otherwise;
 the team settles them on spec review. The summary
 is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
 and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
@@ -1056,6 +1059,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OJS1](#ojs1) | Editors are offered a language "Change" on an article published as Author's Original, and every change is refused | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [OMP5](#omp5) | Book page: with press License Terms and no book license, a "License" link reloads the page | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS3](#ops3) | In French a preprint server shows the Author's "posted" banner and the Copyright Holder and Copyright Year descriptions as raw codes | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A23](#a23) | A term field emptied before its suggestions show opens the list again under the empty field, and Enter there adds a term nobody typed | 🐞 | minor | — |
 | [A3](#a3) | Reset permissions rewrites every submission, unpublished and declined included, and logs one "metadata updated" line per version | ❓ | user-visible | — |
 | [A17](#a17) | The Author's Contributors page offers "Add Contributor", "Edit", "Delete" and "Order" on a new version of a published item; whether a save there is kept is untried | ❓ | user-visible | — |
 | [A5](#a5) | A scheduled article keeps "Change", and a language change on it is accepted | ❓ | minor | claim check (claude), 2026-10-07 — seen live |
@@ -1282,6 +1286,20 @@ with half a second of delay, and typing that starts within that half
 second. Keys typed later are not shown at all while the box is pale. On
 an ordinary link the box has loaded before the first key.
 Basis: probe, 2026-10-19. <sup>f-a22</sup>
+
+<a id="a23"></a>
+**A23 — A term field emptied before its suggestions show opens the list again under the empty field** · 🐞 · minor.
+Text erased from Keywords (or another term list) before its suggestions
+have shown does not leave the list closed: a moment later the list
+opens under the empty field and stays open. Typing "t" and pressing
+Backspace at once opens it with every published keyword of the
+journal, the first one highlighted. Typing "tidal" and erasing it with
+Ctrl+A and Delete just before its suggestions show opens it with
+"tidal mixing", a suggestion for the erased text. Pressing Enter in the
+empty field then adds the highlighted term as a chip ("Remove tidal
+mixing") that nobody typed; it is stored only if Save is pressed.
+Text erased once the suggestions have shown closes the list.
+Basis: probe, 2026-11-27. <sup>f-a23</sup>
 
 ### OJS
 
@@ -2670,6 +2688,41 @@ holding the English title (A15). First seen in a test run 2026-09-30
 keys pressed before the editor was initialized were lost. Kept script
 `shared/playwright/checks/U40/I07/i07.js` (`PHASES=type`).
 Issue report: [pkp-e2e#1023](https://github.com/jardakotesovec/pkp-e2e/issues/1023) ([docs/issues/U40-A22-language-panel-title-typed-early-lost.md](../issues/U40-A22-language-panel-title-typed-early-lost.md)).
+
+<a id="fn-f-a23"></a>
+**f-a23 — A23 evidence.** lib/ui-library `FieldControlledVocab.vue`
+(fn-e; the same file in OJS, OMP and OPS, and the same lookup and
+filter on `stable-3_5_0`): `getSuggestions()` on an empty field sets
+`suggestions = []` and returns, cancelling neither the debounced
+`loadSuggestions()` (250 ms; it reads `this.inputValue` when it runs,
+so a lookup due after the erase asks `vocabs?term=` with nothing
+typed, and the answer is every entry of that vocabulary in the
+context) nor the debounced `setSuggestions()` (250 ms after the
+answer; its filter `!this.inputValue || …` passes every entry when the
+field is empty). The combobox stays open after the emptying input
+(headlessui `onInput`), so the list shows as soon as `suggestions` is
+not empty, and nothing empties it again until the next typing. A fix:
+on an empty field call `loadSuggestions.clear()` and
+`setSuggestions.clear()`, and drop an answer whose term is no longer
+the field's text. Live-probed 2026-11-27 on OJS `main` (a scratch
+journal with two published submissions carrying the keywords "tidal
+mixing" and "benthic flux", the Journal Manager on a third
+submission's Metadata page, the page loaded afresh for each run):
+"tidal mixing" filled in at once and the field emptied the moment its
+answer arrived left one option, "tidal mixing", under the empty field
+(3/3); emptied 600 ms after the answer, the list closed (3/3); "t" and
+Backspace at once sent one lookup with an empty term and opened the
+list with "benthic flux" and "tidal mixing", the first one
+highlighted, in either order across runs (3/3); "tidal" typed key by
+key, then Ctrl+A and Delete as its answer arrived, left "tidal mixing"
+(3/3); "t", Backspace, then Enter added a "tidal mixing" chip (2/2).
+No server error and no script error in any run. OMP and OPS, and
+Subjects, Disciplines and Supporting Agencies, rest on the shared
+component (not driven); 3.4 and 3.3 carry the same debounced filter
+with its empty-field pass (read, not driven). First seen as OJS
+scenario 2 failing on CI three times with one option left under the
+field after its first "clear the field"; the suites now wait for the
+list to take the answer before they empty the field.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1 — OJS1 evidence.** The submission's status comes from lib/pkp

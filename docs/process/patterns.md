@@ -608,6 +608,15 @@ no cleanup fixture.
   review-round files. The Add Reviewer modal's file selection writes the
   `review_files` grant. Mirror that flow; do not expect seeded files to be
   visible to the reviewer.
+- **A term field's list takes its answer a quarter second late.** The
+  Keywords, Subjects, Disciplines and Agencies fields (`FieldControlledVocab`)
+  apply a lookup's answer to the list 250 ms after it arrives, through a
+  debounced filter that reads the field when it runs: a read taken on the
+  answer sees the list before it (an absence read passes vacuously), and a
+  field emptied inside that quarter second gets the answer back as an open
+  list. A page object that types into one returns only after
+  `termSuggestionsApplied(page)` (`shared/playwright/support/term-suggestions.js`),
+  and nothing empties, re-types or reads the list before it.
 - **Settings › Users & Roles › Users is a Vue table** (`<user-access-manager>`),
   not a legacy grid: each row has an ellipsis menu ("Edit", "Email", "Remove
   User", "Disable User"); "Edit" leaves the modal for

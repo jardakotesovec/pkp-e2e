@@ -1204,7 +1204,27 @@ trips.
   [45616461927](https://github.com/jardakotesovec/pkp-e2e/actions/runs/45616461927)
   (`main`, round 2 of the PR review of pkp/pkp-lib#13877, a contributor
   API change only), OJS shard 2/3, "Expected: 0" at the same line, green
-  on its retry.
+  on its retry. **Diagnosed 2026-11-27** (housekeeping,
+  `.reports/flake-1127/u40s2/`): an app defect, worked around
+  (app-changes row 25). The three error contexts show one "tidal mixing"
+  suggestion and one lookup per page, so no late answer to an earlier
+  lookup: `FieldControlledVocab.vue` applies the answer 250 ms late, and
+  the test emptied the field inside that window. Lever (hold the answer
+  until the field is emptied): 8/8 red before, 0/8 after. Fixed in the
+  page objects of the three apps (`termSuggestionsApplied()`); the
+  finding is U40 A23. Watch: a sighting after the fix.
+
+- **U40 S2 "Word Count: 0/50" for a four-word abstract** (OJS, local
+  only). `wordLimitLine()` (`apps/ojs/playwright/pages/PublicationMetadataPages.js`,
+  from the spec's S2 at about line 614) read "Word Count: 0/50" for 30 s:
+  3 of 5 runs of the U40 file at eight workers and 4 of 8 at 4× CPU
+  throttling, in the 2026-11-27 flake diagnosis above
+  (`.reports/flake-1127/u40s2/diagnosis.md`, "Not this class"). Lead,
+  read not driven: `FieldRichTextarea.vue` counts once, 1 s after the
+  form mounts, and an editor that loads its content later stays at 0
+  until the text changes. No CI sighting yet. **Watch condition**: a CI
+  sighting; then a diagnostician (the count's timing against TinyMCE's
+  load, and whether a person on a slow page sees 0 too).
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

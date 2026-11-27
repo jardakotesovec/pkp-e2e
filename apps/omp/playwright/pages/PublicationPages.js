@@ -15,6 +15,7 @@
  */
 const {expect} = require('@playwright/test');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
+const {termSuggestionsApplied} = require('../../../../shared/playwright/support/term-suggestions.js');
 
 /** The Unpublish dialog's verbatim question (U49 Rule 9). */
 const UNPUBLISH_QUESTION = "Are you sure you don't want this to be published?";
@@ -180,8 +181,11 @@ function keywordsField(page) {
 /**
  * On the open "Metadata" page, type `term` into the Keywords box without
  * pressing Enter, bounded by the list's own fetch (`api/v1/vocabs?…&term=`,
- * sent a quarter of a second after the typing stops, U40 fn-e). Resolves
- * with the list's options (a locator inside the field, the typed text
+ * sent a quarter of a second after the typing stops, U40 fn-e) and by
+ * the page applying that answer to the list (`termSuggestionsApplied`, a
+ * further quarter of a second; a box emptied before that gets the answer
+ * back as a list under the empty box, flake diagnosis 2026-11-27 u40s2,
+ * which `clearKeywordBox()` relies on). Resolves with the list's options (a locator inside the field, the typed text
  * first) and the terms that fetch answered with. Added for U40 S2
  * (Rule 7b).
  *
@@ -204,6 +208,7 @@ async function typeKeywordForSuggestions(page, term) {
     const response = await fetched;
     expect(response.ok(), `the suggestion fetch answered ${response.status()}`).toBe(true);
     const answered = (await response.json()).map((entry) => entry.name);
+    await termSuggestionsApplied(page);
     return {options: field.getByRole('option'), answered};
 }
 

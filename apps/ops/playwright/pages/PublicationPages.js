@@ -62,6 +62,7 @@
 const {expect} = require('@playwright/test');
 const {waitForJQueryIdle} = require('../support/legacy.js');
 const {waitForEditorReady} = require('../../../../shared/playwright/support/richtext.js');
+const {termSuggestionsApplied} = require('../../../../shared/playwright/support/term-suggestions.js');
 
 /**
  * Open a submission's workflow panel straight by URL (editorial or author
@@ -872,7 +873,11 @@ exports.keywordsField = keywordsField;
  * Type a term into the open "Metadata" page's Keywords box without pressing
  * Enter, resolved once the suggestion list's own fetch for that term
  * (`GET api/v1/vocabs?…&term=<term>`) has answered (Rule 7b; the list is
- * fetched a quarter of a second after typing stops). Returns the list's
+ * fetched a quarter of a second after typing stops) and the page has
+ * applied the answer to the list (`termSuggestionsApplied`, a further
+ * quarter of a second; a box emptied before that gets the answer back as
+ * a list under the empty box, flake diagnosis 2026-11-27 u40s2, which
+ * `clearKeywordBox()` relies on). Returns the list's
  * options (the typed text first, then the suggestions) and the names the
  * fetch answered.
  *
@@ -895,6 +900,7 @@ async function typeKeywordForSuggestions(page, term) {
     const response = await fetched;
     expect(response.ok(), `the suggestion fetch answered ${response.status()}`).toBe(true);
     const answered = (await response.json()).map((entry) => entry.name);
+    await termSuggestionsApplied(page);
     return {options: field.getByRole('option'), answered};
 }
 
