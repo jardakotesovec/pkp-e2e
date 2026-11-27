@@ -14,10 +14,10 @@
  * and runs alone in the `ops-solo` project: its "Done" rewrites the whole
  * site's order as the page loaded it (harness.md "Project chain").
  *
- * Not asserted here, by register ID: A1, A3, A4, A5, OPS1 (the register
- * carries them, the spec's Coverage section); A2 and A6 are passed by S3
- * and S2, which read the row after a reload and never press "Jump to next
- * error".
+ * Not asserted here, by register ID: A1, A3, A4, A5, A12, OPS1 (the
+ * register carries them, the spec's Coverage section); A2 and A6 are
+ * passed by S3 and S2, which read the row after a reload and never press
+ * "Jump to next error".
  *
  * Seeding (footnote s): scratch servers from `POST scenarios/context`
  * (`enabled`, `country`, `acronym`, `description`, throwaway `users[]`
@@ -323,14 +323,16 @@ test.describe('hosted journals', () => {
         // The email address refused by the server (Fields; Rule 4). Typing
         // the title and initials drops their reasons; "Save" stays disabled
         // while the other refused fields' reasons stand (T-ojs-1), and is
-        // enabled once each refused field has changed.
+        // enabled once each refused field has changed. Four stand, not the
+        // bullet's five: "Primary locale"'s goes with the title's
+        // (T-ops-1, returned to the fold; note td3's runs read the same).
         await win.type(win.title('en'), harbour.name);
         await win.type(win.initials('en'), 'HR');
         await expect(win.error('name', 'en')).toHaveCount(0);
         await expect(win.error('acronym', 'en')).toHaveCount(0);
         await expect
             .poll(() => win.errorMap())
-            .toMatchObject({contactName: REQUIRED, contactEmail: REQUIRED, urlPath: REQUIRED, supportedLocales: REQUIRED});
+            .toEqual({contactName: REQUIRED, contactEmail: REQUIRED, urlPath: REQUIRED, supportedLocales: REQUIRED});
         await expect(win.saveButton).toBeDisabled();
         await win.showLanguage('French', 'fr_CA');
         await win.type(win.title('fr_CA'), harbour.fr);
@@ -399,6 +401,50 @@ test.describe('hosted journals', () => {
         await expect.poll(() => hosted.rowName(harbour.path)).toBe(harbour.name);
         await expect(hosted.pathCell(harbour.path)).toHaveText(harbour.path);
         await expect.poll(() => hosted.orderOf([tide.path, harbour.path])).toEqual([tide.path, harbour.path]);
+
+        // Refused through the programming interface: the add "Create
+        // Journal" sends, posted from this page's own session with its CSRF
+        // token (footnote s; note f-a12), the title, contact name, contact
+        // email and path empty: a 400 with an error on each of those four
+        // fields and none other. Reloaded, the list is unchanged: Harbour
+        // Review still the last of this test's rows, and no row with an
+        // empty "Path", which is what the refused add would have left
+        // (Rules 4, 5).
+        const csrf = await ap.evaluate(() => /** @type {any} */ (window).pkp.currentUser.csrfToken);
+        expect(csrf, 'the page carries its CSRF token').toBeTruthy();
+        const emptyAdd = await ap.request.fetch(new URL('/index.php/index/api/v1/contexts', ap.url()).href, {
+            method: 'POST',
+            headers: {'X-Csrf-Token': csrf, 'Content-Type': 'application/json'},
+            data: {
+                name: {en: ''},
+                acronym: {en: 'HR'},
+                abbreviation: {en: ''},
+                contactName: '',
+                contactEmail: '',
+                country: 'CA',
+                description: {en: ''},
+                urlPath: '',
+                supportedLocales: ['en'],
+                primaryLocale: 'en',
+                enabled: false,
+            },
+            failOnStatusCode: false,
+        });
+        expect(emptyAdd.status(), 'the empty add is refused').toBe(400);
+        const emptyErrors = await emptyAdd.json();
+        expect(Object.keys(emptyErrors).sort()).toEqual(['contactEmail', 'contactName', 'name', 'urlPath']);
+        expect(Object.keys(emptyErrors.name)).toEqual(['en']);
+        for (const key of ['contactEmail', 'contactName', 'urlPath']) {
+            expect(emptyErrors[key].length, `an error under ${key}`).toBeGreaterThan(0);
+        }
+        expect(emptyErrors.name.en.length, 'an error under name.en').toBeGreaterThan(0);
+        await hosted.reload();
+        await expect.poll(() => hosted.rowName(harbour.path)).toBe(harbour.name);
+        await expect(hosted.pathCell(harbour.path)).toHaveText(harbour.path);
+        await expect.poll(() => hosted.orderOf([tide.path, harbour.path])).toEqual([tide.path, harbour.path]);
+        const pathsAfter = await hosted.paths();
+        expect(pathsAfter, 'the list read holds the new row').toContain(harbour.path);
+        expect(pathsAfter, 'no row with an empty path').not.toContain('');
 
         // Read in French: Harbour Review's French name, Tide Journal's
         // English one; English again (Rules 2, 3).

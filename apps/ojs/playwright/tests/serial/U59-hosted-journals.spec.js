@@ -13,10 +13,10 @@
  * runs alone in the `ojs-solo` project: its "Done" rewrites the whole
  * site's order as the page loaded it (harness.md "Project chain").
  *
- * Not asserted here, by register ID: A1, A3, A4, A5, OPS1 (the register
- * carries them, the spec's Coverage section); A2 and A6 are passed by S3
- * and S2, which read the row after a reload and never press "Jump to next
- * error".
+ * Not asserted here, by register ID: A1, A3, A4, A5, A12, OPS1 (the
+ * register carries them, the spec's Coverage section); A2 and A6 are passed
+ * by S3 and S2, which read the row after a reload and never press "Jump to
+ * next error".
  *
  * Seeding (footnote s): scratch journals from `POST scenarios/context`
  * (`enabled`, `country`, `acronym`, `description`, {OJS} `issues[]`,
@@ -156,6 +156,33 @@ async function mailSince(pkpMail, since) {
         if (!messages.length || new Date(messages[messages.length - 1].Created).getTime() < since) break;
     }
     return out;
+}
+
+/**
+ * Send a request from a signed-in page (footnote s): `fetch` inside the page
+ * at the site's address, with the page's own session and its
+ * `pkp.currentUser.csrfToken`, the body as JSON. Returns the answer's status
+ * and its JSON (or null).
+ */
+async function sendFromPage(page, method, path, body) {
+    await page.waitForFunction(() => !!(window.pkp && window.pkp.currentUser && window.pkp.currentUser.csrfToken), null, {timeout: T});
+    return page.evaluate(
+        async ({method, path, body}) => {
+            const response = await fetch(path, {
+                method,
+                headers: {'X-Csrf-Token': window.pkp.currentUser.csrfToken, 'Content-Type': 'application/json'},
+                body: JSON.stringify(body),
+            });
+            let json = null;
+            try {
+                json = await response.json();
+            } catch {
+                // not JSON
+            }
+            return {status: response.status, json};
+        },
+        {method, path, body}
+    );
 }
 
 /**
@@ -319,16 +346,17 @@ test.describe('hosted journals', () => {
         await expect(win.saveButton).toBeDisabled();
 
         // The email address refused by the server (Fields; Rule 4). Typing
-        // the title and initials drops their reasons; "Save" stays disabled
-        // while the other refused fields' reasons stand (T-ojs-1), and is
-        // enabled once each refused field has changed.
+        // the title and initials drops their reasons and "Primary locale"'s,
+        // though nothing is chosen there (Rule 4; note td3); the other four
+        // stand and "Save" stays disabled (T-ojs-1); it is enabled once
+        // each refused field has changed.
         await win.type(win.title('en'), harbour.name);
         await win.type(win.initials('en'), 'HR');
         await expect(win.error('name', 'en')).toHaveCount(0);
         await expect(win.error('acronym', 'en')).toHaveCount(0);
         await expect
             .poll(() => win.errorMap())
-            .toMatchObject({contactName: REQUIRED, contactEmail: REQUIRED, urlPath: REQUIRED, supportedLocales: REQUIRED});
+            .toEqual({contactName: REQUIRED, contactEmail: REQUIRED, urlPath: REQUIRED, supportedLocales: REQUIRED});
         await expect(win.saveButton).toBeDisabled();
         await win.showLanguage('French', 'fr_CA');
         await win.type(win.title('fr_CA'), harbour.fr);
@@ -397,6 +425,38 @@ test.describe('hosted journals', () => {
         await expect.poll(() => hosted.rowName(harbour.path)).toBe(harbour.name);
         await expect(hosted.pathCell(harbour.path)).toHaveText(harbour.path);
         await expect.poll(() => hosted.orderOf([tide.path, harbour.path])).toEqual([tide.path, harbour.path]);
+
+        // Refused through the programming interface: the add "Create
+        // Journal" sends, from this page's own session and CSRF token, with
+        // the title, contact name, contact email and path empty; an error on
+        // each of the four. After a reload Harbour Review is still the last
+        // of this test's rows and no row has an empty path or reads
+        // "Untitled", the shape a stored add of this body would take (the
+        // serial project's other workers add rows of their own, so the read
+        // is scoped) (Rules 4, 5; footnote s, note f-a12).
+        const apiAdd = await sendFromPage(ap, 'POST', '/index.php/index/api/v1/contexts', {
+            name: {en: ''},
+            acronym: {en: 'HR'},
+            abbreviation: {en: ''},
+            contactName: '',
+            contactEmail: '',
+            country: 'CA',
+            description: {en: ''},
+            urlPath: '',
+            supportedLocales: ['en'],
+            primaryLocale: 'en',
+            enabled: false,
+        });
+        expect(apiAdd.status, `the add answers ${apiAdd.status} ${JSON.stringify(apiAdd.json)}`).toBe(400);
+        for (const field of ['name', 'contactName', 'contactEmail', 'urlPath']) {
+            expect(apiAdd.json && apiAdd.json[field], `an error on ${field}: ${JSON.stringify(apiAdd.json)}`).toBeTruthy();
+        }
+        await hosted.reload();
+        await expect.poll(() => hosted.rowName(harbour.path)).toBe(harbour.name);
+        await expect(hosted.pathCell(harbour.path)).toHaveText(harbour.path);
+        await expect.poll(() => hosted.orderOf([tide.path, harbour.path])).toEqual([tide.path, harbour.path]);
+        expect(await hosted.paths(), 'no row with an empty path').not.toContain('');
+        await expect(hosted.rows.locator('td:first-child', {hasText: /^\s*Untitled(\s|$)/})).toHaveCount(0);
 
         // Read in French: Harbour Review's French name, Tide Journal's
         // English one; English again (Rules 2, 3).

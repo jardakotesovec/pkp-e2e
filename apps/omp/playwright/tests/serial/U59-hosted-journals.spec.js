@@ -16,10 +16,11 @@
  * runs alone in the `omp-solo` project: its "Done" rewrites the whole
  * site's order as the page loaded it (harness.md "Project chain").
  *
- * Not asserted here, by register ID: A1, A3, A4, A5, OPS1 (the register
- * carries them, the spec's Coverage section); A2 and A6 are passed by S3
- * and S2, which read the row after a reload and never press "Jump to next
- * error".
+ * Deliberately NOT covered (register IDs from the spec's Findings register:
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
+ * A2 🐞, A3 🐞, A4 🐞, A5 ❓, A6 🐞, A7 🐞, A8 🐞, A9 ❓, A10 🐞, A11 🐞,
+ * A12 🐞, OPS1 🐞. The spec's Coverage section records everything else
+ * left out.
  *
  * Seeding (footnote s): scratch presses from `POST scenarios/context`
  * (`enabled`, `country`, `acronym`, `description`, throwaway `users[]` with the username twice as password and
@@ -325,7 +326,9 @@ test.describe('hosted journals', () => {
         // The email address refused by the server (Fields; Rule 4). Typing
         // the title and initials drops their reasons; "Save" stays disabled
         // while the other refused fields' reasons stand (T-ojs-1, T-omp-1),
-        // and is enabled once each refused field has changed.
+        // and is enabled once each refused field has changed. The spec has
+        // "Primary locale"'s reason standing too; the screen drops it here
+        // (T-omp-2, 2026-11-27, with the fold), so it is not read.
         await win.type(win.title('en'), harbour.name);
         await win.type(win.initials('en'), 'HR');
         await expect(win.error('name', 'en')).toHaveCount(0);
@@ -401,6 +404,38 @@ test.describe('hosted journals', () => {
         await expect.poll(() => hosted.rowName(harbour.path)).toBe(harbour.name);
         await expect(hosted.pathCell(harbour.path)).toHaveText(harbour.path);
         await expect.poll(() => hosted.orderOf([tide.path, harbour.path])).toEqual([tide.path, harbour.path]);
+
+        // Refused through the programming interface: the add "Create Press"
+        // sends, from this page's own session, with the English title, the
+        // principal contact and "Path" empty: a 400 with an error under each
+        // of the four. Reloaded, Harbour Review is still the last of this
+        // test's rows and no row has an empty path (Rules 4, 5; footnote s).
+        await ap.waitForFunction(() => !!(window.pkp && window.pkp.currentUser && window.pkp.currentUser.csrfToken), null, {timeout: T});
+        const token = await ap.evaluate(() => window.pkp.currentUser.csrfToken);
+        const apiAdd = await ap.request.post(hosted.siteUrl('/api/v1/contexts'), {
+            headers: {'X-Csrf-Token': token},
+            data: {
+                name: {en: ''},
+                acronym: {en: 'HR'},
+                contactName: '',
+                contactEmail: '',
+                country: 'CA',
+                description: {en: ''},
+                urlPath: '',
+                supportedLocales: ['en'],
+                primaryLocale: 'en',
+                enabled: false,
+            },
+            failOnStatusCode: false,
+        });
+        const apiAnswer = await apiAdd.text();
+        expect(apiAdd.status(), `the add answers ${apiAdd.status()} ${apiAnswer.slice(0, 400)}`).toBe(400);
+        expect(Object.keys(JSON.parse(apiAnswer)).sort()).toEqual(['contactEmail', 'contactName', 'name', 'urlPath']);
+        await hosted.reload();
+        await expect.poll(() => hosted.rowName(harbour.path)).toBe(harbour.name);
+        await expect(hosted.pathCell(harbour.path)).toHaveText(harbour.path);
+        await expect.poll(() => hosted.orderOf([tide.path, harbour.path])).toEqual([tide.path, harbour.path]);
+        expect((await hosted.paths()).filter((p) => p === '')).toEqual([]);
 
         // Read in French: Harbour Review's French name, Tide Journal's
         // English one; English again (Rules 2, 3).

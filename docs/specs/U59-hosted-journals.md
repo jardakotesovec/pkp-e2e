@@ -120,7 +120,9 @@ wizard, the journal's primary language. <sup>c</sup> <sup>d</sup>
    {n} error(s) were encountered. Please correct these errors and try
    again." at the top right. A field's message goes once that field is
    changed, and "Save" stays disabled until every refused field has been
-   changed. <sup>d</sup> <sup>td3</sup>
+   changed. Typing the title and initials in the site's language also
+   takes away the message under "Primary locale", though nothing is
+   chosen there. <sup>d</sup> <sup>td3</sup>
 5. **An accepted save.** The browser leaves the list for the new
    journal's Settings Wizard (Rule 16). The journal takes the last place
    in the site's order (Rule 13). It is enabled publicly only if
@@ -513,14 +515,16 @@ journals runs alone. <sup>s</sup>
      error" ⚠ [A6](#a6); "Save" is disabled (Fields; Rule 4).
    - **The email address refused**: type Harbour Review in the English
      "Journal Title" and HR in the English "Journal Initials": the
-     messages under those two boxes go, while those under "Principal
-     Contact Name", "Principal Contact Email address", "Path" and
-     "Languages" stand and "Save" stays disabled. Type Revue du Port in
-     the French "Journal Title" and RP in the French "Journal Initials",
-     Ana Pereira in "Principal Contact Name" and x in "Principal Contact
-     Email address", choose "Canada" under "Country", type harbourreview
-     in "Path", tick English and French under "Languages" and choose
-     English under "Primary locale": "Save" is enabled again. Press
+     messages under those two boxes go, and so does the one under
+     "Primary locale", though nothing is chosen there; those under
+     "Principal Contact Name", "Principal Contact Email address", "Path"
+     and "Languages" stand and "Save" stays disabled. Type Revue du
+     Port in the French "Journal Title" and RP in the French "Journal
+     Initials", Ana Pereira in "Principal Contact Name" and x in
+     "Principal Contact Email address", choose "Canada" under "Country",
+     type harbourreview in "Path", tick English and French under
+     "Languages" and choose English under "Primary locale": "Save" is
+     enabled again. Press
      "Save": "This is not a valid email address." shows under
      the email address, beside "Save" "Please correct one error.", and at
      the top right "The form was not saved because 1 error(s) were
@@ -553,6 +557,17 @@ journals runs alone. <sup>s</sup>
    - **The new row**: open Administration › "Hosted Journals": the last
      row reads Harbour Review under "Name" and harbourreview under "Path"
      (Rules 2, 5).
+   - **Refused through the programming interface**: from the Site
+     Administrator's signed-in browser, send the install's programming
+     interface, at the site's address, the add "Create Journal" sends
+     (the address and the body in the footnote <sup>s</sup>), with the
+     English "Journal Title", "Principal Contact Name", "Principal Contact Email
+     address" and "Path" sent empty, HR in the English "Journal
+     Initials", "Canada" under "Country", and English under "Languages"
+     and "Primary locale": the answer refuses the add, with an error on
+     each of those four fields. Reload Hosted Journals: the last row
+     still reads Harbour Review under "Name" and harbourreview under
+     "Path", the refused add having created nothing (Rules 4, 5).
    - **Read in French**: in the editorial header's initials menu, choose
      "français" under "Change Language"
      ([Languages & locales](U57-languages-and-locales.md)): Harbour
@@ -804,10 +819,6 @@ Left out of the scenarios above, by reason:
   - {OPS} the path "0" on "Create Server" refused with "A path is
     required." under "Path", not a raw code ([OPS1](#ops1)): the guard
     the issue report proposes [report 2026-10-02]
-  - the add [A12](#a12) describes, with "Journal Title", "Principal
-    Contact Name", "Principal Contact Email address" and "Path" sent
-    empty, refused with messages under each and nothing stored (Rule 4)
-    [incidental 2026-11-27]
 - **Rarely met**:
   - exactly one journal enabled publicly, where the site's address opens
     that journal instead of the list (Rule 19; Settings bullet 4): a
@@ -1302,10 +1313,16 @@ title"/"Server initials") removed those two messages, while those under
 "Principal Contact Name", "Principal Contact Email address", "Path" and
 "Languages" stayed and "Save" stayed disabled (on OJS and OMP rendered
 disabled for the whole 10 s wait); it was enabled once every refused
-field had been changed. The ui-library's `FormPage.vue` disables the
-button while the form holds any error (`isSaving || !canSubmit ||
-(isLastPage && !!Object.keys(errors).length)`), and `Form.vue`'s
-`removeError()` drops only the changed field's.
+field had been changed. Test runs 2026-11-27 (scenario 2, three apps;
+OJS three runs, OMP two, OPS one): at that point the message under
+"Primary locale" had gone too, with neither "English" nor "French"
+chosen under it; the line beside "Save" read "Please correct 4 errors."
+with "Go to …" buttons for the four fields above alone. The
+ui-library's `FormPage.vue` disables the button while the form holds
+any error
+(`isSaving || !canSubmit || (isLastPage && !!Object.keys(errors).length)`),
+and `Form.vue`'s `removeError()` drops only the changed field's; what
+also takes away "Primary locale"'s was not traced.
 With "Primary locale" French and only the French title and initials
 typed, "This field is required." stood under both English boxes and
 nothing was sent; the same with the page read in French ("Ce champ est
@@ -1785,7 +1802,15 @@ with a `manager`, `marshreview` with `enabled: false`. Scenario 2:
 `tide` enabled, with an English name only; French is the fleets' second
 site language (`fr_CA`), its boxes behind the form's "French" button
 (note td3); the typed paths `harbourreview` and `harbournotes`, and the
-in-use refusal on `publicknowledge`, read only. Scenario 3: `sealetters`
+in-use refusal on `publicknowledge`, read only; its add through the
+programming interface is `POST index.php/index/api/v1/contexts` at the
+site's base URL, from Hosted Journals' own session as `admin`, header
+`X-Csrf-Token` the page's `pkp.currentUser.csrfToken`, as JSON the body
+"Create Journal" sends (note f-a12) with `name` `{"en": ""}`,
+`contactName` `""`, `contactEmail` `""` and `urlPath` `""`, `acronym`
+`{"en": "HR"}`, `country` `CA`, `supportedLocales` `["en"]` and
+`primaryLocale` `en`; the refusal is a 400 answer with errors under
+`name`, `contactName`, `contactEmail` and `urlPath`. Scenario 3: `sealetters`
 with `acronym: 'SL'`, `country` and a `manager`. Scenario 4:
 `riverreview` created first, with `description`, `country` and {OJS}
 `issues: [{volume: 1, number: 1, year: <this year>, published: true}]`;
