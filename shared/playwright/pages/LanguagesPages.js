@@ -29,7 +29,8 @@
  * - JournalLanguagesTab — Settings › Website › "Setup" › "Languages" (and
  *   the Settings wizard's "Languages" side tab): "Website Languages",
  *   "Submission Languages", "Add/Remove Languages".
- * - AddLanguagesWindow — the "Add/Remove Languages" window.
+ * - AddLanguagesWindow — the "Add/Remove Languages" window, closed or left
+ *   for another address with its leave question answered.
  * - LanguageBlock — the sidebar "Language" block of a public page.
  * - LanguageMenu — "Change Language" in the editorial header's initials
  *   menu (U08's EditorialChrome, read language-independently).
@@ -50,7 +51,9 @@
  * - "Install Locale" and "Add/Remove Languages" open a window holding
  *   `form#installLanguageForm` / `form#addLanguageForm`, one box per
  *   language (`input[type=checkbox][value=<code>]`); closing it with a box
- *   changed asks through the browser's confirm();
+ *   changed asks through the browser's confirm(), and opening another
+ *   address with a box changed asks the browser's page-leave question (a
+ *   `beforeunload` dialog; U57 I27A, 2026-11-27);
  * - the notice at the top right is `.pkpNotification`;
  * - Settings › Website turns `#setup/languages` into `#languages` and a
  *   load of `…/website#languages` opens "Appearance", so the tab is opened
@@ -687,6 +690,20 @@ class AddLanguagesWindow extends BasePage {
             await pastModalSlot(this.page);
         });
         return asked.length ? asked[0].message : null;
+    }
+
+    /**
+     * Open another address with the window still open (the address typed
+     * into the browser's address bar: a `page.goto()`), the browser's
+     * page-leave question (a `beforeunload` dialog) accepted; returns the
+     * questions asked, as `{type, message}`, once the new page has loaded.
+     *
+     * @param {string} url
+     */
+    async leaveFor(url) {
+        return answeringDialogs(this.page, ['accept'], async () => {
+            await this.page.goto(url);
+        });
     }
 }
 

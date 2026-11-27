@@ -9,12 +9,8 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A2 ❓,
- * A3 🐞, A5 🐞, A6 🐞, A7 🐞, A8 🐞 (OMP OPS), A11 ❓, A14 🐞, A15 ❓; A1, A10,
- * A12, A13 (the serial file's scenarios). A6 is an app race between two French
- * form-language installs at once (ci-triage "Two contexts adding French at
- * the same moment"): a 500 on the "Forms"/"Submissions" tick or on the
- * French seed here is that race, not this suite's defect. The spec's
- * Coverage section records everything else left out.
+ * A3 🐞, A5 🐞, A6 🐞, A7 🐞, A8 🐞 (OMP OPS), A11 ❓, A14 🐞, A15 ❓, A16 🐞,
+ * A17 ❓; A1, A10, A12, A13 (the serial file's scenarios).
  *
  * Seeding (footnote s): every scenario runs on its own scratch journal from
  * `POST scenarios/context` (`context.supportedLocales` for "UI", the
@@ -366,6 +362,25 @@ test.describe('languages and locales', () => {
             expect(await win.closeAnswering('accept')).toBe(LEAVE);
             await expect(win.form).toBeHidden();
             expect(await tab.submission.codes()).toEqual(['en']);
+
+            // Left for another address: with French (Canada) ticked and the
+            // window open, Settings › Journal's address opened (typed into the
+            // address bar: a goto) asks the browser's own page-leave question
+            // (a beforeunload dialog: its type is asserted, never its words);
+            // left, the page is Settings › Journal, and "Submission Languages"
+            // read afresh still lists English alone (Fields; footnote l).
+            win = await tab.openAddRemove();
+            await win.box('fr_CA').check();
+            await win.box('fr_CA').blur();
+            await expect(win.box('fr_CA'), 'control: the window is changed and open when the page is left').toBeChecked();
+            const leftFor = await win.leaveFor(journal(tag, '/en/management/settings/context'));
+            expect(leftFor.map((q) => q.type)).toEqual(['beforeunload']);
+            await expect(mp).toHaveURL(/\/management\/settings\/context$/);
+            await expect(win.form).toHaveCount(0);
+            await tab.goto();
+            await expect(tab.submission.row('en'), 'control: the list is drawn with its English row').toBeVisible();
+            expect(await tab.submission.codes()).toEqual(['en']);
+            await expect(tab.submission.row('fr_CA')).toHaveCount(0);
 
             // Nothing ticked: refused at the top right, the window stays (Fields).
             win = await tab.openAddRemove();

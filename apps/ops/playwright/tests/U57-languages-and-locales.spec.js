@@ -11,7 +11,8 @@
  *
  * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
  * contract, a ❓ is parked, not a gap): A1 🐞, A2 ❓, A3 🐞, A5 🐞, A6 🐞,
- * A7 🐞, A8 🐞, A10 ❓, A11 ❓, A12 ❓, A13 ❓, A14 🐞, A15 ❓, U07 OPS3 🐞.
+ * A7 🐞, A8 🐞, A10 ❓, A11 ❓, A12 ❓, A13 ❓, A14 🐞, A15 ❓, A16 🐞, A17 ❓,
+ * U07 OPS3 🐞.
  * The spec's Coverage section records everything else left out.
  *
  * Seeding (footnote s): each of scenarios 4–8 runs on its own scratch
@@ -44,6 +45,7 @@ const {
     JournalLanguagesTab,
     LanguageBlock,
     LanguageMenu,
+    answeringDialogs,
     noticeDuring,
 } = require('../../../../shared/playwright/pages/LanguagesPages.js');
 const {startUrl, startFormLegend} = require('../pages/SubmissionWizardPages.js');
@@ -347,6 +349,27 @@ test.describe('languages and locales', () => {
             await win.box('fr_CA').blur();
             expect(await win.closeAnswering('accept')).toBe(FORM_CHANGED);
             await expect(win.form).toBeHidden({timeout: T});
+            expect(await tab.submission.codes()).toEqual(['en']);
+
+            // Left for another address: French (Canada) ticked in the open
+            // window, Settings › Server's address opened; the browser's own
+            // page-leave question (a beforeunload dialog: its type asserted,
+            // never its words), and no other; accepted, Settings › Server is
+            // on screen, and the list still English alone (Fields; note s).
+            win = await tab.openAddRemove();
+            await expect(win.box('fr_CA')).not.toBeChecked();
+            await win.box('fr_CA').check();
+            await win.box('fr_CA').blur();
+            const serverSettings = new SettingsPages(mp, tag, {locale: 'en'});
+            const asked = await answeringDialogs(mp, [], () => serverSettings.goto('journal'));
+            expect(asked.map((d) => d.type)).toEqual(['beforeunload']);
+            await expect(mp).toHaveURL(new RegExp(`/index\\.php/${tag}(/en)?/management/settings/context$`));
+            await expect(serverSettings.heading).toHaveText('Server Settings');
+            await expect(serverSettings.topTabs.filter({hasText: 'Masthead'})).toBeVisible();
+            await expect(win.form).toHaveCount(0);
+            await tab.goto();
+            await expect(tab.submission.row('en')).toBeVisible();
+            await expect(tab.submission.row('fr_CA')).toHaveCount(0);
             expect(await tab.submission.codes()).toEqual(['en']);
 
             // Nothing ticked: refused, the window stays open (Fields).

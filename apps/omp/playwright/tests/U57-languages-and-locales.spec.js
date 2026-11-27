@@ -27,6 +27,12 @@
  * for another sends it as `Accept-Language` and `locale`. No site setting
  * changes here, so the suite runs in the parallel project.
  *
+ * S7's "Left for another address" opens Settings › Press's address
+ * (`{press}/en/management/settings/context`, footnote s) with `page.goto()`
+ * over the changed "Add/Remove Languages" window; the browser's
+ * `beforeunload` question is read from the dialogs the page raises
+ * (`recordBrowserDialogs`, accepted) and its type.
+ *
  * S5 and S7 run one after the other (a serial describe): each ticks French
  * as a form or submission language, which installs the French default email
  * data, and two such installs at once answer 500 (register A6).
@@ -41,6 +47,7 @@ const {
     LanguageMenu,
     noticeDuring,
 } = require('../../../../shared/playwright/pages/LanguagesPages.js');
+const {recordBrowserDialogs} = require('../../../../shared/playwright/pages/SubmissionFilesPages.js');
 
 const SEEDED = 'publicknowledge';
 const SAVED = 'Locale settings saved.';
@@ -364,6 +371,24 @@ test.describe('languages and locales', () => {
             await win.box('fr_CA').blur();
             expect(await win.closeAnswering('accept')).toBe(LEAVE);
             await expect(win.form).toBeHidden();
+            expect(await tab.submission.codes()).toEqual(['en']);
+
+            // Left for another address: Settings › Press's address opened over the
+            // changed window raises the browser's own leave question; left, the
+            // list still holds English alone (Fields; footnotes l, s).
+            win = await tab.openAddRemove();
+            await win.box('fr_CA').check();
+            await win.box('fr_CA').blur();
+            await expect(win.box('fr_CA')).toBeChecked();
+            const asked = recordBrowserDialogs(mp, {fallback: 'accept'});
+            const leaveQuestion = mp.waitForEvent('dialog', {timeout: 30_000});
+            const pressSettings = new SettingsPages(mp, tag, {locale: 'en'});
+            await pressSettings.goto('journal');
+            asked.stop();
+            expect((await leaveQuestion).type(), 'the browser asks whether to leave the page').toBe('beforeunload');
+            expect(asked.messages, 'one question, the browser\'s own (no page text)').toEqual(['']);
+            await expect(mp).toHaveURL(/\/management\/settings\/context$/);
+            await tab.goto();
             expect(await tab.submission.codes()).toEqual(['en']);
 
             // Nothing ticked: refused at the top right, the window stays (Fields).
