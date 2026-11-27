@@ -12,7 +12,8 @@
  *   const context = await newGuardedContext(browser, '<repo>/.reports/plugin-review/pg-<PR>/drive/outside.log');
  *
  * `allow` adds hosts the review's request allowed (host or host:port);
- * other options go to `browser.newContext()`. API calls go through the
+ * other options go to `browser.newContext()`. `readNotices(page)` keeps
+ * the page's notification texts (below). API calls go through the
  * page (`page.evaluate(() => fetch(…))`): `page.request` and
  * `context.request` ignore the bypass list and fail on the dead proxy
  * (ECONNREFUSED 127.0.0.1:9) for every host, the pod's included. A POST
@@ -89,4 +90,39 @@ async function newGuardedContext(browser, logFile, {allow = [], ...options} = {}
     return context;
 }
 
-module.exports = {newGuardedContext};
+/**
+ * The page's trivial notifications ("Plugin installed", "Your changes have
+ * been saved"), as they arrive. Each is handed out once, in the next
+ * `fetchNotification` answer, and the page removes it within seconds, so a
+ * DOM read after an install or a settings save often finds nothing; this
+ * keeps every answer's text. Call it right after `context.newPage()`:
+ *
+ *   const notices = readNotices(page);   // later: notices.map((n) => n.text)
+ */
+function readNotices(page) {
+    const notices = [];
+    const texts = (value, out = []) => {
+        if (typeof value === 'string') {
+            const text = value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            if (text) out.push(text);
+        } else if (value && typeof value === 'object') {
+            Object.values(value).forEach((v) => texts(v, out));
+        }
+        return out;
+    };
+    page.on('response', async (response) => {
+        if (!response.url().includes('fetchNotification')) return;
+        try {
+            const body = await response.json();
+            const general = body?.content?.general;
+            if (general && texts(general).length) {
+                notices.push({at: new Date().toISOString(), page: page.url(), text: texts(general).join(' | ')});
+            }
+        } catch {
+            // not JSON: the page navigated away before the body was read
+        }
+    });
+    return notices;
+}
+
+module.exports = {newGuardedContext, readNotices};

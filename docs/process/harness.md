@@ -608,6 +608,17 @@ Mac a plugin is only read.
   logs a page's request to any host but the pod's two ports. The refusal
   sits in the context's proxy (a dead port, the pod's ports bypassed),
   because a route alone sees only the first request of a redirect chain.
+  Its `readNotices(page)` keeps the text of every trivial notification
+  ("Plugin installed", a settings save), which the page's next
+  `fetchNotification` hands out once and a later DOM read misses.
+- **A plugin's row in Settings › Website › "Plugins"**: the grid's id
+  carries a random suffix, so find the row by the plugin's lower-cased
+  class name (`tr[id$="-<class>-row"]`); its "Settings" and "Delete"
+  links sit in a separate control row (`tr[id$="-<class>-control-row"]`),
+  shown only after the row's `a.show_extras` is clicked. Take the
+  settings link as `a[href*="verb=settings"]`: a text match on "Settings"
+  finds the row's `hide_extras` toggle first. The settings window is a
+  `[role=dialog]`.
 
 ```bash
 node bin/plugin-fetch.js <gallery PR> pg-<PR>        # download, MD5, unpack safely, compare with the tagged source → .reports/plugin-review/pg-<PR>/integrity.md
@@ -1164,7 +1175,10 @@ other slots run beside it).
   commit under test; it runs this repo's `main` unless `e2e_ref` is given.
   The hooks also pass `companion_branch`, the PR's branch name: when a
   pkp-e2e branch of the same name exists, the suite runs from it instead
-  (MAINTENANCE "A developer's PR fails the suite").
+  (MAINTENANCE "A developer's PR fails the suite"). Pushing such a branch
+  can print the ruleset's "Bypassed rule violations" notice ("Cannot
+  force-push to this branch", "creations being restricted"): that is not a
+  refusal, and `git ls-remote origin <branch>` shows the new head.
 - CI runs each app as three shards (one job each with its own services
   and install, check names `e2e (<app>) n/3`) at `PLAYWRIGHT_WORKERS=4`
   and `--retries=1`. A shard runs three passes, because Playwright shards

@@ -594,8 +594,9 @@ no cleanup fixture.
   publication key is rewritten to the stage view, so a 3.5 walk presses
   the menu entry instead.
 - **`useFetch` tunnels DELETE and PUT via POST + `X-Http-Method-Override`, and
-  unauthorized API calls return 401**, not 403. Match `waitForResponse` method
-  predicates and status assertions accordingly.
+  unauthorized API calls return 401**, not 403. A `waitForResponse` keyed on
+  `method() === 'PUT'` never matches: probes wait with the kit's
+  `waitForSave(page, urlPart, {method})`, tests match the header too.
 - **The reviewer dashboard endpoint (`_submissions/reviewerAssignments`)
   ignores `searchPhrase` AND pagination.** Reviewer-side list assertions need
   scratch-journal scoping or a bounded full-list assertion.
@@ -734,6 +735,9 @@ script.
   through `settled()` on the form's footer or an editor field). On
   timeout it returns what is there and adds `{settled: false}` to the run
   record's `warnings`, never a throw.
+- `waitForSave(page, urlPart, {method})`: the response to a save, matched
+  on the method the server acts on (a Vue form's PUT arrives as a POST with
+  `X-Http-Method-Override`); start it before the press.
 - `idle(page)`: `waitForJQueryIdle` plus a bounded network-quiet wait, so
   a Vue panel that fetches its own data is on screen before `screen()`
   reads; after a press it waits out the requests the press started, which

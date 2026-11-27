@@ -1238,6 +1238,24 @@ function usageLog(app, {contextId = null} = {}) {
  * @param {import('@playwright/test').Locator} locator
  * @param {{timeout?: number}} [options] milliseconds, default 15000
  */
+/**
+ * The response to a save sent to an address containing `urlPart` (a string,
+ * or a RegExp tested on the URL), matched on the method the server acts on:
+ * the Vue forms send PUT and DELETE as a POST carrying
+ * `X-Http-Method-Override`, so a filter on `request().method() === 'PUT'`
+ * never matches and the wait times out (patterns.md "UI realities").
+ * Start it before the click: `const saved = waitForSave(page, '/contexts/');`.
+ */
+function waitForSave(page, urlPart, {method = 'PUT', timeout = 30_000} = {}) {
+    const wanted = method.toUpperCase();
+    return page.waitForResponse((response) => {
+        const request = response.request();
+        const effective = (request.headers()['x-http-method-override'] || request.method()).toUpperCase();
+        const url = response.url();
+        return effective === wanted && (urlPart instanceof RegExp ? urlPart.test(url) : url.includes(urlPart));
+    }, {timeout});
+}
+
 async function settled(page, locator, {timeout = 15_000} = {}) {
     await idle(page);
     const deadline = Date.now() + timeout;
@@ -1491,6 +1509,7 @@ module.exports = {
     note,
     idle,
     settled,
+    waitForSave,
     drainJobs,
     apiAs,
     sql,

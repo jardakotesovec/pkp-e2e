@@ -212,6 +212,19 @@ function fetchApp(name) {
         bundleStale = !uiMoved && fs.existsSync(bundle) && fs.statSync(bundle).mtimeMs < uiTime;
     } catch {}
     if (bundleStale) console.log('  js/build.js is older than lib/ui-library\'s commit: the UI bundle will be rebuilt');
+    // The ui-library commit the bundle was last built from: a review that
+    // moved the submodule and an --update that moved it back leave the pointer
+    // "unmoved" and the mtimes fresh, yet node_modules and the bundle are the
+    // review's (friction 2026-11-24).
+    const stampFile = path.join(dir, 'node_modules', '.ui-library-built'); // gitignored, and npm ci empties it
+    const uiHead = () => {
+        try {
+            return execFileSync('git', ['rev-parse', 'HEAD'], {cwd: path.join(dir, 'lib', 'ui-library'), stdio: ['ignore', 'pipe', 'ignore']}).toString().trim();
+        } catch { return ''; }
+    };
+    const builtFrom = fs.existsSync(stampFile) ? fs.readFileSync(stampFile, 'utf8').trim() : null;
+    const stampDiffers = builtFrom !== null && builtFrom !== uiHead();
+    if (stampDiffers) console.log(`  js/build.js was built from lib/ui-library ${builtFrom.slice(0, 10)}, the checkout is at ${uiHead().slice(0, 10)}: node_modules and the bundle will be rebuilt`);
 
     // Submodule origins point at pkp remotes (.gitmodules) — disable pushes.
     run(dir, 'git', [
@@ -244,13 +257,14 @@ function fetchApp(name) {
 
     // UI build, on the line's Node when LINES names one.
     const env = buildEnv();
-    if (rebuild || uiMoved || !fs.existsSync(path.join(dir, 'node_modules'))) {
+    if (rebuild || uiMoved || stampDiffers || !fs.existsSync(path.join(dir, 'node_modules'))) {
         run(dir, 'npm', ['ci'], {env});
     } else {
         console.log('  npm ci: node_modules present, skipping (--rebuild forces)');
     }
-    if (rebuild || uiMoved || bundleStale || !fs.existsSync(bundle)) {
+    if (rebuild || uiMoved || bundleStale || stampDiffers || !fs.existsSync(bundle)) {
         run(dir, 'npm', ['run', 'build'], {env});
+        fs.writeFileSync(stampFile, `${uiHead()}\n`);
     } else {
         console.log('  UI build: js/build.js present and newer than lib/ui-library, skipping (--rebuild forces)');
     }
