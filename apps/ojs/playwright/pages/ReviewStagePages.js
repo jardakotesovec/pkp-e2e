@@ -1994,6 +1994,39 @@ exports.modifyReviewErrorSummary = function modifyReviewErrorSummary(editModal) 
 };
 
 /**
+ * The "Modify Review" window's "Save Changes" button.
+ *
+ * @param {import('@playwright/test').Locator} editModal from openModifyReview
+ */
+exports.modifyReviewSaveButton = function modifyReviewSaveButton(editModal) {
+    return editModal.getByRole('button', {name: 'Save Changes', exact: true});
+};
+
+/**
+ * Press the "Modify Review" window's "Save Changes" on a save the server
+ * refuses (a recommendation the journal switched off after the workflow
+ * page loaded, Rule 14b): returns the review save's answer (POST
+ * …/reviewAssignments/{id}/review, a 422) once the window's refusal summary
+ * shows. The window stays open; its texts are the caller's assertions.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} editModal from openModifyReview
+ * @returns {Promise<import('@playwright/test').Response>}
+ */
+exports.saveModifyReviewRefused = async function saveModifyReviewRefused(page, editModal) {
+    const answered = page.waitForResponse(
+        (r) =>
+            /\/reviewAssignments\/\d+\/review$/.test(r.url().split('?')[0]) &&
+            r.request().method() === 'POST',
+        {timeout: 30_000}
+    );
+    await exports.modifyReviewSaveButton(editModal).click();
+    const response = await answered;
+    await expect(exports.modifyReviewErrorSummary(editModal)).toBeVisible({timeout: 30_000});
+    return response;
+};
+
+/**
  * The Review Details window's attribution paragraph under its heading
  * ("Last modified by {full name}"), shown once an editor saved "Modify
  * Review".

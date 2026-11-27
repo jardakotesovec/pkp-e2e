@@ -931,15 +931,16 @@ review forms* unless said otherwise. <sup>n</sup>
 
 ## Canonical scenarios
 
-Scenarios 2, 3, 4, 5, 6, 7, 9, 10, 11, 20 and 21 run on a scratch journal
-with throwaway accounts: a Journal Manager who also holds the Reviewer role
-and a reviewer pool past thirty (2), a fresh address (3), a user to enroll
-(4), an editor whose notices no other test reads (5), reviewers whose
-mailbox and task list are read (6, 7, 9, 11), an active review form (9,
-10), a review setup of the journal's own (20) and a competing-interests
-policy (21). Every other
-scenario, and scenario 20's control, runs on the seeded journal with ready
-accounts and scratch submissions. Each email is read in the mailbox of the
+Scenarios 2, 3, 4, 5, 6, 7, 9, 10, 11, 16, 20 and 21 run on a scratch
+journal with throwaway accounts: a Journal Manager who also holds the
+Reviewer role and a reviewer pool past thirty (2), a fresh address (3), a
+user to enroll (4), an editor whose notices no other test reads (5),
+reviewers whose mailbox and task list are read (6, 7, 9, 11), an active
+review form (9, 10), a recommendation switched off (16), a review setup
+of the journal's own (20) and a competing-interests policy (21). Every
+other scenario, scenario 16 on a press and scenario 20's control, runs on
+the seeded journal with ready accounts and scratch submissions. Each email
+is read in the mailbox of the
 address it was sent to. The accounts, the passwords and the tooling recipe
 are in the footnote. <sup>s</sup>
 
@@ -1405,7 +1406,8 @@ App-specific:
 16. **The editor modifies a submitted review**
 
     Given: Editor, in the "Review Details" window of a submitted review
-    with both comment blocks.
+    with both comment blocks ({OJS}: and a Journal Manager of the journal
+    ready to sign in).
 
     - **"Modify Review"**: press it: the dialog "Modify this review?" reads
       "You are about to modify the review submitted by {reviewer name}. All
@@ -1415,10 +1417,24 @@ App-specific:
     - **"Cancel"**: with nothing typed, press it: the "Modify Review"
       window closes and the view window shows again. Press "Modify Review"
       and confirm again.
+    - **A recommendation switched off meanwhile** {OJS}: Journal Manager,
+      in a second browser: on Settings › Workflow › Review › "Reviewer
+      Recommendations", switch off a recommendation other than the
+      review's own with its "Activate" tick
+      ([→ reviewer recommendations](U29-review-setup-and-review-forms.md#recommendations)).
+      Editor: in the still-open "Modify Review" window the
+      "Recommendation" select still lists it. Choose it and press "Save
+      Changes": the save is refused. The page notice reads "The form was
+      not saved because 1 error(s) were encountered. Please correct these
+      errors and try again.", "The submitted reviewer recommendation ID is
+      not a valid for this Context." shows under "Recommendation", and the
+      window's summary reads "Please correct one error. Go to
+      Recommendation: …". The window stays open, nothing is saved, and
+      "Save Changes" stays disabled until a field changes.
     - **"Save Changes"**: replace the "For author and editor" comment with
       "Revised by the editor." ({OJS}: also pick a different
-      "Recommendation") and press "Save Changes": the edit window closes,
-      and the view window shows "Last modified by {name}" under its title
+      "Recommendation", not the one switched off) and press "Save
+      Changes": the edit window closes, and the view window shows "Last modified by {name}" under its title
       with the edited text ({OJS}: and the new recommendation; a press has
       no recommendation field [OMP1](#omp1)).
     - **The activity log**: lists "The following was modified in this
@@ -1668,11 +1684,6 @@ Left out of the scenarios above, by reason:
     "Radio buttons" question saved with no "Response Options", "Editor
     Form Shows All Review Sections (XML)" and "Author-Only Sections
     Displayed (XML)" each download a file (Rule 15): waits for the fix [incidental 2026-11-27]
-  - {OJS} a recommendation other than the review's own switched off
-    while "Modify Review" is open: still listed, its save refused with
-    "The submitted reviewer recommendation ID is not a valid for this
-    Context." under "Recommendation" and nothing saved, and a listed
-    choice then saving (Rule 14b) [incidental 2026-11-27]
 - **Rarely met**:
   - submitting a review for the reviewer on a "Request Resent" row, on an accepted row holding no draft, or with a comment entered, and the row's menu, the reviewer's side and the missing acceptance email after any such save (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a reminded, an accepted or a declined request with no review: "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", and the empty blocks (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -3708,7 +3719,16 @@ both comment blocks (a review seeded `completed` with `comments` carries
 the "For author and editor" block only, and no seed key sets the
 editor-only one), the second with `reviewForm` naming the form, answering
 both questions (a review seeded `completed` on a form saves no answers,
-finding A56). 16: a roster reviewer seeded `completed` with `comments`. 11: a
+finding A56). 16: on a press, a roster reviewer seeded `completed` with
+`comments`; on a journal, a scratch journal, because the Journal Manager
+switches off one of its recommendations, a setting every test on
+`publicknowledge` shares: a throwaway `manager`, `editor`, `author` and
+`externalReviewer`, the reviewer seeded `accepted` and submitting the
+review on their own screen with both comment blocks and "Accept
+Submission", the default recommendation (a review seeded `completed`
+carries the "For author and editor" block only, as in 10), and the
+Journal Manager signed in in a second browser context beside the
+Editor's, after the Editor's workflow page has loaded. 11: a
 scratch journal with two throwaway reviewers, one seeded `invited`, the
 other holding `['externalReviewer', 'funding']`, seeded `accepted` and
 assigned to the stage through `participants[]` as `funding`. 12: a roster
@@ -3774,7 +3794,11 @@ the scratch journal (press) above, its first reviewer submitting through
 their own screens with both comment blocks, the second on the two-question
 form; the first review's window showed both blocks, both of its PDF files
 and both of the second review's XML files downloaded, and every bullet
-held on both apps.
+held on both apps. Test run 2026-11-27 (OJS): scenario 16 runs on the
+scratch journal above, its reviewer submitting through their own screens
+with both comment blocks and "Accept Submission"; the refused save, the
+saved edit and the "For editor" comment's missing edit control showed as
+the scenario reads, and every bullet held.
 
 <a id="fn-a1"></a>
 **f-a1** — `useReviewerManagerConfig.js::getItemActions`: the guard reads

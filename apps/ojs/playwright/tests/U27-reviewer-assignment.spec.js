@@ -18,7 +18,8 @@
  * Seeding: scenario endpoints only; publicknowledge and the 18 seeded users
  * are read-only. Tests that mutate roles/accounts (S2–S4), need a private
  * toast queue, a bounded task list, a throwaway mailbox or a review form
- * (S1, S5, S6, S7, S9, S10, S11, S12, S21) run on scratch journals with
+ * (S1, S5, S6, S7, S9, S10, S11, S12, S21), or switch a journal's
+ * recommendation off (S16), run on scratch journals with
  * throwaway users whose addresses carry app + test in the username (u27s7ojsw0…@mail.test). Mail assertions
  * on seeded reviewers are scoped by recipient + the scratch submission's
  * unique tag-bearing title. Silence claims are bounded (pkpMail.count after
@@ -85,6 +86,8 @@ const {
     modifyReviewRecommendation,
     modifyReviewCommentsBody,
     modifyReviewErrorSummary,
+    modifyReviewSaveButton,
+    saveModifyReviewRefused,
     reviewerCommentsGroup,
     lastModifiedLine,
     waitForJQueryIdle,
@@ -2013,23 +2016,53 @@ test.describe('reviewer-assignment', () => {
         test.slow();
         test.setTimeout(300_000);
         const tag = makeTag('s16', testInfo);
-        const {submissionId} = await seedInReview(ojsApi, tag, {
-            reviewers: [{username: 'reviewer.adam', status: 'accepted'}],
+        const manager = `mgr${tag}`;
+        const editor = `ed${tag}`;
+        const editorName = `Ed${tag} Editor`;
+        const author = `au${tag}`;
+        const reviewer = `rev${tag}`;
+        const reviewerName = `Rev${tag} Reviewer`;
+        const title = `Submission ${tag}`;
+        const switchedOff = 'See Comments';
+        const STALE_RECOMMENDATION = 'The submitted reviewer recommendation ID is not a valid for this Context.';
+        // Scratch journal (footnote s): the Journal Manager switches off one
+        // of its recommendations, a setting every test on publicknowledge
+        // shares. The Reviewer submits on their own screen so the review
+        // carries both comment blocks (a review seeded `completed` carries
+        // the "For author and editor" block only), with the default
+        // recommendation "Accept Submission".
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: manager, givenName: `Mgr${tag}`, familyName: 'Manager', roles: ['manager']},
+                {username: editor, givenName: `Ed${tag}`, familyName: 'Editor', roles: ['editor']},
+                {username: author, roles: ['author']},
+                {username: reviewer, givenName: `Rev${tag}`, familyName: 'Reviewer', roles: ['externalReviewer']},
+            ],
         });
-
-        // The reviewer submits a review with both comment blocks and a
-        // recommendation.
-        const reviewerPage = await (await asUser('reviewer.adam')).newPage();
-        await performReview(reviewerPage, JOURNAL, submissionId, {
+        const {submissionId} = await seedInReview(ojsApi, tag, {
+            context: tag,
+            submitter: author,
+            reviewers: [{username: reviewer, status: 'accepted'}],
+        });
+        const reviewerPage = await (await asUser(reviewer)).newPage();
+        await performReview(reviewerPage, tag, submissionId, {
             recommendation: 'Accept Submission',
             comments: `Original comment ${tag}`,
             privateComments: `Private remark ${tag}`,
         });
 
-        const editorPage = await (await asUser('sectioneditor.ana')).newPage();
-        const workflow = new WorkflowPage(editorPage, JOURNAL);
+        const editorPage = await (await asUser(editor)).newPage();
+        const workflow = new WorkflowPage(editorPage, tag);
         await workflow.gotoEditorial(submissionId);
-        const row = workflow.panelRow('Reviewers', 'Adam Reviewer');
+        // The Journal Manager signs in in a second browser context, after
+        // the Editor's workflow page has loaded (the page carries the
+        // recommendation list the "Modify Review" window offers).
+        const managerPage = await (await asUser(manager)).newPage();
+        const settings = new ReviewSettingsPage(managerPage, tag);
+        await settings.goto('Reviewer Recommendations');
+
+        const row = workflow.panelRow('Reviewers', reviewerName);
         const readModal = await openReviewDetails(editorPage, row);
         await awaitReviewDetailsSettled(readModal);
 
@@ -2041,17 +2074,17 @@ test.describe('reviewer-assignment', () => {
             .filter({hasText: 'Modify this review?'});
         await expect(confirmDialog).toBeVisible({timeout: 30_000});
         await expect(confirmDialog).toContainText(
-            'You are about to modify the review submitted by Adam Reviewer. ' +
+            `You are about to modify the review submitted by ${reviewerName}. ` +
                 'All modifications will be recorded in the activity log.'
         );
         await confirmDialog.getByRole('button', {name: 'Modify Review', exact: true}).click();
 
-        // The "Modify Review" window stacks over the view window. Edit the
-        // "For author and editor" comment through its TinyMCE editor (the
-        // form model reads the editor, not the backing textarea) and pick a
-        // different recommendation (required select).
+        // The "Modify Review" window stacks over the view window, naming the
+        // submission, with a "Submitted recommendation:" line.
         const editModal = editorPage.getByRole('dialog', {name: 'Modify Review'});
         await expect(editModal).toBeVisible({timeout: 30_000});
+        await expect(editModal.getByText(title, {exact: true})).toBeVisible();
+        await expect(editModal).toContainText(/Submitted recommendation:\s*Accept Submission/);
 
         // "Cancel": the "Modify Review" window closes and the view window
         // shows again (its "Modify Review" button back in reach); then
@@ -2061,12 +2094,55 @@ test.describe('reviewer-assignment', () => {
         await expect(readModal.getByRole('button', {name: 'Modify Review', exact: true})).toBeEnabled();
         await openModifyReview(editorPage, readModal);
         await expect(editModal).toBeVisible({timeout: 30_000});
+        const select = modifyReviewRecommendation(editModal);
+        const saveButton = modifyReviewSaveButton(editModal);
+        await expect(select.locator('option:checked')).toHaveText('Accept Submission');
+
+        // A recommendation switched off meanwhile {OJS}: the Journal Manager,
+        // in the second browser, unticks "See Comments" (not the review's
+        // own) on Settings › Workflow › Review › "Reviewer Recommendations".
+        await settings.recommendations.deactivate(switchedOff);
+        // Control: the review's own entry and the one saved below stay ticked.
+        await expect(settings.recommendations.tick(settings.recommendations.row('Accept Submission'))).toBeChecked();
+        await expect(settings.recommendations.tick(settings.recommendations.row('Revisions Required'))).toBeChecked();
+
+        // Editor: the still-open window still lists it (beside the entries
+        // still active, the positive control). Chosen and saved, the save
+        // is refused: the page notice, the reason under "Recommendation",
+        // the window's summary; the window stays open and "Save Changes"
+        // stays disabled until a field changes.
+        await expect(select.locator('option', {hasText: switchedOff})).toHaveCount(1);
+        await expect(select.locator('option', {hasText: 'Revisions Required'})).toHaveCount(1);
+        await select.selectOption({label: switchedOff});
+        await expect(saveButton).toBeEnabled();
+        const refused = await saveModifyReviewRefused(editorPage, editModal);
+        expect(refused.status()).toBe(422);
+        await expect(
+            notice(
+                editorPage,
+                'The form was not saved because 1 error(s) were encountered. Please correct these errors and try again.'
+            )
+        ).toBeVisible({timeout: 30_000});
+        await expect(recommendationSection(editModal).getByText(STALE_RECOMMENDATION, {exact: true})).toBeVisible();
+        await expect(modifyReviewErrorSummary(editModal)).toHaveText(
+            new RegExp(
+                `^\\s*Please correct one error\\.\\s*Go to Recommendation: ${STALE_RECOMMENDATION.replace(/\./g, '\\.')}\\s*Jump to next error\\s*$`
+            )
+        );
+        await expect(editModal).toBeVisible();
+        await expect(saveButton).toBeDisabled();
+
+        // "Save Changes": replace the "For author and editor" comment and
+        // pick a different recommendation, not the one switched off (the
+        // field change enables "Save Changes" again).
         const commentsEditorId = 'reviewDetailsForm-comments-control';
         await editorPage.waitForFunction(
             (id) => !!window.tinymce?.get(id)?.initialized,
             commentsEditorId,
             {timeout: 30_000}
         );
+        await select.selectOption({label: 'Revisions Required'});
+        await expect(saveButton).toBeEnabled();
         await editorPage.evaluate(
             ([id, value]) => {
                 const editor = window.tinymce.get(id);
@@ -2075,9 +2151,6 @@ test.describe('reviewer-assignment', () => {
             },
             [commentsEditorId, `<p>Modified comment ${tag}</p>`]
         );
-        await editModal
-            .locator('select[name="reviewerRecommendationId"]')
-            .selectOption({label: 'Revisions Required'});
 
         // Control: the "For editor" comment offers no edit control in either
         // window — the edit window's one TinyMCE instance is the shared
@@ -2086,51 +2159,37 @@ test.describe('reviewer-assignment', () => {
         await expect(editModal.locator('.tox-tinymce')).toHaveCount(1);
 
         // Save Changes: the edit window closes and the view window refreshes
-        // with the attribution line and the edited values (the review PUT
-        // rides POST via X-Http-Method-Override).
-        const saved = editorPage.waitForResponse(
-            (r) =>
-                /\/reviewAssignments\/\d+\/review$/.test(r.url().split('?')[0]) &&
-                r.request().method() === 'POST' &&
-                r.ok(),
-            {timeout: 30_000}
-        );
-        await editModal.getByRole('button', {name: 'Save Changes', exact: true}).click();
-        await saved;
-        await expect(editModal).toBeHidden({timeout: 30_000});
-        await expect(
-            readModal.getByText('Last modified by Ana Section Editor')
-        ).toBeVisible({timeout: 30_000});
+        // with the attribution line and the edited values.
+        await saveModifyReview(editorPage, editModal);
+        await expect(readModal.getByText(`Last modified by ${editorName}`)).toBeVisible({timeout: 30_000});
         await expect(readModal.getByText(`Modified comment ${tag}`)).toBeVisible();
+        await expect(readModal.getByText(`Private remark ${tag}`)).toBeVisible();
+        await expect(readModal.locator('.tox-tinymce')).toHaveCount(0);
         const recommendationLine = readModal
             .getByText('Recommendation:', {exact: true})
             .locator('xpath=..');
         await expect(recommendationLine).toContainText('Revisions Required');
         await closeReviewDetails(editorPage, readModal);
 
-        // The activity log lists both modification entries attributed to the
-        // editor, each with a "View changes" action (behind the legacy grid
-        // row's expander).
+        // The activity log lists both modification entries attributed to
+        // the editor, one each (the refused save recorded nothing), the
+        // Comments row's expander offering "View changes".
         await editorPage.getByRole('button', {name: 'Activity Log', exact: true}).click();
         const log = editorPage.getByRole('dialog').filter({hasText: 'Activity Log & Notes'});
         const commentsEntry = log
             .getByRole('row')
-            .filter({hasText: 'The following was modified in this review: Comments.'})
-            .first();
-        await expect(commentsEntry).toBeVisible({timeout: 30_000});
-        await expect(commentsEntry).toContainText('Ana Section Editor');
-        await commentsEntry.locator('a.show_extras').click();
-        await expect(log.getByRole('link', {name: 'View changes'}).first()).toBeVisible({
-            timeout: 30_000,
+            .filter({hasText: 'The following was modified in this review: Comments.'});
+        await expect(commentsEntry.first()).toBeVisible({timeout: 30_000});
+        await expect(commentsEntry).toHaveCount(1);
+        await expect(commentsEntry).toContainText(editorName);
+        const recommendationEntry = log.getByRole('row').filter({
+            hasText: 'The following was modified in this review: Reviewer Recommendation.',
         });
-        const recommendationEntry = log
-            .getByRole('row')
-            .filter({
-                hasText: 'The following was modified in this review: Reviewer Recommendation.',
-            })
-            .first();
-        await expect(recommendationEntry).toBeVisible();
-        await expect(recommendationEntry).toContainText('Ana Section Editor');
+        await expect(recommendationEntry).toHaveCount(1);
+        await expect(recommendationEntry).toContainText(editorName);
+        await commentsEntry.locator('a.show_extras').click();
+        await expect(log.getByRole('link', {name: 'View changes'})).toBeVisible({timeout: 30_000});
+        await expect(log.getByRole('link', {name: 'View changes'})).toHaveCount(1);
     });
 
     test('S17: the Author sees no Reviewers panel', async ({asUser, ojsApi}, testInfo) => {

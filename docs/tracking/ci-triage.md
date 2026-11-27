@@ -1226,6 +1226,16 @@ trips.
   sighting; then a diagnostician (the count's timing against TinyMCE's
   load, and whether a person on a slow page sees 0 too).
 
+- **A worker server truncates `js/build.js`** (OJS, local only). In the
+  2026-11-27 U28 revision's first OJS run (`.reports/U28/test-ojs-run1-output/`),
+  S6 found no tab: the trace shows `js/build.js` (7.6 MB) answered with
+  `net::ERR_CONTENT_LENGTH_MISMATCH` by the worker's `php -S`, then "Cannot
+  read properties of undefined (reading 'init')", so the page's app never
+  started; green on the rerun. The VM was under load (4 cores, a load
+  average above 20 that morning). No CI sighting. **Watch condition**: a
+  CI sighting, or a second local one; then a diagnostician (the PHP
+  built-in server's handling of a large static file under load).
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull

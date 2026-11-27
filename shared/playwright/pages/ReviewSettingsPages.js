@@ -708,6 +708,32 @@ class ReviewerRecommendationsTable extends BasePage {
         await expect(dialog).toBeHidden({timeout: 30_000});
     }
 
+    /**
+     * Untick a row's "Activate" and answer "Yes" to "Are you sure you want
+     * to deactivate the recommendation {title}…": returns once the status
+     * save (…/reviewers/recommendations/{id}/status, a PUT the ui-library's
+     * useFetch sends as POST with X-Http-Method-Override) has answered and
+     * the table has re-read the row unticked, so another session's screen
+     * meets the switch-off from then on.
+     *
+     * @param {string} title the row's exact title
+     */
+    async deactivate(title) {
+        const tick = this.tick(this.row(title));
+        await expect(tick).toBeChecked({timeout: 30_000});
+        const saved = this.page.waitForResponse(
+            (r) =>
+                /\/reviewers\/recommendations\/\d+\/status$/.test(r.url().split('?')[0]) &&
+                ['PUT', 'POST'].includes(r.request().method()),
+            {timeout: 30_000}
+        );
+        await tick.click();
+        await this.answerConfirm(`Are you sure you want to deactivate the recommendation ${title}`, 'Yes');
+        const response = await saved;
+        expect(response.ok(), `status save answered ${response.status()}`).toBe(true);
+        await expect(tick).not.toBeChecked({timeout: 30_000});
+    }
+
     /** "Add Recommendation": fill the window and save; the row appears. */
     async add({title, type, status = null}) {
         await this.openAdd();
