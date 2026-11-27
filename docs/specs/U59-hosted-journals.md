@@ -112,7 +112,9 @@ wizard, the journal's primary language. <sup>c</sup> <sup>d</sup>
    correct one error." ("Please correct {n} errors.") and the link
    "Jump to next error" ⚠ [A6](#a6); a screen reader also hears a "Go
    to {field}" per refused field. An empty required field is refused
-   before anything is sent. The "Path", email and "Country" refusals,
+   before anything is sent; the server refuses one sent empty too
+   ("Journal Initials" apart), but not one a request leaves out
+   ⚠ [A12](#a12). The "Path", email and "Country" refusals,
    and a "Primary locale" not ticked under "Languages", come back from
    the server and also show the notice "The form was not saved because
    {n} error(s) were encountered. Please correct these errors and try
@@ -802,6 +804,10 @@ Left out of the scenarios above, by reason:
   - {OPS} the path "0" on "Create Server" refused with "A path is
     required." under "Path", not a raw code ([OPS1](#ops1)): the guard
     the issue report proposes [report 2026-10-02]
+  - the add [A12](#a12) describes, with "Journal Title", "Principal
+    Contact Name", "Principal Contact Email address" and "Path" sent
+    empty, refused with messages under each and nothing stored (Rule 4)
+    [incidental 2026-11-27]
 - **Rarely met**:
   - exactly one journal enabled publicly, where the site's address opens
     that journal instead of the list (Rule 19; Settings bullet 4): a
@@ -837,6 +843,9 @@ Left out of the scenarios above, by reason:
   - A10 ({OMP OPS} "Remove" failing on a press or preprint server that
     holds an institution; Rule 14)
   - A11 (the path "00" refused with "A path is required."; Fields)
+  - A12 (a journal added through the API with "Path" left out failing
+    with a server error, or stored with no title or principal contact;
+    Rule 4)
   - OPS1 (the path "0" refused with a raw code on a preprint server;
     Fields)
 - **No seed**:
@@ -907,6 +916,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | Signing in at a journal not enabled publicly leads to the Dashboard or home page, not the page asked for | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | A press or preprint server that holds an institution cannot be removed and is left half deleted {OMP OPS} | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | Journal form: a path of zeros such as "00" is refused with "A path is required." | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A12](#a12) | A program adding a journal through the API without its required fields gets a server error, or a journal with no name or principal contact | 🐞 | low · crash: server | — |
 | [OPS1](#ops1) | Hosted Servers: a path of zeros ("0", "00") on a preprint server is refused with a raw code | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | A changed path leaves the default "For Readers" and "For Authors" texts linking to the old address {OJS OMP} | ❓ | minor | — |
 | [A9](#a9) | On the Login page of a journal not enabled publicly, "Register" and "Home" load the Login page again | ❓ | minor | — |
@@ -1082,6 +1092,30 @@ reported apart under [OPS1](#ops1)
 ([pkp-e2e#503](https://github.com/jardakotesovec/pkp-e2e/issues/503)).
 Basis: probe, 2026-10-21. <sup>f-a11</sup>
 
+<a id="a12"></a>
+**A12 — A program adding a journal through the API without its required fields gets a server error, or a journal with no name or principal contact** · 🐞 · low · crash: server.
+"Create Journal" always sends every field of the journal form, and
+refuses the required ones left empty (Fields). A program can send the
+same request to the install's programming interface at the site's
+address, not a journal's, signed in as the Site Administrator, the only
+account it answers (by hand: note f-a12), leaving fields out. It
+expects the add refused with an error on each required field left out,
+as the window refuses an empty one.
+
+Instead the add checks none of the required fields its request leaves
+out. A request with no "Path" fails with a server error, and no journal
+is stored. A request with a path but no "Journal Title" ("Press Name",
+"Server Title") is stored: Administration › "Hosted Journals" lists the
+journal as "Untitled", and its "Remove" asks "Are you sure you want to
+permanently delete  and all of its contents?", with nothing where the
+name goes; "OK" removes it. A request with no "Principal Contact Name"
+and "Principal Contact Email address" is stored with no principal
+contact. The untitled journal's Settings Wizard opens as any other
+journal's does. "Journal Initials" is not required by the server at
+all: sent empty, it draws no error. A press and a preprint server
+behave the same way.
+Since: 2021-06-03 (pkp/pkp-lib#5328) · Basis: probe, 2026-11-27. <sup>f-a12</sup>
+
 ### OPS
 
 <a id="ops1"></a>
@@ -1212,7 +1246,9 @@ with values typed, and leaving the page by its address: note td3.
 **d** — `PKPContextService::validate()`: the schema's required props
 (`lib/pkp/schemas/context.json` `required`: `name`, `primaryLocale`,
 `supportedLocales`, `urlPath`, `contactName`, `contactEmail`; no overlay
-adds any) through `ValidatorFactory::required()`; `acronym` is required
+adds any) through `ValidatorFactory::required()`, which on an add
+refuses only a prop the request carries empty and passes one it leaves
+out (note f-a12); `acronym` is required
 by the form alone (`isRequired`, so an empty box is refused in the
 browser before sending). `country` carries the schema validation
 `["country"]` without `nullable`, so an empty choice fails the string and
@@ -1904,6 +1940,34 @@ is required." and OPS "##admin.contexts.form.pathRequired##" under
 field is required." and sent nothing. OMP was read in the code only:
 the check is lib/pkp's, and OMP defines the key with OJS's sentence.
 Issue report: [pkp-e2e#1057](https://github.com/jardakotesovec/pkp-e2e/issues/1057) ([docs/issues/U59-A11-journal-path-zeros-refused-as-empty.md](../issues/U59-A11-journal-path-zeros-refused-as-empty.md)).
+
+<a id="fn-f-a12"></a>
+**f-a12** — `PKPContextService::validate()` passes its action (`add`)
+to `ValidatorFactory::required()`, which since pkp/pkp-lib#5328
+(pkp/pkp-lib@1f48f6e414, 2021-06-03, first tagged 3.4.0-0) takes the
+object being edited instead, `null` on an add; given a value, it checks
+a required prop only when the request carries it, so an add checks none
+that are left out (note d). 3.4 has the same call (`stable-3_4_0`, by
+code); 3.3's `required()` still took the action and refuses a left-out
+prop. A left-out `urlPath` reaches the insert, which fails on the
+context table's not-null `path` column. Live-probed 2026-11-27 on
+`main` (lib/pkp `44b36bf802`), OJS, OMP and OPS, three runs each,
+by hand: `POST index.php/index/api/v1/contexts` at the site's base URL,
+from Hosted Journals' own session as `admin`, header `X-Csrf-Token`
+the page's `pkp.currentUser.csrfToken`, as JSON the body "Create
+Journal" sends less the keys left out. With `urlPath` left out it
+answered 500 (twice per run), the server log carrying the request's 500 line,
+and the context table's row count was unchanged; with `urlPath` `""` the answer was 400
+with "This is not a valid string.", the path rule's message and "This
+field is required." under `urlPath`; the same body with a fresh path
+answered 200 (the control). Without `name` the add answered 200 with
+`name.en` "", the list row read "Untitled", its "Remove" asked the
+question with no name, and `index/en/admin/wizard/{id}` opened; without
+`contactName` and `contactEmail` it answered 200 with both `null`.
+Every scratch journal was removed afterwards. `acronym` is not in the
+schema's `required` list (note d); live-probed 2026-10-30, the three
+apps: an add with `acronym` `{"en": ""}` and the other required fields
+empty was refused with errors on those fields and none on `acronym`.
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `PKPContextService::validate()` adds
