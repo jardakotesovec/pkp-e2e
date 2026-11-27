@@ -90,7 +90,7 @@ give no access to any screen in this spec. <sup>l</sup>
 | "For editor" {OJS} / "For editor only" {OMP} | no | Rich text, same condition. Never required |
 | The review form's questions | per question, marked "*" | Shown instead of the two text boxes when the assignment carries a review form: the form's title and description, then each question as the form defines it (a text box, a checkbox group, a radio group or a drop-down). A required question left unanswered stops "Submit Review" only after its confirmation: the step stays, nothing is submitted, and the box "Please fill in required fields." / "Some required fields are not filled in. Please complete them before submitting your review." appears under the buttons ({OMP}: the first sentence prints as a raw key ⚠ [OMP3](#omp3)). On a form with a required "Single line text box" question (an item type), "This field is required." also appears under each unanswered required question, a radio group included; on a form whose only required question is a radio group, a press marks no question and a journal shows none in view ⚠ [A16](#a16). The page stays scrolled at the buttons, so a mark on a question higher up is out of sight until the reviewer scrolls up. "Save for Later" saves whether or not a required question is answered and shows "Your changes have been saved.". With that question unanswered it also shows the box and the marks, as a refused submit does; {OJS} so does any review form saved while "Recommendation" reads "Choose One", with the mark under the list ⚠ [A14](#a14). A reload keeps what was saved and clears the box and the marks |
 | "Reviewer Files" (the list under "Upload") | no | The reviewer's own attachments. "Upload File" opens the shared upload wizard ([→ the upload wizard](U36-submission-files.md#upload-wizard)), here with three steps, "1. Upload File", "2. Review Details" and "3. Confirm", and no file-type question. It never asks which file an upload revises, even with files listed: a corrected version of a listed file is uploaded as a new file and lists beside the earlier one, which stays until deleted. As everywhere the wizard is used, "Change File" in step 1 leaves the first file in the list too ⚠ [→ Submission files A14](U36-submission-files.md#a14). Each row offers "Edit" and "Delete" ([→ deleting](U36-submission-files.md#delete)). "Edit" opens "Edit a file" with only the name box "Name the file (e.g., Manuscript; Table 1)", "Cancel" and "Save"; a saved name shows in the list at once and after a reload. Once the review is submitted, "Upload File" and "Delete" are gone and "Edit" stays (Rule 13) <sup>h</sup> |
-| "Recommendation" {OJS} | yes, on submit | Drop-down preset to "Choose One" listing the journal's active recommendations (by default "Accept Submission", "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere", "Decline Submission" and "See Comments"), in no fixed order [→ recommendation order](U29-review-setup-and-review-forms.md#a7). "Submit Review" with "Choose One" is asked for confirmation first; after "OK" the step stays and "This field is required." appears under the list. It is the only check a free-form submit meets (row 1). "Save for Later" keeps whatever is chosen. A press has no such field [OMP1](#omp1) |
+| "Recommendation" {OJS} | yes, on submit | Drop-down preset to "Choose One" listing the journal's active recommendations (by default "Accept Submission", "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere", "Decline Submission" and "See Comments"), in no fixed order [→ recommendation order](U29-review-setup-and-review-forms.md#a7); a recommendation the journal has switched off [→ "Activate" on "Reviewer Recommendations"](U29-review-setup-and-review-forms.md#recommendations) is not listed. "Submit Review" with "Choose One" is asked for confirmation first; after "OK" the step stays and "This field is required." appears under the list. Of the values the list offers, that is the only check a free-form submit meets (row 1). Only an edited page sends a value the list never offers: one that is not a number makes "Submit Review" fail, and a number that is no recommendation makes "Save for Later" fail, each with no message ⚠ [A19](#a19); a switched-off recommendation is submitted with the review ⚠ [A20](#a20). "Save for Later" keeps whatever is chosen. A press has no such field [OMP1](#omp1); one of that name added to its form makes "Submit Review" and "Save for Later" fail with no message ⚠ [OMP5](#omp5) |
 
 ## Rules & state
 
@@ -374,15 +374,17 @@ give no access to any screen in this spec. <sup>l</sup>
     "Completed". A finished review on a submission that moves on keeps
     its "View" button, under "Completed" and later "Published". <sup>b</sup>
     <sup>c</sup>
-18. **Leaving step 3 unsaved.** A changed review-form answer is guarded.
-    Pressing another tab asks "The data on this form has changed. Do you
-    wish to continue without saving?": "Cancel" keeps step 3 with the
-    change; "OK" opens the tab, and back on step 3 the answer shows its
-    last saved value. Leaving the page through the address bar asks the
-    browser's own leave-page question, and leaving drops the change too.
-    Text typed into "For author and editor" or "For editor" {OJS} / "For
-    editor only" {OMP} is not guarded: either way out asks nothing, and
-    back on step 3 the typed text is gone ⚠ [A15](#a15). <sup>i</sup>
+18. **Leaving step 3 unsaved.** A changed review-form answer is guarded,
+    and so is {OJS} a changed "Recommendation". Pressing another tab asks
+    "The data on this form has changed. Do you wish to continue without
+    saving?": "Cancel" keeps step 3 with the change; "OK" opens the tab,
+    and back on step 3 the answer or the list shows its last saved value
+    ("Choose One" when nothing was saved). Leaving the page through the
+    address bar asks the browser's own leave-page question, and leaving
+    drops the change too. Text typed into "For author and editor" or "For
+    editor" {OJS} / "For editor only" {OMP} is not guarded: either way out
+    asks nothing, and back on step 3 the typed text is gone ⚠ [A15](#a15).
+    <sup>i</sup>
 
 ## Side effects
 
@@ -1085,6 +1087,7 @@ Left out of the scenarios above, by reason:
     wish to continue without saving?", "Cancel" keeping the text
     ([A15](#a15); Rule 18): the guard the issue report proposes, once
     fixed [report 2026-10-02]
+  - {OJS} on a review without a review form, "Accept Submission" chosen in "Recommendation" with nothing saved, then the "2. Guidelines" tab, asking "The data on this form has changed. Do you wish to continue without saving?", and after "OK" the list back on step 3 reading "Choose One" (Rule 18) [incidental 2026-11-27]
   - {OPS} a user invited to a home-made "Reviewer"-level role beside Author landing on "Active submissions" after sign-in, with no "My Assignments as Reviewer" group and the typed reviewer-list address refused ([OPS1](#ops1); Purpose, scenario 17): the guard the issue report proposes, once fixed [report 2026-10-02]
 - **Rarely met**:
   - the "Read Round {N} Review" window of a round declined with an empty message, showing the "Decline Review Request" window's prefilled text in place of a typed reason (Rule 14)
@@ -1113,7 +1116,10 @@ Left out of the scenarios above, by reason:
   - A16 (a refused review-form submit marking the unanswered questions on one form and none on another; Fields step 3)
   - A17 (step 3's "Reviewer Files" list on "Loading" with no "Upload File" on an install running in strict mode; Rule 12, Settings)
   - A18 (a review reading "Deadline for completing this review has passed" on its due date, and a request whose response and review are both due today offering "Finish review"; Rule 3)
+  - A19 (a "Recommendation" value the list never offers, put into the page, making "Submit Review" or "Save for Later" fail with no message; Fields step 3)
+  - A20 (a review sent with a recommendation the journal has switched off submitted with it; Fields step 3)
   - OMP3 (the press's review-form refusal opening with a raw key; Fields)
+  - OMP5 (a recommendation added to a press's step 3 making "Submit Review" fail and leaving the review half submitted; Fields step 3)
   - OPS1 (a home-made reviewer role landing on a page headed "undefined (0)" that lists nothing under an "Error" window; Purpose, scenario 17)
 - **No seed**:
   - {OMP} a press submission's supporting agencies in the "View All Submission Details" window of an "Open" review (Rule 7)
@@ -1151,12 +1157,15 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A15](#a15) | Unsaved free-form review text is lost without a warning when the reviewer leaves step 3, while a changed "Recommendation" or review-form answer is guarded | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A17](#a17) | With strict mode on, step 3's "Reviewer Files" list stays on "Loading" with no "Upload File" | 🐞 | low | — |
 | [A18](#a18) | On its due date a review already reads as overdue, to the reviewer and to the editor | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
+| [A19](#a19) | A recommendation value step 3's list never offers makes "Submit Review" or "Save for Later" fail with no message | 🐞 | latent · crash: server | — |
 | [OMP3](#omp3) | {OMP} On a press, a review form refused for an unanswered required question shows the reviewer a raw text code | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [OMP5](#omp5) | {OMP} A recommendation added to a press's step 3 makes "Submit Review" fail with no message and leaves the review half submitted | 🐞 | latent · crash: server | — |
 | [OPS1](#ops1) | {OPS} On a preprint server, a user given a "Reviewer"-level role lands after every sign-in on a page headed "undefined (0)" under an "Error" window | 🐞 | low · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [A3](#a3) | Declining a request sends the reviewer to the journal's public home page instead of their assignments | ❓ | minor | — |
 | [A11](#a11) | An assignment left behind under "Archived" still opens a wizard that takes and submits a full review | ❓ | minor | — |
 | [A13](#a13) | The "Read Round {N} Review" window never lists the files that were sent for review | ❓ | minor | — |
 | [A16](#a16) | A refused review-form submit marks the unanswered questions on one form and none on another | ❓ | minor | — |
+| [A20](#a20) | A review sent with a recommendation the journal has switched off is submitted with it | ❓ | latent | — |
 | [OMP1](#omp1) | A press's wizard collects no recommendation, and each review stage shows its own guidelines | ✅ | — | — |
 
 ### All apps
@@ -1485,6 +1494,51 @@ The fix is a handful of comparisons in one shared library.
 The editor's row of the assignment reads "Overdue" by the same rule ([→ statuses](U27-reviewer-assignment-and-management.md#statuses)).
 Basis: probe, 2026-10-15. <sup>[f-a18](#fn-a18)</sup>
 
+<a id="a19"></a>
+**A19 — A recommendation value step 3's list never offers makes "Submit Review" or "Save for Later" fail with no message** · 🐞 · latent · crash: server.
+On a journal, step 3 sends whatever "Recommendation" value the page
+holds. With a value the list never offers put into the page, the app
+fails on the server in two cases:
+- A value that is not a number, at "Submit Review" and "OK": the step
+  stays as it was, with no message, no mark under the list and no
+  dialog, and the list still shows the value. Nothing is submitted, and
+  after a reload the list reads "Choose One".
+- A number that is no recommendation at all, at "Save for Later": no
+  "Your changes have been saved." and no other message shows. The review
+  text typed before the press is saved, the recommendation is not, and
+  after a reload the list reads "Choose One".
+
+The reviewer expects the review saved or submitted, or a message saying
+what is wrong. The same number at "Submit Review" is refused as it
+should be: the step stays with the notice "Must select a recommendation
+associated with journal" and the list back on "Choose One". A value
+that is not a number at "Save for Later" is saved as no recommendation,
+with the saved notice.
+
+Only an edited page sends such a value, so no reviewer meets it in
+ordinary use.
+Basis: probe, 2026-11-27. <sup>[f-a19](#fn-a19)</sup>
+
+<a id="a20"></a>
+**A20 — A review sent with a recommendation the journal has switched off is submitted with it** · ❓ · latent.
+Step 3's "Recommendation" list leaves out the recommendations the
+journal has switched off ([→ "Activate" on "Reviewer
+Recommendations"](U29-review-setup-and-review-forms.md#recommendations)).
+A review sent with one by an edit of the page (here "See Comments") is
+submitted with it: the editor's row reads "Review Submitted" over "See
+Comments", the Review Details window shows "Recommendation: See
+Comments", and the editors' email reads "Review complete: {reviewer}
+recommends See Comments for #{id} …". "Save for Later" keeps it too,
+and after a reload the list shows it chosen. The editor's "Modify
+Review" refuses it with "The submitted reviewer recommendation ID is
+not a valid for this Context."
+([→ Review Details](U27-reviewer-assignment-and-management.md#read-review)).
+Question: may a review be submitted with a recommendation the journal
+has switched off? Lean: no, unless the review already held it when it
+was switched off; the editor's window draws that line, and the
+reviewer's step does not.
+Basis: probe, 2026-11-27. <sup>[f-a20](#fn-a20)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1497,6 +1551,8 @@ guidelines text ("Internal Review Guidelines" on Internal Review,
 "External Review Guidelines" on External Review) on step 2 and in step 3's
 dialog. The editor-facing half of the same absence is recorded with
 [→ reviewer assignment & management](U27-reviewer-assignment-and-management.md#read-review).
+A recommendation sent to a press all the same makes the step fail
+([OMP5](#omp5)).
 Basis: probe (2026-09-04, both press stages), and code for the design
 intent (the press disables reviewer recommendations, and the OJS-only step-3
 template carries the list). <sup>[f-omp1](#fn-omp1)</sup>
@@ -1519,6 +1575,23 @@ interface language. On `main` and 3.5 the same box, with the code, also
 appears at the first answer typed, before any button is pressed
 (a fault of its own, reported separately: [A14](#a14)).
 Basis: probe, 2026-10-02. <sup>[f-omp3](#fn-omp3)</sup>
+
+<a id="omp5"></a>
+**OMP5 — A recommendation added to a press's step 3 makes "Submit Review" fail with no message and leaves the review half submitted** · 🐞 · latent · crash: server.
+A press asks its reviewers for no recommendation ([OMP1](#omp1)), but
+step 3 still takes one sent in a field named like a journal's
+"Recommendation" list, added to its form. Whatever its value, "Submit
+Review" and "OK" fail on the server and the step shows nothing. After a
+reload the wizard opens on step 3 with "4. Completion" enabled, and
+that tab reads "Review Submitted" / "Thank you for completing the
+review of this submission. Your review has been submitted successfully.
+…", although the review is not submitted: a plain "Submit Review"
+afterwards is what completes it. "Save for Later" with the same value
+fails the same way and shows nothing.
+
+Only an edited page sends such a value, so no reviewer meets it in
+ordinary use.
+Basis: probe, 2026-11-27. <sup>[f-omp5](#fn-omp5)</sup>
 
 ### OPS
 
@@ -1919,13 +1992,17 @@ adds one `required` rule per `fieldset[aria-required=true]`, shows
 `#reviewStep3MessageBox` on `invalid-form.validate`, hides it once valid,
 and sets `validator.cancelSubmit` for "Save for Later". Server:
 `PKPReviewerHandler::saveStep()` — `isSave` → `saveForLater()` (saves form
-responses or comments, stores the recommendation, `null` when 0) + trivial
-notification `common.changesSaved` ("Your changes have been saved.");
-else `validate()` (required review-form elements via
-`getRequiredReviewFormElementIds`, `…form.responseRequired`; OJS
-`ReviewerReviewStep3Form` adds `reviewerRecommendationId` required with
+responses or comments, stores the recommendation, `null` when 0; an id
+that is no recommendation fails, finding A19) + trivial notification
+`common.changesSaved` ("Your changes have been saved."); else
+`validate()` (required review-form elements via
+`getRequiredReviewFormElementIds`, `…form.responseRequired`; on OJS, since
+pkp/pkp-lib#1660, `ReviewerReviewStep3Form` adds a `FormValidatorCustom`
+that the code is one of the journal's recommendations (`withContextId`,
+`withRecommendations`, any status: finding A20), message
 `…form.recommendationRequired` = "Must select a recommendation associated
-with journal") then `execute()`. `saveReviewForm()` writes a comment only
+with journal"; a non-numeric code fails it, finding A19) then
+`execute()`. `saveReviewForm()` writes a comment only
 when `strlen(...) > 0` (finding A4), through
 `Repo::reviewAssignment()->saveReviewComment()`, which updates the existing
 viewable / non-viewable comment row in place (no duplicates). Submitting a
@@ -1959,7 +2036,20 @@ was refused the same way; once a recommendation was chosen, "Submit
 Review" and "OK" opened step 4 on the same page. OMP, the same drive: no
 list, and step 4 opened. Live-probed 2026-09-28 on OJS and OMP, four
 runs (Rule 18): the leave question and the lost free-form text, footnote
-f-a15. Seen once per app and not settled:
+f-a15. Live-probed 2026-11-27 on OJS `main`, four runs, a scratch
+journal with "See Comments" switched off (Fields step 3
+"Recommendation", Rules 13 and 18): the list read "Choose One" and the
+five active defaults; on a free-form review, "Accept Submission" chosen
+and nothing saved, the "2. Guidelines" tab asked "The data on this form
+has changed. Do you wish to continue without saving?", "OK" opened step
+2, and back on step 3 the list read "Choose One"; an offered choice then
+submitted and opened step 4. With 99999 added to the list in the page,
+"Submit Review" and "OK": `saveStep` answered 200 with the form shown
+again, the step stayed, the only message was the page notice "Must
+select a recommendation associated with journal", the list read "Choose
+One" again, the typed review text stayed and nothing was stored; an
+offered choice then submitted. The other codes: footnotes f-a19, f-a20.
+Seen once per app and not settled:
 after "Cancel" on the confirmation, a second "Submit Review" press on the
 same page did nothing until the page was reloaded.
 
@@ -2380,10 +2470,13 @@ stands.
 <a id="fn-q"></a>
 **q** — OMP: `Application::hasCustomizableReviewerRecommendation()` returns
 false on the press and its `templates/reviewer/review/` holds only
-`step1.tpl` (the description label), so `$additionalFormFields` is empty
-and no recommendation is collected or validated; `getLocalizedRecommendation()`
-is empty in the history payload; the stage-specific guidelines come from
-footnote g. OMP's `ReviewerHandler` adds nothing beyond OJS's minus the
+`step1.tpl` (the description label), so `$additionalFormFields` is
+empty and no recommendation is asked for or validated; the shared
+`PKPReviewerReviewStep3Form` still reads `reviewerRecommendationId` and
+`execute()` / `saveForLater()` store it, which on a press (no
+`reviewer_recommendations` rows) fails the foreign key (finding OMP5);
+`getLocalizedRecommendation()` is empty in the history payload; the
+stage-specific guidelines come from footnote g. OMP's `ReviewerHandler` adds nothing beyond OJS's minus the
 step-3 form override, and both apps' step-3 forms share
 `PKPReviewerReviewStep3Form` — shared-behaviour evidence for every unmarked
 claim on the wizard, with the recommendation-related lines the only
@@ -2801,6 +2894,44 @@ for the accepted review due that day and for the request due that day,
 The "Edit" window refuses a review due date before the response due date.
 Issue report: [pkp-e2e#1000](https://github.com/jardakotesovec/pkp-e2e/issues/1000) ([docs/issues/U28-A18-review-due-today-reads-overdue.md](../issues/U28-A18-review-due-today-reads-overdue.md)).
 
+<a id="fn-a19"></a>
+**f-a19** — Both cases answer 500 to `POST reviewer/saveStep/{id}?step=3`
+(`PKPReviewerHandler::saveStep()`). Submit: OJS
+`ReviewerReviewStep3Form`'s custom validator (footnote i) passes the
+posted string to `withRecommendations([...])`, and PostgreSQL rejects the
+comparison (Uncaught PDOException SQLSTATE[22P02], invalid input syntax
+for type bigint: "abc"). Save: `PKPReviewerReviewStep3Form::saveForLater()`
+runs `saveReviewForm()` before `Repo::reviewAssignment()->edit()`, where
+the foreign key `review_assignments_reviewer_recommendation_id_foreign`
+rejects the unknown id (SQLSTATE[23503]), after the comment is written.
+Live-probed 2026-11-27 on OJS `main` (d37c63cc7c, lib/pkp 44b36bf802),
+four runs, a scratch journal, the code added as an option of the page's
+own "Recommendation" list: "abc" at "Submit Review" and "OK", the
+step stayed with no notice, toast, mark or dialog, the list on the added
+option, nothing stored, "Choose One" after a reload, and an offered
+choice then submitted; 99999 at "Save for Later", no notice or toast,
+the recommendation stored empty, "Choose One" after a reload, and the
+typed text found saved (read after one run); "abc" at "Save for Later",
+"Your changes have been saved." and the recommendation stored empty.
+
+<a id="fn-a20"></a>
+**f-a20** — The step-3 validator of footnote i does not check the
+recommendation's status; the editor's `EditReview` does, and lets an
+inactive one stand only when it is already the review's.
+Once a review holds an inactive recommendation, the reviewer's list adds
+it back as an entry and preselects it. Live-probed 2026-11-27 on OJS
+`main`, four runs, a scratch journal with "See Comments" switched off
+(by SQL) and added back to the page's list: "Submit Review" and "OK"
+opened step 4 and stored it as completed; the editor's row read "Review
+Submitted" / "See Comments", Review Details "Recommendation: See
+Comments", the email subject "Review complete: {reviewer} recommends See
+Comments for #{id} …"; "Save for Later" showed "Your changes have been
+saved.", the choice preselected after a reload, and a submit with it
+went through. The editor's "Modify Review" with the same code, as a
+Journal Manager and as an assigned Section Editor: refused (422) with
+"The submitted reviewer recommendation ID is not a valid for this
+Context." under "Recommendation", nothing stored.
+
 <a id="fn-omp1"></a>
 **f-omp1** — OMP `classes/core/Application.php::hasCustomizableReviewerRecommendation()`
 → false; no `templates/reviewer/review/step3.tpl` in omp-main;
@@ -2843,6 +2974,24 @@ right after "Submit Review", before any reload, the same line read "Round
 other round, had no box. Live-probed 2026-09-05 on OJS and OMP: a journal
 shows the same box to a round-1 reviewer once round 2 opens without them,
 so the entry retired into A12 (footnote f-a12).
+
+<a id="fn-omp5"></a>
+**f-omp5** — OMP has no `ReviewerReviewStep3Form` override, so
+`PKPReviewerReviewStep3Form::readInputData()` reads
+`reviewerRecommendationId` (footnote q). `execute()` saves the step
+(`updateReviewStepAndSaveSubmission`, step 4) before
+`Repo::reviewAssignment()->edit()` stores the raw value, and a press has
+no `reviewer_recommendations` rows, so the foreign key
+`review_assignments_reviewer_recommendation_id_foreign` rejects any value
+(Uncaught PDOException SQLSTATE[23503]): `POST reviewer/saveStep/{id}?step=3`
+answers 500. Live-probed 2026-11-27 on OMP `main` (39fc76c2b), four runs,
+a scratch press, a one-option select named `reviewerRecommendationId`
+added to step 3's form: 99999 and "abc" at "Submit Review" and "OK", no
+notice, toast or dialog; after a reload step 3 with "4. Completion"
+enabled, that tab reading "Review Submitted" / "Thank you for completing
+the review of this submission. …", the assignment stored at step 4 with
+no completion date; a plain "Submit Review" then completed it. 99999 at
+"Save for Later": no notice, nothing stored. Three 500s per run.
 
 <a id="fn-ops1"></a>
 **f-ops1** — The `reviewAssignments` op and the sidebar's
