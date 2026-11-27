@@ -638,9 +638,14 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
 5. **Save a review for later**
 
-   Given: Reviewer, on step 3 of an accepted request whose submission has
-   an assigned Section Editor.
+   Given: Reviewer, on step 3 of an accepted request with nothing saved
+   yet, whose submission has an assigned Section Editor.
 
+   - **Leaving with a changed recommendation** {OJS}: choose "Accept
+     Submission" in "Recommendation" and press the "2. Guidelines" tab:
+     the browser asks "The data on this form has changed. Do you wish to
+     continue without saving?"; press "OK": "2. Guidelines" opens. Press
+     the "3. Download & Review" tab: "Recommendation" reads "Choose One".
    - **The review**: type "Sound method, thin data." into "For author and
      editor" and "Check the second table." into "For editor" {OJS} / "For
      editor only" {OMP}; {OJS} choose "Revisions Required" in
@@ -1087,7 +1092,6 @@ Left out of the scenarios above, by reason:
     wish to continue without saving?", "Cancel" keeping the text
     ([A15](#a15); Rule 18): the guard the issue report proposes, once
     fixed [report 2026-10-02]
-  - {OJS} on a review without a review form, "Accept Submission" chosen in "Recommendation" with nothing saved, then the "2. Guidelines" tab, asking "The data on this form has changed. Do you wish to continue without saving?", and after "OK" the list back on step 3 reading "Choose One" (Rule 18) [incidental 2026-11-27]
   - {OPS} a user invited to a home-made "Reviewer"-level role beside Author landing on "Active submissions" after sign-in, with no "My Assignments as Reviewer" group and the typed reviewer-list address refused ([OPS1](#ops1); Purpose, scenario 17): the guard the issue report proposes, once fixed [report 2026-10-02]
 - **Rarely met**:
   - the "Read Round {N} Review" window of a round declined with an empty message, showing the "Decline Review Request" window's prefilled text in place of a typed reason (Rule 14)

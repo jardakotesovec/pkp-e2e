@@ -66,7 +66,7 @@ const {
     signInAtContext,
 } = require('../../../../shared/playwright/pages/ReviewerPages.js');
 const {TasksPanel} = require('../../../../shared/playwright/pages/NotificationsPages.js');
-const {EditFileWindow} = require('../../../../shared/playwright/pages/SubmissionFilesPages.js');
+const {EditFileWindow, recordBrowserDialogs} = require('../../../../shared/playwright/pages/SubmissionFilesPages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
 
@@ -97,6 +97,8 @@ const THANK_YOU =
 const DISCUSSIONS = 'Review Tasks & Discussions';
 const RESPONSE_OVERDUE = 'Deadline for responding to this request has passed. Please accept or decline this request at the earliest.';
 const REVIEW_OVERDUE = 'Deadline for completing this review has passed. Please complete the review at the earliest.';
+/** Rule 18: the browser's own confirm() a guarded change raises on a tab press. */
+const LEAVE_QUESTION = 'The data on this form has changed. Do you wish to continue without saving?';
 const RECOMMENDATIONS = ['Accept Submission', 'Revisions Required', 'Resubmit for Review', 'Resubmit Elsewhere', 'Decline Submission', 'See Comments'];
 const DATE = /\d{4}-\d{2}-\d{2}/;
 /** A legacy grid's date cell ("September 12, 2026"). */
@@ -613,6 +615,26 @@ test.describe('reviewer\'s review', () => {
         const wizard = new ReviewWizardPage(page, tag);
         await wizard.goto(submissionId);
         await walkToStep3(wizard);
+        const recommendation = wizard.recommendationSelect.locator('option:checked');
+
+        // Leaving with a changed recommendation (Rule 18): "Accept Submission"
+        // chosen with nothing saved, the "2. Guidelines" tab asks the
+        // browser's own confirm() (the wizard's tab change); "OK" opens
+        // step 2, and back on step 3 the list reads "Choose One" again.
+        await expect(recommendation).toHaveText('Choose One');
+        await wizard.chooseRecommendation('Accept Submission');
+        await expect(recommendation).toHaveText('Accept Submission');
+        const asked = recordBrowserDialogs(page);
+        asked.answerNext('accept');
+        const leaveDialog = page.waitForEvent('dialog');
+        await wizard.tab(2).click();
+        expect((await leaveDialog).type()).toBe('confirm');
+        await expect.poll(() => asked.messages).toEqual([LEAVE_QUESTION]);
+        await wizard.expectStep(2);
+        await wizard.selectStep(3);
+        await expect(recommendation).toHaveText('Choose One');
+        asked.stop();
+
         await wizard.typeComments(publicText);
         await wizard.typePrivateComments(privateText);
         await wizard.chooseRecommendation('Revisions Required');
@@ -624,7 +646,7 @@ test.describe('reviewer\'s review', () => {
         await wizard.expectStep(3);
         await expect(wizard.commentsBody).toContainText(publicText);
         await expect(wizard.privateCommentsBody).toContainText(privateText);
-        await expect(wizard.recommendationSelect.locator('option:checked')).toHaveText('Revisions Required');
+        await expect(recommendation).toHaveText('Revisions Required');
 
         // "Save for Later": the confirmation text, and the step stays.
         const saved = page.waitForResponse((r) => r.url().includes('/reviewer/saveStep/') && r.request().method() === 'POST');
@@ -1077,7 +1099,7 @@ test.describe('reviewer\'s review', () => {
             await d.dismiss();
         });
         await wizard.tab(2).click();
-        await expect.poll(() => question).toBe('The data on this form has changed. Do you wish to continue without saving?');
+        await expect.poll(() => question).toBe(LEAVE_QUESTION);
         await wizard.expectStep(3);
         await expect(wizard.formTextField).toHaveValue(changed);
 
