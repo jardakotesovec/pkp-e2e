@@ -108,7 +108,11 @@ right; the window stays open and nothing is saved. <sup>l</sup>
 Both windows ask before throwing a change away: closing one with a box
 changed and not saved asks "The data on this form has changed. Do you
 wish to continue without saving?"; "Cancel" keeps the window open, "OK"
-closes it and nothing is installed or saved. <sup>b</sup> <sup>l</sup>
+closes it and nothing is installed or saved. Leaving the page itself
+(another address opened in the browser) while the "Add/Remove
+Languages" window is open and changed asks the browser's own question
+about leaving the page instead, and leaving saves nothing. <sup>b</sup>
+<sup>l</sup>
 
 **The sidebar "Language" block** (on public pages): the heading
 "Language" ("Langue" in French) and one link per interface language, each
@@ -228,6 +232,14 @@ as "Uzbek (Latin)/o‘zbek (lotin) (uz_Latn)". <sup>a</sup>
    Settings" on a preprint server), side tab "Languages"; Rules 8–16 hold
    there alike. Each change shows "Locale settings saved." unless its rule
    names another notice. <sup>f</sup>
+   - 7a. **Two changes at once.** A "Forms" tick takes a second or two
+     to save. When a second manager saves another change to the same
+     journal's lists in that time ("Add/Remove Languages", or a
+     "Submissions" tick), one of the two changes can be lost, while
+     each manager sees their notice ⚠ [A16](#a16). Overlapping "Forms"
+     and "Submissions" ticks have also been seen, though not
+     reproduced, to fail on the server and to leave "Submissions"
+     ticked without "Metadata" ⚠ [A17](#a17). <sup>[f-a16](#fn-a16)</sup>
 8. **What a journal starts with.** The "Website Languages" list has a row
    for each language the site has enabled. A new journal starts with the
    languages ticked on the Hosted Journals create form under "UI" (every
@@ -438,8 +450,9 @@ as "Uzbek (Latin)/o‘zbek (lotin) (uz_Latn)". <sup>a</sup>
   again; and on a journal the "Reviewer Recommendations" list gains
   names in that language
   ([Review setup & review forms](U29-review-setup-and-review-forms.md)).
-  When two managers tick the same language at the same moment, one of
-  the two ticks can fail without a word ⚠ [A6](#a6). <sup>r</sup>
+  When the same language is ticked or reloaded on two journals at the
+  same moment, one of the two can fail without a word ⚠ [A6](#a6).
+  <sup>r</sup>
 - **The journal's primary language changed (Rule 11)**: on a journal the
   "Reviewer Recommendations" list gains names in the new primary
   language. <sup>j</sup>
@@ -926,6 +939,10 @@ Left out of the scenarios above, by reason:
     `docs/issues/U57-A1-site-language-change-unticks-submission-languages.md`): a language the site does not enable, ticked under "Submissions" and made the "Default", keeping both ticks and its place on "Make a Submission" after the Site Administrator installs another language [report 2026-10-01]
   - the guard for A8 (issue report
     `docs/issues/U57-A8-french-default-texts-stored-as-codes.md`): a press and a server created with French under "UI", and French "Reload defaults", leaving no "##" code on the French "Submissions", "Privacy Statement" and "Editorial Masthead" pages {OMP OPS} [report 2026-10-01]
+  - the "Add/Remove Languages" window changed and still open when the
+    page is left for another address: the browser's question about
+    leaving the page, and the list unchanged afterwards (Fields)
+    [incidental 2026-11-27]
 - **Rarely met**:
   - the Site Administrator's "Reload defaults" on a journal's "Website
     Languages" row, which puts the default texts back over the
@@ -949,8 +966,8 @@ Left out of the scenarios above, by reason:
     with a port; Rule 19; scenario 8 passes it)
   - A5 (the "Forms" tick's script failures; Rule 10b; scenario 5 passes
     it)
-  - A6 (two managers ticking the same language at the same moment;
-    Side effects)
+  - A6 (the same language ticked or reloaded on two journals at the
+    same moment; Side effects)
   - A7 (a journal created on a one-language site; Rule 8)
   - A8 (a press's and a preprint server's French "Author Guidelines" and
     checklist; Rule 10a)
@@ -964,6 +981,10 @@ Left out of the scenarios above, by reason:
     empty email template boxes; Side effects; scenario 1 passes it)
   - A15 (the sidebar "Language" block with two scripts of one
     language ticked under "UI"; Fields)
+  - A16 (two changes saved at once on one journal's lists, one of
+    them lost; Rule 7a)
+  - A17 (overlapping "Forms" and "Submissions" ticks on one journal
+    failing on the server or leaving "Metadata" unticked; Rule 7a)
   - OMP1 (the press's line under the site's list opening with an
     asterisk; Fields; scenario 1 names it)
 - **Owned by another feature**:
@@ -1001,16 +1022,18 @@ an entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | Any change to the site's languages silently unticks journals' submission languages the site does not offer | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
 | [A3](#a3) | Choosing a language in the sidebar "Language" block lands on the home page when the site's address has a port | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A5](#a5) | After a manager ticks a language under "Forms", "Date & Time" shows no choices for it | 🐞 | low · crash: script | issues (claude), 2026-10-01 — re-verified |
-| [A6](#a6) | Two managers adding the same form language at the same moment: one tick silently fails on the server | 🐞 | latent · crash: server | Jarda 2026-09-26 · risk accepted |
+| [A6](#a6) | The same language ticked or reloaded on two journals at the same moment: one of the two silently fails on the server | 🐞 | latent · crash: server | Jarda 2026-09-26 · risk accepted |
 | [A7](#a7) | On a one-language site, typing in "Create Journal" makes the page's script fail at every keystroke | 🐞 | low · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A8](#a8) | A press's or preprint server's French (Canada) guidelines, checklist, privacy statement, role and component names show internal text codes | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A14](#a14) | Norwegian (Bokmål) is no longer offered to install, and a site that has it installed fails on its settings pages | 🐞 | high | — |
+| [A16](#a16) | Two managers saving changes to one journal's languages at the same moment: one change is lost, both are told it saved | 🐞 | minor | — |
 | [A2](#a2) | "Reload defaults" is offered to the Site Administrator alone | ❓ | minor | — |
 | [A10](#a10) | With German the site's primary, the site's home once named a press in French | ❓ | minor | — |
 | [A11](#a11) | A browser that lists only "en-US" opened a French-primary journal in French, not English | ❓ | minor | — |
 | [A12](#a12) | "Change Language" on "Site Settings" names the languages in the language being read, not each in its own | ❓ | minor | — |
 | [A13](#a13) | A form language that is not an interface language gets empty email template boxes, not the default texts | ❓ | minor | — |
 | [A15](#a15) | The sidebar "Language" block is not yet seen with two scripts of one language | ❓ | minor | — |
+| [A17](#a17) | Overlapping "Forms" and "Submissions" ticks on one journal were seen, not reproduced, to fail on the server and to leave "Metadata" unticked | ❓ | minor · crash: server | — |
 | [OMP1](#omp1) | A press's site "Languages" list prints its own asterisk before "Marked locales may be incomplete." | ✅ | — | — |
 
 ### All apps
@@ -1083,14 +1106,20 @@ the page loaded does not fail, nor does a tick under "UI" or
 Basis: probe, 2026-10-01. <sup>[f-a5](#fn-a5)</sup>
 
 <a id="a6"></a>
-**A6 — Adding the same form language twice at once fails** · 🐞 · latent · crash: server.
-When two journals tick the same language under "Forms", or under
-"Submissions" (Rule 15a), at the same moment (two managers, or two
-journals set up together), one of the two changes
-fails on the server and is not saved. That manager's box shows unticked
-again and nothing on the page says the change failed; ticked again, it
-saves. A journal's managers meet it only by coincidence.
-Basis: probe. <sup>[f-a6](#fn-a6)</sup>
+**A6 — Adding or reloading the same language on two journals at once fails** · 🐞 · latent · crash: server.
+When two journals tick the same language under "Forms" at the same
+moment (two managers, or two journals set up together), the app fails
+on the server for one of the two ticks and saves nothing of it: that
+manager's box shows unticked again, and nothing on the page says the change
+failed. A "Submissions" tick (Rule 15a) that fails this way keeps half
+of the change: after a reload its row shows "Metadata" ticked and
+"Submissions" unticked. Either box, ticked again, saves. "Reload
+defaults" (Rule 13), pressed by the Site Administrator for the same
+language on two journals at once, fails the same way: on one of them
+the "Reload defaults" window stays open with "OK" and "Cancel", and
+nothing says the reload failed. A journal's managers meet it only by
+coincidence.
+Basis: probe, 2026-11-27. <sup>[f-a6](#fn-a6)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-09-26**: confirmed 🐞, risk accepted.
 > Ruling: not a realistic problem for a journal; the test suites work
@@ -1227,6 +1256,41 @@ as "Change Language" does? Lean: yes; it names the journal's interface
 languages the same way "Change Language" does.
 Basis: code. <sup>[f-a15](#fn-a15)</sup>
 
+<a id="a16"></a>
+**A16 — Two changes saved at once on one journal's "Languages" tab undo each other** · 🐞 · minor.
+While one manager's "Forms" tick for a language is still saving, a
+second manager of the same journal adds that language through
+"Add/Remove Languages" and presses "Save": one of the two changes is
+lost. Either the language is no longer a form language, or it is gone
+from "Submission Languages"; on a preprint server only the "Forms"
+tick was seen lost. Both managers see their notice, "Locale settings
+saved." and "Submission locales updated.", and nothing says a change
+was lost: the lost "Forms" box shows unticked right under "Locale
+settings saved.", and a lost submission language usually still shows
+on the second manager's list until the page is reloaded. When the
+second manager ticks "Submissions" for the language instead, the
+"Forms" tick is nearly always the one lost. Changes that do not
+overlap lose nothing.
+Basis: probe, 2026-11-27. <sup>[f-a16](#fn-a16)</sup>
+
+<a id="a17"></a>
+**A17 — Overlapping "Forms" and "Submissions" ticks on one journal: two outcomes not reproduced** · ❓ · minor · crash: server.
+Two managers of one journal ticked French (Canada) under "Forms" and
+under "Submissions" at the same moment, three times on each app, and
+the series was done twice. Besides the lost "Forms" tick of
+[A16](#a16), two outcomes showed in one series only. On a journal,
+once, the "Forms" tick failed on the server as in [A6](#a6): its box
+unticked again, with no message. On a preprint server, all three times
+in one series, the row showed "Submissions" ticked and "Metadata"
+unticked after a reload, a pair Rules 15a and 15b never produce.
+Question: do overlapping ticks on one journal fail on the server, and
+leave "Submissions" ticked without "Metadata", beyond the series that
+showed each? Lean: yes to both; A6's failure does not need two
+journals, and the "Metadata" loss looks like A16's, the "Forms" tick's
+save putting back the "Metadata" ticks it read before the
+"Submissions" tick. A second series that shows each would settle it.
+Basis: probe, 2026-11-27. <sup>[f-a17](#fn-a17)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1283,7 +1347,7 @@ OJS, OMP and OPS unless its note names fewer apps.
 **h** — "UI" posts `saveLanguageSetting` with `setting=supportedLocales`. The block and "Change Language" read the journal's `getSupportedLocales()`; addresses carry the language when `PKPPageRouter::_getContextAndLocales()` returns more than one (`PKPPageRouter::url()`); the alternate links are `PKPTemplateManager`'s `<link rel='alternate' hreflang=…>` headers under the same condition. Live-probed 2026-09-27 (Rule 9): on a scratch journal with English alone and the block placed, the bare home stayed bare, with no block, no alternate links and an initials menu opening with "Edit Profile"; French ticked under "UI" ("Locale settings saved."): the bare address landed on `…/en/index`, the block listed "English", "français", alternate links for en, fr-CA and x-default, the editorial addresses carried `/en/`, the menu opened with "Change Language"; French unticked: a visitor who had been reading in French got the bare home in English, `…/fr_CA/about` landed on `…/about`, and the block, the alternates and "Change Language" were gone.
 
 <a id="fn-i"></a>
-**i** — "Forms" posts `saveLanguageSetting` with `setting=supportedFormLocales`; on a tick it runs `PKPContextService::restoreLocaleDefaults()` (which also calls `Locale::installLocale()`) and `Repo::reviewerRecommendation()->setLocalizedDataOnNewLocaleAdd()`. The default texts are the context schema's multilingual props with a `defaultLocaleKey`: `authorGuidelines`, `authorInformation`, `beginSubmissionHelp`, `contributorsHelp`, `detailsHelp`, `forTheEditorsHelp`, `librarianInformation`, `openAccessPolicy`, `privacyStatement`, `readerInformation`, `reviewHelp`, `reviewerSuggestionsHelp` (OJS, OMP), `submissionChecklist`, `uploadFilesHelp`, plus `lockssLicense` and `clockssLicense` on OJS (`lib/pkp/schemas/context.json` and each app's `schemas/context.json`); `openAccessPolicy` and the two licenses have no box on any Settings page (Settings › Distribution holds "Publishing Mode"/"Posting Mode", "Enable OAI" and, on OJS, two LOCKSS/CLOCKSS enable boxes), and OJS's LOCKSS page prints the fixed English line "LOCKSS system has permission to collect, preserve, and serve this Archival Unit." at `/en/` and `/fr_CA/` alike. `restoreLocaleDefaults()` merges the default over the language's value, yet a text already typed survives the tick on screen: the grid's own save afterwards writes back the journal it loaded before, texts included (read, not traced further). The answer carries the global event `set-form-languages`, which `lib/ui-library/src/components/Container/Container.vue` hands to every form on the page; the "Date & Time" form's `FieldRadioInput.vue` then fails in `isInputSelected` (A5). Every "Forms" cell is live on every row (`supported` is always true on this list), whatever "UI" says. The older windows' per-language boxes are the form builder's multilingual fields. Live-probed 2026-09-27 (Rules 10, 10a, 10b): before the tick the "Privacy Statement" form had no language button; after it, "French" on "Privacy Statement", "Information", "Author Guidelines" and the rest, on the same page without a reload and after one, and "Date & Time" still took a click; the section window (OJS, OPS) and the navigation-item window gained a French title box; on a journal with French under "UI", English alone under "Forms", `…/fr_CA/about/privacy` showed the English text under French headings; French ticked under "Forms" without "UI" saved and the form gained "French", and "UI" unticked with "Forms" ticked saved too; the French privacy box held the French default on OJS and OMP (OPS: [U07 OPS3](U07-journal-identity-and-about-pages.md#ops3)), the author guidelines and wizard help texts were filled; "Notre politique." typed in the French "Privacy Statement" and saved stayed, on the form after a reload and on the public page, after French was unticked and ticked again under "Forms", after French (Canada) was added on "Submission Languages" and its "Submissions" ticked, and after "Metadata" was unticked and "Submissions" ticked again (two runs on each app). Test runs 2026-09-27 (Rule 10b; every run on each app, OPS also with "Privacy Statement" opened before the tick and not): without a reload the French "Privacy Statement" box was empty, "1/2 languages completed" under both boxes, while the journal already held the French default; after a reload the box held the French default (OJS, OMP) or `##default.contextSettings.privacyStatement##` (OPS).
+**i** — "Forms" posts `saveLanguageSetting` with `setting=supportedFormLocales`; on a tick it runs `PKPContextService::restoreLocaleDefaults()` (which also calls `Locale::installLocale()`) and `Repo::reviewerRecommendation()->setLocalizedDataOnNewLocaleAdd()`. The default texts are the context schema's multilingual props with a `defaultLocaleKey`: `authorGuidelines`, `authorInformation`, `beginSubmissionHelp`, `contributorsHelp`, `detailsHelp`, `forTheEditorsHelp`, `librarianInformation`, `openAccessPolicy`, `privacyStatement`, `readerInformation`, `reviewHelp`, `reviewerSuggestionsHelp` (OJS, OMP), `submissionChecklist`, `uploadFilesHelp`, plus `lockssLicense` and `clockssLicense` on OJS (`lib/pkp/schemas/context.json` and each app's `schemas/context.json`); `openAccessPolicy` and the two licenses have no box on any Settings page (Settings › Distribution holds "Publishing Mode"/"Posting Mode", "Enable OAI" and, on OJS, two LOCKSS/CLOCKSS enable boxes), and OJS's LOCKSS page prints the fixed English line "LOCKSS system has permission to collect, preserve, and serve this Archival Unit." at `/en/` and `/fr_CA/` alike. `restoreLocaleDefaults()` merges the default over the language's value, yet a text already typed survives the tick on screen: the grid's own save afterwards writes back the journal it loaded before, texts included (`PKPContextService::edit()` writes the whole context it is given, the write that loses a change across two requests, A16). The answer carries the global event `set-form-languages`, which `lib/ui-library/src/components/Container/Container.vue` hands to every form on the page; the "Date & Time" form's `FieldRadioInput.vue` then fails in `isInputSelected` (A5). Every "Forms" cell is live on every row (`supported` is always true on this list), whatever "UI" says. The older windows' per-language boxes are the form builder's multilingual fields. Live-probed 2026-09-27 (Rules 10, 10a, 10b): before the tick the "Privacy Statement" form had no language button; after it, "French" on "Privacy Statement", "Information", "Author Guidelines" and the rest, on the same page without a reload and after one, and "Date & Time" still took a click; the section window (OJS, OPS) and the navigation-item window gained a French title box; on a journal with French under "UI", English alone under "Forms", `…/fr_CA/about/privacy` showed the English text under French headings; French ticked under "Forms" without "UI" saved and the form gained "French", and "UI" unticked with "Forms" ticked saved too; the French privacy box held the French default on OJS and OMP (OPS: [U07 OPS3](U07-journal-identity-and-about-pages.md#ops3)), the author guidelines and wizard help texts were filled; "Notre politique." typed in the French "Privacy Statement" and saved stayed, on the form after a reload and on the public page, after French was unticked and ticked again under "Forms", after French (Canada) was added on "Submission Languages" and its "Submissions" ticked, and after "Metadata" was unticked and "Submissions" ticked again (two runs on each app). Test runs 2026-09-27 (Rule 10b; every run on each app, OPS also with "Privacy Statement" opened before the tick and not): without a reload the French "Privacy Statement" box was empty, "1/2 languages completed" under both boxes, while the journal already held the French default; after a reload the box held the French default (OJS, OMP) or `##default.contextSettings.privacyStatement##` (OPS). Live-probed again 2026-11-27 (Rule 10a; two runs on each app): "Notre politique." saved in the French "Privacy Statement" stayed, on the form and in the database, through a "Forms" untick and re-tick and a "Submissions" tick; the box emptied and saved lost its French text, and after a "Forms" untick and re-tick held the French default (OJS, OMP) or `##default.contextSettings.privacyStatement##` (OPS).
 
 <a id="fn-j"></a>
 **j** — `LanguageGridHandler::setContextPrimaryLocale()` (an `AjaxAction`, no question): adds the locale to `supportedLocales` and `supportedFormLocales`, sets the primary locale, calls `setLocalizedDataOnNewLocaleAdd()` for the reviewer recommendations, and shows `notification.localeSettingsSaved`; it does not call `restoreLocaleDefaults()`. `saveLanguageSetting()` refuses unticking `supportedLocales` or `supportedFormLocales` on the primary locale with `notification.defaultLocaleSettingsCannotBeSaved`, shown by the browser's alert (note f). Live-probed 2026-09-27 (Rules 11, 12; Side effects): French's "Primary locale" pressed: no question, "Locale settings saved.", French ticked under "Primary locale", "UI" and "Forms", English keeping its boxes; Settings › Journal › "Masthead" then offered "English" as the other language and "Save" with the French title empty was refused with "This field is required."; a first visit from a browser preferring German landed on `…/fr_CA/index`; unticking "UI" or "Forms" on the primary row raised the alert "The language setting could not be saved. All options need to be enabled." and the box stayed ticked after a reload; on a journal created with English alone, French made primary left the French "Privacy Statement" box empty, and the OJS reviewer recommendations turned French.
@@ -1292,7 +1356,7 @@ OJS, OMP and OPS unless its note names fewer apps.
 **k** — `LanguageGridRow::initialize()` adds `reload` (`manager.language.reloadLocalizedDefaultSettings` "Reload defaults", `RemoteActionConfirmationModal` `manager.language.confirmDefaultSettingsOverwrite`, per-app "journal/press/server settings", titled "Reload defaults") only when `Validation::isSiteAdmin()` and a journal is in the request; with no action a row gets no arrow. `ManageLanguageGridHandler::reloadLocale()` is role-assigned to managers too but nothing links it for them (A2). `reloadLocale()` runs `restoreLocaleDefaults()` and shows `notification.localeReloaded` "{$locale} locale reloaded for {$contextName}.". Live-probed 2026-09-27 (Actors row 5; Fields; Rule 13; A2): the Site Administrator's rows carried an arrow offering "Reload defaults", on the journal's tab and in the Settings wizard; the rows of the Journal Manager, the Editor and a Production Editor carried no arrow; "Our own policy." typed in the English "Privacy Statement" and saved; "Reload defaults" on English asked in a window titled "Reload defaults" with "OK" and "Cancel"; "Cancel" sent nothing; "OK" showed "English/English locale reloaded for {journal name}." and the English "Privacy Statement" read the default text after a reload.
 
 <a id="fn-l"></a>
-**l** — `SubmissionLanguageGridHandler::loadData()` lists `supportedAddedSubmissionLocales`, named by `Locale::getSubmissionLocaleDisplayNames()` (the Weblate language list, every language of the world) as "{name}/{name in itself}"; rows are plain `GridRow`s with no action. "Add/Remove Languages" opens `AddLanguageForm` (`templates/controllers/grid/languages/addLanguageForm.tpl`: `admin.languages.availableLocales`, `manager.language.submission.form.description`, labels "[ {code} ] {name}", the current ones checked); `validate()` refuses an empty choice with `manager.language.submission.from.error`; `execute()` drops unticked languages from the three lists and, when the default was dropped, makes the first of the sorted codes the default and adds it to both lists; the notice is `notification.submissionLocales`. In `saveLanguageSetting()`: a `supportedSubmissionLocales` tick adds the locale to `supportedSubmissionMetadataLocales` when missing and then runs `restoreLocaleDefaults()`; a `supportedSubmissionMetadataLocales` untick also removes it from `supportedSubmissionLocales`; unticking either on the default locale answers `notification.defaultLocaleSettingsCannotBeSaved`. `setDefaultSubmissionLocale()` adds the locale to both lists. The wizard's choice is `StartSubmission::addLanguage()`, shown with two or more submission languages; `Repo::submission()->add()` gives a submission without a language the default one. Live-probed 2026-09-27 (Fields; Rules 14–16): the window titled "Add/Remove Languages", "Available Locales", "Select submission and metadata languages.", 799 boxes such as "[ de ] German" and "[ fr_CA ] French (Canada)", the listed ones ticked, "Cancel" and "Save"; German and French (Canada) saved: "Submission locales updated.", the rows "German/Deutsch" and "French (Canada)/français (Canada)" with nothing ticked; an empty "Save" showed "At least one locale needs to be selected." at the top right with the window still open and the list unchanged; closing the window with a box changed asked the leave question and saved nothing; German's "Submissions" ticked "Metadata" too, "Metadata" unticked took "Submissions" with it, "Submissions" unticked left "Metadata"; the Default row's untick raised the Rule 12 alert; French (Canada) as the Default unticked in the window made German the Default with both boxes, English not; German's "Default" pressed ticked both its boxes; with English and German under "Submissions", "Make a Submission" asked "Submission Language" with "German" and "English", neither preselected, and a submission begun in English offered German boxes on its Details step; with German alone the wizard asked nothing.
+**l** — `SubmissionLanguageGridHandler::loadData()` lists `supportedAddedSubmissionLocales`, named by `Locale::getSubmissionLocaleDisplayNames()` (the Weblate language list, every language of the world) as "{name}/{name in itself}"; rows are plain `GridRow`s with no action. "Add/Remove Languages" opens `AddLanguageForm` (`templates/controllers/grid/languages/addLanguageForm.tpl`: `admin.languages.availableLocales`, `manager.language.submission.form.description`, labels "[ {code} ] {name}", the current ones checked); `validate()` refuses an empty choice with `manager.language.submission.from.error`; `execute()` drops unticked languages from the three lists and, when the default was dropped, makes the first of the sorted codes the default and adds it to both lists; the notice is `notification.submissionLocales`. In `saveLanguageSetting()`: a `supportedSubmissionLocales` tick adds the locale to `supportedSubmissionMetadataLocales` when missing and then runs `restoreLocaleDefaults()`; a `supportedSubmissionMetadataLocales` untick also removes it from `supportedSubmissionLocales`; unticking either on the default locale answers `notification.defaultLocaleSettingsCannotBeSaved`. `setDefaultSubmissionLocale()` adds the locale to both lists. The wizard's choice is `StartSubmission::addLanguage()`, shown with two or more submission languages; `Repo::submission()->add()` gives a submission without a language the default one. Live-probed 2026-09-27 (Fields; Rules 14–16): the window titled "Add/Remove Languages", "Available Locales", "Select submission and metadata languages.", 799 boxes such as "[ de ] German" and "[ fr_CA ] French (Canada)", the listed ones ticked, "Cancel" and "Save"; German and French (Canada) saved: "Submission locales updated.", the rows "German/Deutsch" and "French (Canada)/français (Canada)" with nothing ticked; an empty "Save" showed "At least one locale needs to be selected." at the top right with the window still open and the list unchanged; closing the window with a box changed asked the leave question and saved nothing; German's "Submissions" ticked "Metadata" too, "Metadata" unticked took "Submissions" with it, "Submissions" unticked left "Metadata"; the Default row's untick raised the Rule 12 alert; French (Canada) as the Default unticked in the window made German the Default with both boxes, English not; German's "Default" pressed ticked both its boxes; with English and German under "Submissions", "Make a Submission" asked "Submission Language" with "German" and "English", neither preselected, and a submission begun in English offered German boxes on its Details step; with German alone the wizard asked nothing. Live-probed 2026-11-27 (Fields; two runs on each app): with a box ticked in the open "Add/Remove Languages" window, opening Settings › Website's address again raised the browser's `beforeunload` question; accepted, the page reloaded with the submission language lists unchanged in the database.
 
 <a id="fn-m"></a>
 **m** — Addresses: `PKPPageRouter::url()` adds `_getLocaleForUrl()` after the journal's path when `_getContextAndLocales()` lists more than one locale (the site's list for the site's own pages). `PKPPageRouter::_setLocale()` redirects a bare address, an address whose language the journal does not support and, on a one-language journal, an address with a language to the same path with the language `Locale::getLocale()` picks (or none), and stores the language of a well-formed address in the session and the `currentLocale` cookie; a segment that is no known locale code is not read as a language at all, so the page handler gets it and answers 404. `Locale::getLocale()` picks, in order: the address's language when supported, the session's, the `currentLocale` cookie, `getPreferredLocale()` (the browser's Accept-Language matched against the journal's languages, the primary first); `setLocale()` falls back to the primary language for anything unsupported. Live-probed 2026-09-27 (Rules 17, 18; Settings bullet 5): on a two-language journal every public and editorial address carried `/en/`, the site's pages `/index/en/…`; a bare address landed on `/en/` in a fresh English browser and on `/fr_CA/` after a French visit; `…/fr_CA/about` switched the visit, on another journal of the site and the site's home too; `/de/`, `/es/`, `/ja/` forwarded to the same page in the Rule 18 language; `/fr_FR/` and `/xx/` showed "404 Not Found"; a one-language journal forwarded `/en/`, `/fr_CA/` and `/de/` to the bare address; `/en/about` with French remembered read English; a French choice held across signing in and out, a new tab and a browser reopened with only its lasting cookies (the choice rides the 30-day session cookie; a fresh browser signing in as the same account read the primary language); browsers preferring English, French (Canada), Japanese, "ja, fr-CA, en" and "de, en" read English, French, the primary, French and English; "fr-FR, fr" read French (Canada); a one-language journal read English whatever the browser. A remembered language the journal does not offer was driven at the one-language end only.
@@ -1334,7 +1398,7 @@ Issue report: [pkp-e2e#362](https://github.com/jardakotesovec/pkp-e2e/issues/362
 Issue report: [pkp-e2e#363](https://github.com/jardakotesovec/pkp-e2e/issues/363) ([docs/issues/U57-A5-forms-language-tick-date-time-script-error.md](../issues/U57-A5-forms-language-tick-date-time-script-error.md)).
 
 <a id="fn-a6"></a>
-**f-a6** — Seen 2026-09-26 on OJS and OPS: 5 of 42 journals created at the same moment with French as a form language (the test tooling's path, which is the "Forms" tick's) answered a server error. Live-probed 2026-09-27: two scratch journals, one Journal Manager each, the second browser on the install's second server process, both "Forms" boxes pressed together, four rounds per pair, three pairs: one side's `POST …/grid/settings/languages/manage-language-grid/save-language-setting?rowId=fr_CA&setting=supportedFormLocales&value=1` answered 500 in 5 of 12 rounds on OJS, 9 of 12 on OMP and 7 of 12 on OPS; that side showed no notice and no alert, its box unticked, still unticked after a reload; the other side saved. `Locale::installLocale()` → `installEmailTemplateLocaleData()` deletes and re-inserts the site-wide default email rows of the language outside a transaction, so two at once meet the unique key of `email_templates_default_data`. The same call runs on "Install Locale", the "Submissions" tick of Rule 15a and "Reload defaults". Seen again 2026-09-27 in an OPS test run, on the "Submissions" tick: two scratch servers ticked French (Canada) under "Submissions" a second apart; one's `POST …/grid/settings/languages/submission-language-grid/save-language-setting?rowId=fr_CA&setting=supportedSubmissionLocales&value=1` answered 500 (`duplicate key value violates unique constraint "email_templates_default_data_unique"`), the other's 200. Each tick installs the language's default email texts again, whether or not the site already carries them, so a language installed once beforehand does not prevent it.
+**f-a6** — Seen 2026-09-26 on OJS and OPS: 5 of 42 journals created at the same moment with French as a form language (the test tooling's path, which is the "Forms" tick's) answered a server error. Live-probed 2026-09-27: two scratch journals, one Journal Manager each, the second browser on the install's second server process, both "Forms" boxes pressed together, four rounds per pair, three pairs: one side's `POST …/grid/settings/languages/manage-language-grid/save-language-setting?rowId=fr_CA&setting=supportedFormLocales&value=1` answered 500 in 5 of 12 rounds on OJS, 9 of 12 on OMP and 7 of 12 on OPS; that side showed no notice and no alert, its box unticked, still unticked after a reload; the other side saved. `Locale::installLocale()` → `installEmailTemplateLocaleData()` deletes and re-inserts the site-wide default email rows of the language outside a transaction, so two at once meet the unique key of `email_templates_default_data`. The same call runs on "Install Locale", the "Submissions" tick of Rule 15a and "Reload defaults". Seen again 2026-09-27 in an OPS test run, on the "Submissions" tick: two scratch servers ticked French (Canada) under "Submissions" a second apart; one's `POST …/grid/settings/languages/submission-language-grid/save-language-setting?rowId=fr_CA&setting=supportedSubmissionLocales&value=1` answered 500 (`duplicate key value violates unique constraint "email_templates_default_data_unique"`), the other's 200. Each tick installs the language's default email texts again, whether or not the site already carries them, so a language installed once beforehand does not prevent it. Live-probed again 2026-11-27 (A6) on OJS `d37c63cc7c` (lib/pkp `44b36bf802`), OMP `39fc76c2b` and OPS `ae2f3c5026`, two runs each, four rounds per kind per run, the second browser on the install's second server process; French (Canada) installed on every install. "Forms" on two journals: one side answered 500 in OJS 3 of 4 and 1 of 4 rounds, OMP 2 and 2, OPS 2 and 0 (run 1, run 2), with no notice and no alert, its box unticked on the same page and after a reload. "Submissions" on two journals: 500 in OJS 2 and 1, OMP 1 and 1, OPS 0 and 3; `saveLanguageSetting()` saves `supportedSubmissionMetadataLocales` before `restoreLocaleDefaults()` fails, so after a reload the failed side's French (Canada) row had "Metadata" ticked and "Submissions" unticked. Every failed tick, pressed once more, answered 200 with "Locale settings saved." and stayed ticked after a reload. "Reload defaults" on French by the Site Administrator on two journals at once (`POST …/manage-language-grid/reload-locale?…&rowId=fr_CA`): 500 in OJS 1 and 3, OMP 2 and 0, OPS 3 and 0; the failed side's window "Reload defaults" stayed open with its question, "OK" and "Cancel", and no notice showed. Every 500 was `duplicate key value violates unique constraint "email_templates_default_data_unique"` in the server log. "Install Locale" was not driven.
 
 <a id="fn-a7"></a>
 **f-a7** — Live-probed 2026-09-27, two runs, three apps: with French disabled on the site (English the one language), each field change on the Hosted Journals create form logged "TypeError: Cannot read properties of undefined (reading 'includes') at Proxy.submitValues" once, six per filled form, none on opening it or on "Save"; the same form on the two-language site logged none. The form then has no language fields (note g); the failing code was not traced further.
@@ -1361,6 +1425,12 @@ Issue report: [pkp-e2e#360](https://github.com/jardakotesovec/pkp-e2e/issues/360
 
 <a id="fn-a15"></a>
 **f-a15** — `LanguageToggleBlockPlugin::getContents()` names the journal's (or, at the site, the site's) `getSupportedLocales()` with `Locale::getFormattedDisplayNames(…, LocaleMetadata::LANGUAGE_LOCALE_ONLY)`, the call `Context::getSupportedLocaleNames()` makes for "Change Language" (note o), so it takes the script since pkp/pkp-lib#13366 (note a); the three apps' copies make the same call (OMP's differs only in the session-less branch). Code read 2026-10-15. Not driven since the fix: "Language Toggle Block" placed in a scratch journal's "Sidebar", with `zh_Hans` and `zh_Hant` ticked under "UI", and the block's links read, would settle it. Before the fix: "中文" twice (note n, 2026-09-27).
+
+<a id="fn-a16"></a>
+**f-a16** — `LanguageGridHandler::saveLanguageSetting()` (each tick of either list) and `AddLanguageForm::execute()` ("Add/Remove Languages") take the context loaded at the start of the request and end in `PKPContextService::edit()`, which writes `array_merge($context->_data, $params)`, every setting of that copy, through `SchemaDAO::updateObject()`. A request that ends after another began puts the other's list back as it was: `supportedFormLocales`, or `supportedAddedSubmissionLocales` with the submission and metadata lists. The "Forms" tick lasts longest because it also runs `restoreLocaleDefaults()` (note r). The same write inside one request is why a typed text survives the tick (note i). Reported upstream as pkp/pkp-lib#13756, open on this defect; its linked PRs (pkp/ojs#6104, pkp/omp#2590, pkp/ops#1522) change only PKP's own Cypress test. A server with a single PHP process queues the two requests and loses nothing. Live-probed 2026-11-27 (Rule 7a) on the installs of note f-a6, two runs each: one scratch journal with English and French (Canada) under "UI" and English alone under "Forms", two Journal Managers, the second browser on the install's second server process. The first ticked French's "Forms" (0.4–2.5 s; up to 4.4 s while other runs loaded the server), the second saved "Add/Remove Languages" with "[ fr_CA ] French (Canada)" ticked at a set delay; every request answered 200. Rounds whose requests overlapped lost one change in OJS 5 of 5 and 2 of 4, OMP 3 of 4 and 3 of 5, OPS 1 of 2 and 3 of 4 (run 1, run 2); rounds that did not overlap lost nothing (0 of 24). Read on both pages, after a reload and in the database: `supportedFormLocales` back to `["en"]`, or `supportedAddedSubmissionLocales` back to `["en"]`; on OPS always the former (16 rounds). The first manager's page showed "Locale settings saved." over an unticked French "Forms" box; the kept ticks logged A5's five script errors, the lost ones none. With the second manager ticking French (Canada)'s "Submissions" instead (the language already on "Submission Languages"; three rounds per run): the "Forms" tick lost in 15 of 18 rounds, both pages showing "Locale settings saved.", one of the 15 a server error (A17); of the other three, one lost the "Submissions" tick and kept "Metadata" (OJS), two lost "Metadata" (OPS, A17).
+
+<a id="fn-a17"></a>
+**f-a17** — Live-probed 2026-11-27, the combined "Forms" and "Submissions" rounds of note f-a16 (three per run, two runs per app). OJS run 1, round 3: the "Forms" tick's `POST …/manage-language-grid/save-language-setting?rowId=fr_CA&setting=supportedFormLocales&value=1` answered 500, `duplicate key value violates unique constraint "email_templates_default_data_unique"` in the server log (A6's cause: both ticks run `Locale::installLocale()`, note r); its box unticked with no notice. OPS run 1, all three rounds: after a reload the French (Canada) row had "Submissions" ticked and "Metadata" unticked, the database `supportedSubmissionLocales` `["en","fr_CA"]` and `supportedSubmissionMetadataLocales` `["en"]`. Neither showed in the other five runs.
 
 <a id="fn-omp1"></a>
 **f-omp1** — `admin.locale.maybeIncomplete`: `omp/locale/en/admin.po` "* Marked locales may be incomplete.", `ojs/locale/en/admin.po` and `ops/locale/en/admin.po` "Marked locales may be incomplete.". Code read 2026-09-27. Live-probed 2026-09-27: the lines as quoted under the site's list, the asterisks beside the languages the same; OMP's French line also opens with one ("*Les paramètres marqués pourraient être incomplets.").
