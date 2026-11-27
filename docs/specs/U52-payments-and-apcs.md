@@ -59,7 +59,7 @@ submission for the APC, the reader for a reader fee. <sup>c</sup>
 | **Request the APC** (Rule 8) | • The deciding editor who records "Accept Submission" or "Accept and Skip Review" while the APC is in force (Rule 5), on the decision's "Request Payment" page ([Editorial decision recording](U34-editorial-decision-recording.md), its Rule 16) <sup>i</sup> |
 | **Record the APC as paid, waived or unpaid** (the workflow's "Payments" menu; Rules 13–15) | • Every role the workflow opens in its editorial view while the APC is in force: manager-level roles on any submission; the assigned Section Editor and Guest Editor; the assigned assistant roles (Copyeditor, Layout Editor, Proofreader and the rest) too ⚠ [A6](#a6) ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md), its Rule 6)<br>• Author: never offered the menu <sup>c</sup> <sup>g</sup> <sup>td12</sup> |
 | **Open a payment page and send the notification of payment** (Rules 9–12) | • The payer, signed in: for the APC, each assigned Author of the submission (their task and their email carry the link); for a reader fee, the reader who asked to buy ([Subscriptions](U51-subscriptions.md), its Rules 12, 28–31)<br>• A signed-out visitor is sent to the Login page first (Rule 9) <sup>c</sup> <sup>h</sup> <sup>td6</sup> |
-| **Buy a membership** ("Association Membership", Rule 7a) | • Nobody through the screens: no page, button or link offers it ⚠ [A7](#a7)<br>• A signed-in user who types the journal's address followed by "user/payMembership" while payments are set up gets the method's payment page for it; signed out, or while payments are not set up, the address fails [A9](#a9) <sup>m</sup> <sup>td13</sup> |
+| **Buy a membership** ("Association Membership", Rule 7a) | • Nobody through the screens ⚠ [A7](#a7)<br>• A signed-in user at the typed address of Rule 7a while payments are set up; signed out, or while they are not set up, the address fails [A9](#a9) <sup>m</sup> <sup>td13</sup> |
 | **Receive the payment emails** (Side effects) | • "Payment Request Notification": each assigned Author of the accepted submission<br>• "Manual Payment Notification": the journal's principal contact <sup>k</sup> |
 
 ## Fields & validation
@@ -211,15 +211,23 @@ page](U69-monograph-landing-page.md) (its Fields, "The payment page").
    current issue, the issue page, the article page), such as "Requires
    Subscription or Fee PDF (USD 5)". <sup>e</sup> <sup>td4</sup>
 
-7a. **The membership.** No page, button or link offers the
+7a. **The membership.** Nothing on screen offers the
     "Association Membership" [A7](#a7). Typed by a signed-in user while
     payments are set up, the journal's address followed by
-    "user/payMembership" opens the method's payment page for an
-    "Individual Membership Fee" of the set amount, such as "20.00 (USD)".
+    "user/payMembership" opens the method's payment page with "Title"
+    "Individual Membership Fee": <sup>m</sup> <sup>td13</sup>
+    - with an "Association Membership" set, "Fee" reads that amount,
+      such as "20.00 (USD)";
+    - with none set, the page opens all the same, with no "Fee" line.
+
     With "Manual Fee Payment", its "Send notification of payment" emails
     the principal contact a "Manual Payment Notification" for "Individual
-    Membership Fee", but the page that follows has no "Continue", and
-    nothing records a membership.
+    Membership Fee", a fee set or not. The page that follows has no
+    "Continue", and nothing records a membership: the list of payments
+    reads "No Items" (Rule 17), "Individual Subscriptions" does not list
+    the payer, and Users & Roles › "Edit" on the payer shows none. With
+    "Paypal Fee Payment" the address opens Rule 9's PayPal page instead;
+    a membership paid there is never recorded ⚠ [A13](#a13).
     Signed out, or with payments not set up, the address fails
     ⚠ [A9](#a9). <sup>m</sup> <sup>td13</sup>
 
@@ -286,7 +294,9 @@ page](U69-monograph-landing-page.md) (its Fields, "The payment page").
     says (its Rule 30). <sup>h</sup> <sup>td10</sup>
 12. **A completed online payment.** A payment completed through PayPal is
     recorded by itself: it joins the list of payments (Rule 17), and for
-    the APC it counts as paid (Rule 15). <sup>l</sup> <sup>n</sup>
+    the APC it counts as paid (Rule 15). A membership payment never is
+    ([A13](#a13)). <sup>l</sup>
+    <sup>n</sup>
 
 ### Recording the APC
 
@@ -341,8 +351,9 @@ page](U69-monograph-landing-page.md) (its Fields, "The payment page").
     A payment completed online (Rule 12) lists with the account the
     request was made for as "User" (the reader for a reader fee, the
     requesting editor for the APC), and with "Payment Type" "Publication
-    Fee", "Subscription Fee ({type name})", "Purchase Article Fee",
-    "Purchase Issue Fee" or "Individual Membership Fee". <sup>n</sup>
+    Fee", "Subscription Fee ({type name})", "Purchase Article Fee" or
+    "Purchase Issue Fee"; a membership paid online never lists
+    ([A13](#a13)). <sup>n</sup>
 
     With the manual method the list holds only what the "Payments" menu
     records (Rule 14): the manual method records nothing (Rule 11).
@@ -403,8 +414,7 @@ page](U69-monograph-landing-page.md) (its Fields, "The payment page").
 5. **"Account Name", "Client ID", "Secret", "Test Mode"** — the same tab.
    Default: empty and unticked (PayPal not set up). "Account Name" filled:
    PayPal is set up (Rule 2). On the test installs the other three change
-   nothing: every PayPal payment page there shows the error of Rule 9,
-   "Test Mode" ticked or not. <sup>l</sup>
+   nothing: every PayPal page there shows Rule 9's error. <sup>l</sup>
 6. **"Article Processing Charge"** — the "Payments" page › "Payment
    Types". Default: empty. Above 0, with payments set up: the APC is in
    force (Rule 5).
@@ -790,9 +800,9 @@ Left out of the scenarios above, by reason:
   - A5 (payments set up with no currency, and "Currency" offering no way
     back once saved; Rule 2; Fields)
   - A6 (an assigned assistant role recording the APC; Actors row 4)
-  - A7 (a signed-in user at the typed membership address, and
-    "Association Membership" set; Actors row 6; Rule 7a; Settings bullet
-    8)
+  - A7 (a signed-in user at the typed membership address, with
+    "Association Membership" set or not; Actors row 6; Rule 7a; Settings
+    bullet 8)
   - A8 (a subscription payment reported to the principal contact; Side
     effects)
   - A9 (the membership address signed out or with payments not set up;
@@ -803,6 +813,8 @@ Left out of the scenarios above, by reason:
     17)
   - A12 (the side menu's "Institutions" right after "Enable" is saved
     unticked; Rule 1; scenario 1 passes it)
+  - A13 (a membership paid through PayPal, and the reader's return to the
+    journal; Rules 7a, 12)
 - **No seed**:
   - a payment completed through PayPal, its hand-over to PayPal and its
     row in the list of payments (Rules 9, 12, 17; no test install reaches
@@ -833,6 +845,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | The PayPal error page has no heading, and the browser tab shows only the journal's name | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A11](#a11) | Merging a payer's account breaks the journal's list of payments and the paid article's publishing | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A12](#a12) | After a journal switches payments off, the side menu keeps "Institutions" until the page is reloaded | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A13](#a13) | A membership paid through PayPal is never recorded: the journal's server fails when PayPal sends the reader back | 🐞 | user-visible · crash: server | — |
 | [A5](#a5) | Payments save and ask for fees with no currency, and a saved currency cannot be removed | ❓ | minor | — |
 | [A6](#a6) | An assigned assistant role can record the APC as paid or waived | ❓ | user-visible | — |
 | [A7](#a7) | No page offers the "Association Membership" the tab prices | ❓ | user-visible | — |
@@ -926,16 +939,18 @@ Basis: probe, 2026-09-27. <sup>f-a6</sup>
 
 <a id="a7"></a>
 **A7 — A membership fee no page offers** · ❓ · user-visible.
-"Association Membership" on "Payment Types" sets a membership fee, and a
-paid-up membership opens restricted galleys ([Subscriptions](U51-subscriptions.md),
-its Settings bullet 7), but no page, button or link offers a reader to
-buy or renew a membership (only the typed address of Rule 7a opens a
-payment page for one), and no screen records one. Beyond that address,
-the fee changes only the wording and offers of [Subscriptions](U51-subscriptions.md)' Rule 12.
+"Association Membership" on "Payment Types" sets a membership fee, but
+no page, button or link offers a reader to buy or renew a membership:
+only the typed address of Rule 7a opens a payment page for one. Nothing
+records a membership, and a reader who has paid one, by Rule 7a's
+notification or on PayPal ([A13](#a13)), still finds locked article and
+"Full Issue" galleys locked ([Subscriptions](U51-subscriptions.md#a33)).
+Beyond that address, the fee changes only the wording and offers of
+[Subscriptions](U51-subscriptions.md)' Rule 12.
 Question: should the journal offer a membership purchase again, or
 should the field go?
 Lean: remove the field; nothing on the screens can make a member.
-Basis: probe, 2026-09-27. <sup>f-a7</sup>
+Basis: probe, 2026-09-27; 2026-11-27. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — Subscription payments go to the principal contact** · ❓ · minor.
@@ -950,13 +965,14 @@ Basis: probe, 2026-09-27. <sup>f-a8</sup>
 
 <a id="a9"></a>
 **A9 — The membership address fails signed out or with payments off** · 🐞 · low · crash: server.
-A signed-out visitor who types the journal's address followed by
-"user/payMembership" gets a blank page, where the server failed,
-instead of the Login page, as at the two subscription purchase
-addresses ([Subscriptions](U51-subscriptions.md#a12)). A signed-in user
-gets the same blank page on a journal whose payments are not set up,
-which is every journal until a manager sets them up.
-Basis: probe, 2026-10-01. <sup>f-a9</sup>
+A signed-out visitor who types the membership address of Rule 7a gets
+a blank page, where the server failed, instead of the Login page; the
+two subscription purchase addresses fail the same way
+([Subscriptions](U51-subscriptions.md#a12)). A signed-in user gets the
+same blank page on a journal whose payments are not set up (Rule 2):
+"Enable" unticked, the method not set up, or a fresh journal.
+Basis: probe, 2026-10-01; 2026-11-27. <sup>f-a9</sup>
+Report: refresh owed — incidental re-probe 2026-11-27 (OJS `main`, two runs) of the membership address signed in on journals whose payments are not set up, which the report on the payment link (pkp-e2e#357) covers at its step 1: with "Enable" unticked and the manual method still set up, the page fails on a payment that was never queued ("Typed property PKP\payment\Payment::$paymentId must not be accessed before initialization"), a crash its Observed does not list and its Cause gives only as a form shown for a payment never stored; with the method not set up, or on a fresh journal, it fails with the "display() on false" the report quotes; no end writes a queued payment; no code changed, so no class or method the report names is touched; the new readings bear on `UserHandler::payMembership()`, `PaymentManager::queuePayment()` and `PaymentManager::getPaymentForm()` (2026-11-27)
 
 <a id="a10"></a>
 **A10 — The PayPal error page has no heading, and the browser tab shows only the journal's name** · 🐞 · low.
@@ -1007,6 +1023,19 @@ follows "Enable": a press has the "Payments" tab too, but its side menu
 never gains either entry.
 Basis: test run; probe, 2026-10-01. <sup>f-a12</sup>
 
+<a id="a13"></a>
+**A13 — A membership paid through PayPal is never recorded: the journal's server fails when PayPal sends the reader back** · 🐞 · user-visible · crash: server.
+On a journal taking payments through "Paypal Fee Payment", the typed
+membership address of Rule 7a, the only way to pay one ([A7](#a7)),
+sends the reader to PayPal for the "Individual Membership Fee".
+When PayPal sends the paying reader back, the journal's server fails
+before it records anything: the reader gets a server error page after
+the money is taken, and nothing in the journal shows the payment. A
+test install, reaching no PayPal account, shows only Rule 9's error
+page; the failure was seen by running the journal's return step on a
+queued membership payment.
+Basis: probe, 2026-11-27. <sup>f-a13</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1031,7 +1060,9 @@ settled, and the f-a notes); what cannot be seen on the test installs is
 named in note n. The suites' test runs of 2026-09-27 corrected Rules 1
 and 4 and scenarios 1, 2, 4 and 6 (notes d, td1, td3, s0, f-a12). A
 re-probe of 2026-09-29 on OMP and OJS scoped Rule 9's sign-in and the
-manual page's layout to a journal (note td16).
+manual page's layout to a journal (note td16). A re-probe of 2026-11-27
+on OJS main, two runs, re-read the membership address and corrected
+Rule 7a, A7 and A9 and added A13 (notes m, td13, f-a7, f-a9, f-a13).
 
 <a id="fn-a"></a>
 **a** — OJS `classes/payment/ojs/OJSPaymentManager.php` (extends lib/pkp `classes/payment/PaymentManager.php`): `isConfigured()` is `PaymentManager::isConfigured()` (a chosen plugin exists and its own `isConfigured($context)` holds) and `paymentsEnabled`; `publicationEnabled()` adds `publicationFee > 0`, `purchaseArticleEnabled()`, `purchaseIssueEnabled()` and `membershipEnabled()` their own fee `> 0`, `onlyPdfEnabled()` `restrictOnlyPdf`. The APC's three consumers: OJS `classes/decision/types/Accept.php` and `SkipExternalReview.php` `getSteps()` prepend `RequestPayment::getPaymentForm()` when `publicationEnabled()`; `pages/dashboard/DashboardHandler.php` sets `pageInitConfig.publicationSettings.submissionPaymentsEnabled` from `publicationEnabled()`, which `workflowConfigEditorialOJS.js::getHeaderItems()` reads; `classes/publication/Repository.php::validatePublish()` (note j). Live-probed 2026-09-02 (the workflow-screen spec's probe; Rule 5): the header's "Payments" absent with payments enabled, a fee of 50 and no instructions, present once the instructions were saved, absent again at a fee of 0. Live-probed 2026-09-20 (seed facts; Rule 5): with no instructions "Accept Submission" had no "Request Payment" page. Live-probed 2026-09-27 (Rule 5; note td2): the three consumers came and went together at every end of the rule.
@@ -1070,10 +1101,10 @@ manual page's layout to a journal (note td16).
 **l** — `plugins/paymethod/paypal/PaypalPaymentForm.php::display()`: in sandbox mode `common.sandbox`; otherwise an Omnipay `PayPal_Rest` purchase with `clientId`, `secret` and `testMode` (PayPal's sandbox when set), redirecting to PayPal, and any failure shows `plugins.paymethod.paypal.error` "A transaction error occurred. Please contact the journal manager for details."; PayPal returns to `payment/plugin/PaypalPayment/return?queuedPaymentId=…`, where `PaypalPaymentPlugin::handle()` confirms the amount and calls `fulfillQueuedPayment()` (records the payment, deletes the request and its task, activates or renews a subscription) and sends to the request URL. The test installs run `sandbox = Off` (`config.test.inc.php`) with no PayPal account. Live-probed 2026-09-27 (Rules 3, 9; Settings bullet 5; note td9): with "Account Name" "test" and "Client ID" and "Secret" empty or "x", the page answered 200 with no redirect and showed the error, "Test Mode" ticked or not; the server logged "PayPal transaction exception: Authentication failed due to invalid authentication credentials or a missing Authorization header.".
 
 <a id="fn-m"></a>
-**m** — OJS `pages/user/UserHandler.php::payMembership()` queues `PAYMENT_TYPE_MEMBERSHIP` for `membershipFee` and shows the method's page, with no check that payments are set up; no template links to it; `OJSPaymentManager::createQueuedPayment()` treats the type as deprecated (`error_log`, `assert(false)`, no request URL); `fulfillQueuedPayment()` would move the user's `dateEndMembership` a year on, which `ArticleHandler`/`IssueHandler` read. Nothing on the screens shows or edits `dateEndMembership`. With payments not set up `getPaymentForm()` returns `false` after the request is queued (note f-a9). Live-probed 2026-09-27 (Actors row 6; Rule 7a; note td13).
+**m** — OJS `pages/user/UserHandler.php::payMembership()` queues `PAYMENT_TYPE_MEMBERSHIP` for `membershipFee` (even at 0) and shows the method's page, with no check of its own; `PaymentManager::queuePayment()` queues nothing unless payments are set up (note f-a9). No template links to it. `OJSPaymentManager::createQueuedPayment()` treats the type as deprecated (`error_log` "Invalid payment type "1"" on every visit, `assert(false)`, no request URL). `fulfillQueuedPayment()` (PayPal's return, note l) stops in `createCompletedPayment()` with a `TypeError` from `Payment::getAssocId(): int` (pkp/pkp-lib#10834) before it records a payment (note f-a13). The `dateEndMembership` it would set is not in `lib/pkp/schemas/user.json`, so it is not stored, and `ArticleHandler`/`IssueHandler`, which ask for it, read null (the Subscriptions spec's note f-a33). Nothing on the screens shows or edits it. Live-probed 2026-09-27 (Actors row 6; Rule 7a; note td13). Live-probed 2026-11-27, OJS main, two runs (Rule 7a; A7, A9, A13; note td13): every visit to the page logged "Invalid payment type "1""; with no "Association Membership" set a row of amount 0 was queued; `user_settings` held no end date and `getData('dateEndMembership')` read null after a fresh load. stable-3_5_0 has the same `payMembership()`, `createQueuedPayment()`, `fulfillQueuedPayment()`, `createCompletedPayment()` and typed `Payment` (read).
 
 <a id="fn-n"></a>
-**n** — No payment completes on the test installs: they reach no PayPal account (note l), the return address PayPal calls is not a request any screen sends, and the manual method completes nothing (Rule 11). So the hand-over to PayPal (Rule 9), a completed online payment (Rule 12) and its row in the list (Rule 17: the account the request was made for as "User", and the reader-fee and membership payment types) cannot be seen there; they are read from the code. `PaypalPaymentPlugin::handle()` calls `OJSPaymentManager::fulfillQueuedPayment()`, which writes the completed payment with the queued payment's user, type and amount (note l); the request's user is the reader for a reader fee and the requesting editor for the APC (note i); `getPaymentName()` names the types (note f). Live-probed 2026-09-27: every PayPal payment page showed the error of Rule 9, and after the manual method's notifications the list read "No Items". Settled by one payment completed with a PayPal sandbox account ("Test Mode" ticked).
+**n** — No payment completes on the test installs: they reach no PayPal account (note l), the return address PayPal calls is not a request any screen sends, and the manual method completes nothing (Rule 11). So the hand-over to PayPal (Rule 9), a completed online payment (Rule 12) and its row in the list (Rule 17: the account the request was made for as "User", and the reader-fee payment types) cannot be seen there; they are read from the code. A membership payment's return was run from PHP instead, and fails before anything is recorded (note f-a13). `PaypalPaymentPlugin::handle()` calls `OJSPaymentManager::fulfillQueuedPayment()`, which writes the completed payment with the queued payment's user, type and amount (note l); the request's user is the reader for a reader fee and the requesting editor for the APC (note i); `getPaymentName()` names the types (note f). Live-probed 2026-09-27: every PayPal payment page showed the error of Rule 9, and after the manual method's notifications the list read "No Items". Settled by one payment completed with a PayPal sandbox account ("Test Mode" ticked).
 
 <a id="fn-s0"></a>
 **s0** — Scenario seeding. Scenarios 1 to 5 each run on a scratch journal from `POST scenarios/context` with throwaway `users[]` (password: the username twice): `manager` (the Journal Manager) in scenarios 1, 2, 4 and 5; `sectionEditor` in scenarios 3 and 4; `author` (the submitting Author) in every one; in scenario 3 also a second `author` account and a `reader`. The payment settings are the `payments` key: scenario 1 `{enabled: false, publicationFee: 50}`; scenario 2 `{currency: 'USD', paymentPluginName: 'ManualPayment', manualInstructions: 'Pay by bank transfer.'}`; scenarios 4 and 5 the same plus `publicationFee: 50`; scenario 3 the same with `manualInstructions: 'Pay by bank transfer.\nAccount 123.'` and `publicationFee: 50`, together with `publishingMode: 'subscription'`, `subscriptionTypes: [{name: 'Online Year', cost: 40, currency: 'USD', duration: 12}]` and `issues: [{volume: 1, number: 1, year: 2026, published: true}]`. "Tidal Patterns" comes from `POST scenarios/submission` with `title: 'Tidal Patterns'` and the throwaway `author` as `submitter`: at the Submission stage in scenarios 1, 2, 3 and 5 (scenario 3 with `participants: [{username: <sectionEditor>, role: 'sectionEditor'}, {username: <second author>, role: 'author'}]`); in scenario 4 with the Section Editor in `participants[]` and `decisions: ['skipExternalReview', 'sendToProduction']` (the menu reads "Unpaid" whether or not that seeded decision requests the fee, Rule 13). Scenario 4's publish windows are the Journal Manager's: in the OJS suite's test run of 2026-09-27 the stage view's "Schedule For Publication" took the assigned Section Editor to "Publication: Title & Abstract", which read "Status: Unscheduled" with no publish button beside it, its header offering "Payments", "Preview", "Activity Log" and "Library". Scenario 5's request is made on screen before its steps: the Journal Manager's "Accept and Skip Review" on "Tidal Patterns" with "Request publication fee (50 USD)" chosen, as in scenario 3's first bullet. Scenario 6 runs on a scratch OMP press from `POST scenarios/context` with the throwaway `manager` (the Press Manager) and `author`, and "Tidal Patterns" from `POST scenarios/submission` with `decisions: ['sendExternalReview']`; the `payments` key is OJS only, so the press's tab is saved on screen, and its control is scenario 1. Scenario 7 runs on OPS `publicknowledge` as `manager.maya` (the Preprint Server Manager), password as `docs/process/users.md` gives it; its control is scenario 1. A scratch journal's principal contact is "Site Admin" <admin@mail.test> (seed-facts). Choosing "the US dollar" in "Currency" is the list's USD entry. The mail catcher is Mailpit at `MAILPIT_URL` (default `http://127.0.0.1:8025`), scoped by recipient address. Live-probed 2026-09-27: `publicknowledge` (OJS) keeps "Enable" unticked, and the `payments` key on a press answers 400 `Unsupported spec key "payments"`.
@@ -1115,7 +1146,7 @@ manual page's layout to a journal (note td16).
 **td12** — Live-probed 2026-09-27 (Actors row 4; A6): the header's "Payments", with "Publication Fee", "Waived", "Paid", "Unpaid" and "Save", was offered to the Journal Manager, Editor, Production Editor, Site Administrator, the assigned Section Editor and Guest Editor, and the assigned Copyeditor, Layout Editor, Proofreader and Funding Coordinator; the Author's and co-author's views had none, and the editorial address refused them. The assigned Copyeditor saved "Paid" ("Saved", "Paid" after a reload, the list's row "Publication Fee 50 USD"); the assigned Layout Editor saved "Waived" (the row "Publication Fee 0" in the Layout Editor's name), and a waived article then scheduled.
 
 <a id="fn-td13"></a>
-**td13** — Live-probed 2026-09-27 (Actors row 6; Rule 7a; A7, A9), on scratch journals with payments set up and "Association Membership" 20, in two runs: as a signed-in Reader, the home page, About the Journal, the "Subscriptions" page, "My Subscriptions" and every Profile tab offered no membership. The journal's address followed by "user/payMembership" opened "Manual Fee Payment" with "Title" "Individual Membership Fee" and "Fee" "20.00 (USD)"; "Send notification of payment" showed "Payment notification sent" with "Home" as the only link, the principal contact received a "Manual Payment Notification" for "Individual Membership Fee" ("The cost is 20 (USD)."), the list of payments stayed "No Items" and the locked galleys stayed locked. Signed out, and signed in on a journal with payments off, the address gave a blank page (note f-a9). OMP and OPS `publicknowledge` answered "404 Not Found" at the address.
+**td13** — Live-probed 2026-09-27 (Actors row 6; Rule 7a; A7, A9), on scratch journals with payments set up and "Association Membership" 20, in two runs: as a signed-in Reader, the home page, About the Journal, the "Subscriptions" page, "My Subscriptions" and every Profile tab offered no membership. The journal's address followed by "user/payMembership" opened "Manual Fee Payment" with "Title" "Individual Membership Fee" and "Fee" "20.00 (USD)"; "Send notification of payment" showed "Payment notification sent" with "Home" as the only link, the principal contact received a "Manual Payment Notification" for "Individual Membership Fee" ("The cost is 20 (USD)."), the list of payments stayed "No Items" and the locked galleys stayed locked. Signed out, and signed in on a journal with payments off, the address gave a blank page (note f-a9). OMP and OPS `publicknowledge` answered "404 Not Found" at the address. Re-probed 2026-11-27, OJS main, two runs, on scratch journals with "Manual Fee Payment" set up: the Site Administrator, Journal Manager, Subscription Manager, Section Editor, Copyeditor, Reviewer, Author and Reader each got "Manual Fee Payment" with "Title" "Individual Membership Fee" and "Fee" "20.00 (USD)" (another journal "7.00 (USD)"). With no "Association Membership" set, the page read "Title" "Individual Membership Fee" and no "Fee" row, and "Send notification of payment" still showed "Payment notification sent" and reached the principal contact. With the fee at 20, the notification's email read "The item being paid for is "Individual Membership Fee". The cost is 20 (USD).", the payer got no copy, the breadcrumb's "Home" was the only link, the "Payments" tab read "No Items" for the Journal Manager and the Subscription Manager, "Individual Subscriptions" did not list the payer, and the Journal Manager's Users & Roles › "Edit" of the payer showed no membership or end date. Signed out, the page was blank on a set-up journal, on one with "Enable" unticked and on a fresh journal; signed in, on the last two and on one with "Enable" ticked and no instructions (note f-a9). OMP and OPS `publicknowledge`, signed out, as `reader.rosa` and as `manager.maya`: a redirect to `…/en/user/payMembership`, then "404 Not Found".
 
 <a id="fn-td14"></a>
 **td14** — Live-probed 2026-09-27 (Rule 10; Side effects; Settings bullet 9; A8): on a journal whose "Subscription Policies" name a subscription contact, a Reader's "Send notification of payment" for a subscription bought, one renewed, an article and an issue each reached the principal contact, and the subscription contact received nothing. "Continue" led to the current issue after a purchase, "My Subscriptions" after a renewal, and the article's and the issue's pages. Manage Emails lists "Payment Request" and no row for the manual payment notification; "Edit Payment Request" took an added sentence, and the next request's email carried it. Live-probed 2026-09-25 (seen while checking Subscriptions): the purchase's email went from the reader's own address to the principal contact.
@@ -1149,13 +1180,13 @@ Issue report: [pkp-e2e#356](https://github.com/jardakotesovec/pkp-e2e/issues/356
 **f-a6** — The menu is given to every editorial view and its save admits `ROLE_ID_ASSISTANT` with submission access (notes c, g). Live-probed 2026-09-27 (note td12): an assigned Copyeditor saved "Paid" and an assigned Layout Editor "Waived", and the waived article scheduled.
 
 <a id="fn-f-a7"></a>
-**f-a7** — Note m; `payment.membership.buyMembership` "Buy Individual Membership" and `.renewMembership` are used nowhere. Live-probed 2026-09-27 (note td13).
+**f-a7** — Note m; `payment.membership.buyMembership` "Buy Individual Membership" and `.renewMembership` "Renew Individual Membership" are used nowhere, on main and stable-3_5_0; no template, JS or Vue file names `payMembership`. Live-probed 2026-09-27 (note td13). Live-probed 2026-11-27, OJS main, two runs (note td13): the Reader found no "membership" text or link on the home page, About the Journal, "Subscriptions", "My Subscriptions" or any of the seven Profile tabs. On journals requiring subscriptions, a Reader with a membership end date a year ahead written into `user_settings` by hand, and a Reader after the journal's PayPal-return code ran for their membership payment (note f-a13), were both refused as before: the article PDF led to "Subscriptions" and the "Full Issue" to "Manual Fee Payment" for a "Purchase Issue Fee"; an active subscriber, and a buyer once set "Active", opened both PDFs (the Subscriptions spec's note f-a33).
 
 <a id="fn-f-a8"></a>
 **f-a8** — `ManualPaymentPlugin::handle('notify')` sends to `contactEmail` for every payment type; `subscriptionEmail` is read only by `SubscriptionAction` and the subscription forms. Live-probed 2026-09-25 (seen while checking Subscriptions): the principal contact received it. Live-probed 2026-09-27 (note td14): the same for a renewal, an article and an issue.
 
 <a id="fn-f-a9"></a>
-**f-a9** — `UserHandler::payMembership()` (note m) reads `$user->getId()` with no sign-in check, and with payments not set up queues the membership payment and then calls `display()` on the `false` that `getPaymentForm()` returns. Live-probed 2026-09-27 (note td13), two runs: `GET {journal}/user/payMembership` answered 500 with an empty page for a signed-out visitor on a scratch journal and on `publicknowledge` (logged "Uncaught Error: Call to a member function getId() on null in pages/user/UserHandler.php:434"), and for a signed-in Reader on a journal with payments off (logged "Call to a member function display() on false in pages/user/UserHandler.php:438", after the queued payment was written).
+**f-a9** — `UserHandler::payMembership()` (note m) reads `$user->getId()` with no sign-in check, and has no payment check of its own: with payments not set up `PaymentManager::queuePayment()` stores nothing, yet the handler shows what `PaymentManager::getPaymentForm()` returns. With "Enable" unticked and the manual method still set up, that is the manual form for a payment that was never queued, and the page fails on its missing id; with the method not set up, or on a fresh journal, it is `false`, and `display()` fails on it. Neither writes a queued payment. Live-probed 2026-09-27 (note td13), two runs: `GET {journal}/user/payMembership` answered 500 with an empty page for a signed-out visitor on a scratch journal and on `publicknowledge` (logged "Uncaught Error: Call to a member function getId() on null in pages/user/UserHandler.php:434"), and for a signed-in Reader on a journal with payments off (logged "Call to a member function display() on false in pages/user/UserHandler.php:438"). Live-probed 2026-11-27, OJS main, two runs, every end answering 500 with an empty page and no queued payment written: signed out on a set-up journal, one with "Enable" unticked and a fresh journal ("getId() on null", the same line); signed in with "Enable" unticked and the manual method set up ("Uncaught Error: Typed property PKP\payment\Payment::$paymentId must not be accessed before initialization in lib/pkp/classes/payment/Payment.php:63"); signed in with "Enable" ticked and no instructions, and on a fresh journal ("display() on false", the same line). Signed out on the set-up journal, `GET {journal}/user/purchaseSubscription/individual` and `…/institutional` also answered 500 with an empty page (logged "Call to a member function getId() on null in pages/user/UserHandler.php:185" and ":182"; the Subscriptions spec's note f-a12).
 Issue report: [pkp-e2e#357](https://github.com/jardakotesovec/pkp-e2e/issues/357) ([docs/issues/U52-A3-A9-payment-link-blank-page-when-payments-off.md](../issues/U52-A3-A9-payment-link-blank-page-when-payments-off.md)).
 Issue report: [pkp-e2e#358](https://github.com/jardakotesovec/pkp-e2e/issues/358) ([docs/issues/U52-A9-membership-address-signed-out-blank-page.md](../issues/U52-A9-membership-address-signed-out-blank-page.md)).
 
@@ -1170,6 +1201,9 @@ Issue report: [pkp-e2e#359](https://github.com/jardakotesovec/pkp-e2e/issues/359
 <a id="fn-f-a12"></a>
 **f-a12** — ui-library `src/components/Container/SettingsPage.vue`: on the `form-success` of `FORM_PAYMENT_SETTINGS` with `paymentsEnabled` off it deletes only `menu.payments`; `menu.institutions`, which the same handler adds with `payments` when `paymentsEnabled` is on, is removed only by the `FORM_CONTEXT_STATISTICS` branch (note d). The server builds the menu afresh on every page load, so a reload drops the entry. OJS suite's test run of 2026-09-27 (Rule 1; scenario 1): after "Save" with "Enable" unticked the side menu held "Institutions" and no "Payments" for the whole 10-second wait on the suite's scratch journal, and the same after each of two unticked saves on another scratch journal driven by hand; after a reload it held neither; a ticked save added both on the same page.
 Issue report: [pkp-e2e#354](https://github.com/jardakotesovec/pkp-e2e/issues/354) ([docs/issues/U52-A12-institutions-menu-entry-stays-after-payments-off.md](../issues/U52-A12-institutions-menu-entry-stays-after-payments-off.md)).
+
+<a id="fn-f-a13"></a>
+**f-a13** — PayPal returns to `payment/plugin/PaypalPayment/return` (note l), where `PaypalPaymentPlugin::handle()` calls `OJSPaymentManager::fulfillQueuedPayment()`; its `createCompletedPayment()` reads `Payment::getAssocId()`, typed `int` since pkp/pkp-lib#10834 (9ad8c699ea, 2025-02-12). A membership payment has no assoc id, so the call throws a `TypeError` before the completed payment is written, the queued payment deleted or the end date set (note m). `handle()` catches `\Exception` only, so the `TypeError` escapes and the request ends in a server error. stable-3_5_0 has the same code (read). Live-probed 2026-11-27, OJS main, two runs, on a scratch journal requiring subscriptions, with "Paypal Fee Payment" chosen and "Account Name" typed on screen by the Journal Manager, and "Association Membership" 20: the Reader's typed membership address showed "A transaction error occurred. Please contact the journal manager for details." (Rule 9; A10) and queued a payment, the server logging "PayPal transaction exception: Authentication failed…". `fulfillQueuedPayment()`, the call `handle()` makes once PayPal confirms a payment, run from PHP on that queued payment with the gateway left out, stopped with "TypeError: PKP\payment\Payment::getAssocId(): Return value must be of type int, null returned at lib/pkp/classes/payment/Payment.php:168", thrown in `createCompletedPayment()`; the queued payment stayed, `completed_payments` stayed empty, the Journal Manager's "Payments" tab read "No Items", and `getData('dateEndMembership')` read null after a fresh load. The PayPal round trip itself cannot be made from a test install (note n).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP `schemas/context.json` `paymentPluginName` default `ManualPayment`, applied when a press is created; OJS gives no default (note b). Live-probed 2026-09-27 (note td1): the press arrived with "Manual Fee Payment" chosen and "Enable" unticked, the journal with none chosen.
