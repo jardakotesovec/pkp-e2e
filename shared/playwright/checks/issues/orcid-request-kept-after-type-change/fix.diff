@@ -1,0 +1,26 @@
+--- a/lib/pkp/api/v1/submissions/PKPSubmissionController.php
++++ b/lib/pkp/api/v1/submissions/PKPSubmissionController.php
+@@ -1782,10 +1782,6 @@
+             return response()->json($errors, Response::HTTP_BAD_REQUEST);
+         }
+ 
+-        if ($shouldSendOrcidEmail && !in_array($params['contributorType'] ?? null, ContributorType::getTypesWithOrcid())) {
+-            return response()->json(['orcid' => [__('api.orcid.400.personOnly')]], Response::HTTP_BAD_REQUEST);
+-        }
+-
+         $affiliationParams = $params['affiliations'] ?? [];
+         unset($params['affiliations']);
+ 
+@@ -2576,6 +2572,12 @@
+                     ? (isset($params[$key]) ? array_map(fn ($_) => null, $params[$key]) : $nulledMProp)
+                     : null;
+             });
++
++        // The ORCID iD field shows only for the types that can hold an iD, so a verification
++        // request it left on the form before the type was changed belongs to none of the others.
++        if (!in_array($contributorType, ContributorType::getTypesWithOrcid())) {
++            unset($params['orcid']);
++        }
+     }
+ 
+     /**

@@ -852,7 +852,7 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A1](#a1) | "Send Review To ORCID" is offered before the review is complete, and confirms in silence | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A2](#a2) | A contributor who presses "Deny" at ORCID lands on a page showing "##orcid.authDenied##" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | "What is ORCID?" beside the ORCID button opens ORCID's sign-in instead of the explanation page | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A5](#a5) | A contributor's ORCID iD field shows a refused verification request as sent, and a refused delete as done | 🐞 | low | issues (claude), 2026-11-03 — re-verified |
+| [A5](#a5) | A contributor's ORCID iD field shows a refused verification request as sent, and a refused delete as done | 🐞 | medium | issues (claude), 2026-11-27 — re-verified |
 | [A8](#a8) | A press's or preprint server's ORCID verification failure page says to contact "the journal manager" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | In 32 interface languages, both ORCID settings tabs carry the name of the retired ORCID Profile plugin | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | A contributor following the "Requesting updated ORCID record access" link gets a blank page and can never allow deposits | 🐞 | medium · crash: server | issues (claude), 2026-10-07 — re-verified |
@@ -863,8 +863,8 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A21](#a21) | The "Requesting updated ORCID record access" email asks contributors for "updateded permissions" | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A22](#a22) | The ORCID authorization page never tells a contributor their published work is going to their record | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A23](#a23) | An edit to a published article's or preprint's metadata no longer reaches its contributors' ORCID records | 🐞 | medium | — |
-| [A25](#a25) | "Request verification" for a contributor without an email sends nothing, and nobody is told | 🐞 | low · crash: server | — |
-| [A26](#a26) | A contributor asked to verify while being added, then made an Organization or Anonymous, cannot be saved | 🐞 | low | — |
+| [A25](#a25) | "Request verification" for a contributor without an email sends nothing, and nobody is told | 🐞 | medium | issues (claude), 2026-11-27 — re-verified |
+| [A26](#a26) | Adding a contributor fails when ORCID verification was requested and the type then changed from Person | 🐞 | low | issues (claude), 2026-11-27 — re-verified |
 | [OJS1](#ojs1) | A review sent to ORCID by a journal with no country fails in the background instead of being skipped | 🐞 | low · crash: server | issues (claude), 2026-10-19 — re-verified |
 | [OJS2](#ojs2) | Verifying from the email for an article published without an issue ends on a blank page, though the iD is stored | 🐞 | medium · crash: server | issues (claude), 2026-10-19 — re-verified |
 | [OPS2](#ops2) | The ORCID request emails have no rows on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -937,25 +937,29 @@ and carry on. Nothing typed is lost.
 Basis: probe, 2026-10-03. <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
-**A5 — A contributor's ORCID iD field shows a refused verification request as sent, and a refused delete as done** · 🐞 · low.
+**A5 — A contributor's ORCID iD field shows a refused verification request as sent, and a refused delete as done** · 🐞 · medium.
 When the server refuses a contributor's "Request verification" or
-"Delete" under "ORCID iD", a window titled "Error" says the form could
-not be submitted, but the field behind it changes as if the action had
+"Delete" under "ORCID iD", the field changes as if the action had
 worked: it reads "ORCID Verification has been requested!" with "Resend
 Verification Email", or the iD disappears. Nothing is sent or removed;
-only the field is wrong, until the form is opened again. Anyone who may
-edit the contributor (an editor, an Assistant allowed to edit, an author)
-meets it when something changes between opening the form and pressing
-the button: they signed out in another tab, their session ran out after
-days without use, ORCID was turned off, they lost the right to edit, or
-the contributor was removed. Until 2026-10-30 the server also refused
-both actions to every Assistant allowed to edit the contributor; the
-routes now admit that Assistant (pkp/pkp-lib#13517). On an install
-with pkp-lib#11972 (Fields, contributor's ORCID iD field) a request for
-a contributor stored without an email is refused too, with no window at
-all ([A25](#a25)).
-Basis: probe, 2026-11-03. <sup>[f-a5](#fn-a5)</sup>
-Report: refresh owed — pkp-lib#11972 (merged 2026-11-23; OJS `main` has it, OMP and OPS once their pointers move) adds refusals that need no change after the form opened, both made before the request is stored: a person stored without an email ([A25](#a25)) and a contributor who is not a person ("ORCID verification can only be sent to a person.", the message of [A26](#a26)). So the report's Cause changes twice: where it says a refusal needs a change after the form opened, and its note on the request stored before queuing the email fails. Each case listed above, ORCID turned off included, still opens the "Error" window; the no-email refusal opens none (probed 2026-11-24, OJS), which the report's Summary must say; touches `OrcidController::requestAuthorVerification()` and `FieldOrcid.vue` `sendEmailRequest()` (2026-11-24)
+the field is wrong until the form is opened again.
+
+On `main`, two refusals ([A25](#a25) for the first) open no window at all, so nobody is told that
+no email went out. One is a request for a person stored without an
+email. The other is a request for a contributor saved as an
+organization or anonymous whose form is switched to "Person", and
+"Request verification" pressed, before the form is saved. Neither
+refusal exists in a release yet.
+
+Every other refusal opens a window titled "Error" saying the form could
+not be submitted, while the field behind it contradicts it. Anyone who
+may edit the contributor (an editor, an Assistant allowed to edit, an
+author) meets those when something changes between opening the form
+and pressing the button: they signed out in another tab, their session
+ran out after days without use, ORCID was turned off, they lost the
+right to edit, or the contributor was removed. That is the fault 3.5
+shows today.
+Basis: probe, 2026-11-27. <sup>[f-a5](#fn-a5)</sup>
 
 <a id="a6"></a>
 **A6 — The email toggle's label misdescribes its trigger** · ❓ · minor.
@@ -1203,7 +1207,7 @@ a resend that does nothing.
 Basis: test run, 2026-10-26. <sup>[f-a24](#fn-a24)</sup>
 
 <a id="a25"></a>
-**A25 — "Request verification" for a contributor without an email sends nothing, and nobody is told** · 🐞 · low · crash: server.
+**A25 — "Request verification" for a contributor without an email sends nothing, and nobody is told** · 🐞 · medium.
 A person contributor stored without an email (the form refuses to
 save a person without one, but before pkp-lib#11972 a program could
 empty a person's email, see
@@ -1221,26 +1225,27 @@ contributor nothing either (seen on a press). Either way nobody is
 emailed, and the editor is not told that the contributor needs an
 email.
 (Rules 8b, 13)
-Basis: probe, 2026-11-24. <sup>[f-a25](#fn-a25)</sup>
+Basis: probe, 2026-11-27. <sup>[f-a25](#fn-a25)</sup>
 
 <a id="a26"></a>
-**A26 — A contributor asked to verify while being added, then made an Organization or Anonymous, cannot be saved** · 🐞 · low.
-On an install with pkp-lib#11972 (Fields, contributor's ORCID iD
-field), a Journal Manager on "Add Contributor" presses "Request
-verification" for a Person and answers "Yes", then changes "Contributor
-Type" to "Organization or group" (or "Anonymous") and presses "Save".
-The form is refused with the page notice "The form was not saved
-because 1 error(s) were encountered. Please correct these errors and
-try again." and, at its foot, "Please correct one error. Go to ORCID
-iD: ORCID verification can only be sent to a person.", but that type's
-form has no ORCID iD field, so no field shows the error and "Jump to
-next error" goes nowhere. Choosing "Person" again shows "Request
-verification", as if the request had been dropped, yet choosing the
-other type again and pressing "Save" is refused the same way. Only
-closing the form and adding the contributor again saves it. Nothing is
-lost but the typing. Without the change the same steps save the
-contributor and email it "Submission ORCID". (Rule 8b)
-Basis: probe, 2026-11-24. <sup>[f-a26](#fn-a26)</sup>
+**A26 — Adding a contributor fails when ORCID verification was requested and the type then changed from Person** · 🐞 · low.
+On "Add Contributor", with ORCID enabled, a user presses "Request
+verification" under "ORCID iD" for a Person and confirms. If they then
+change "Contributor Type" to "Organization or group" or "Anonymous",
+"Save" is refused: "The form was not saved because 1 error(s) were
+encountered.", and at the form's foot "Go to ORCID iD: ORCID
+verification can only be sent to a person.". That type's form has no
+ORCID iD field, so nothing on it can be corrected.
+
+Switching back to "Person" does not help: the field reads "Request
+verification", but "Save" stays disabled, even with the person's names
+and email filled in. The contributor can only be added by closing the
+form and starting again without the request.
+
+No release carries it: the refusal came with a change merged on
+2026-11-23.
+(Rule 8b)
+Basis: probe, 2026-11-27. <sup>[f-a26](#fn-a26)</sup>
 
 <a id="a27"></a>
 **A27 — A Person asked to verify can be made an Organization or Anonymous, and keeps the verification link** · ❓ · latent.
@@ -2526,6 +2531,7 @@ and OMP; on OMP the second run's drain recorded Nemo's
 kept to its scratch journal, recorded no failed job); on OJS the job
 was queued and ended quietly (`SendAuthorMail::handle()` returns for a
 non-person or an empty email), no failed job in either run.
+Issue report (its `main` half): [pkp-e2e#749](https://github.com/jardakotesovec/pkp-e2e/issues/749) ([docs/issues/U04-A5-orcid-field-refusal-shown-as-done.md](../issues/U04-A5-orcid-field-refusal-shown-as-done.md)). Its 3.5 half (the request accepted, the send job then failing on an empty address) is a fault `main` lost and is not written up yet (2026-11-27).
 
 <a id="fn-a26"></a>
 **f-a26** — Live-probed 2026-11-24 (the installs and script of note
@@ -2543,6 +2549,7 @@ were unchanged and nothing was queued or delivered. On OMP and OPS the
 same save answered 200, stored the Organization or Anonymous row with
 `orcidEmailToken` and `orcidVerificationRequested=1`, and "Submission
 ORCID" was delivered to it.
+Issue report: docs/issues/U04-A26-orcid-request-blocks-organization-save.md
 
 <a id="fn-a27"></a>
 **f-a27** — Live-probed 2026-11-24 (the installs and script of note

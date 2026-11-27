@@ -371,3 +371,81 @@ async function addWithRequest(page, app) {
 }
 
 module.exports = {T, sleep, flat, dismissErrors, setOrcidMember, seedVerifiedOrcid, logoutInOtherTab, loginOnTab, CASES, NEWCOMER, ADDED, enableOrcid, grantPermissions, roleTakesProduction, newcomerJoins, assign, verifiedId, stored, openContributors, openContributor, fieldState, closeContributor, reopenContributor, pressAndConfirm, mailTo, addWithRequest, screen, shot};
+
+// ---- walk-refused-at-once.js (2026-11-27 refresh: the refusals pkp/pkp-lib#11972 added) ----
+
+/** Per app: the dataset contributor's author_id on the submission's current publication (main and 3.5 alike). */
+function authorId(app, c) {
+    const v = sql(app, `select a.author_id from authors a join submissions s on s.current_publication_id = a.publication_id where s.submission_id = ${c.id} and a.email = '${c.email}'`);
+    return v ? Number(v.split('\n')[0]) : null;
+}
+
+/** A row's "Edit" by its text; the side window found by its Email box (an organization's form has no given name). */
+async function openEditFor(page, text) {
+    const item = page.locator('.listPanel__item').filter({hasText: text}).first();
+    await item.getByRole('button', {name: 'Edit', exact: true}).click();
+    const modal = page.locator('[data-cy="active-modal"]').filter({has: page.locator('input[name="email"]')});
+    await modal.locator('input[name="email"]').first().waitFor({timeout: T});
+    await idle(page);
+    await sleep(600);
+    return modal;
+}
+
+/** "Contributor Type": the radio by its label; false when the form has no such choice (3.5). */
+async function setType(modal, label) {
+    const radio = modal.getByRole('radio', {name: label, exact: true});
+    if (!(await radio.count())) return false;
+    await radio.check();
+    await sleep(500);
+    return true;
+}
+
+/** The form's "ORCID iD" field inside `modal`. */
+function orcidField(modal) {
+    return modal.locator('.pkpFormField').filter({hasText: 'ORCID iD'}).first();
+}
+
+/** "Add Contributor", "Organization or group", the name, "Canada", "Author" when asked, "Save". */
+async function addOrganization(page, name) {
+    await page.getByRole('button', {name: 'Add Contributor'}).click();
+    const modal = page.locator('[data-cy="active-modal"]').filter({has: page.locator('input[name="email"]')});
+    await modal.locator('input[name="email"]').first().waitFor({timeout: T});
+    await idle(page);
+    await sleep(400);
+    if (!(await setType(modal, 'Organization or group'))) {
+        await closeContributor(page, modal);
+        return {typeChoice: false};
+    }
+    await modal.locator('input[name="organizationName-en"]').fill(name);
+    await modal.locator('select[name="country"]').selectOption({label: 'Canada'});
+    const author = modal.getByRole('checkbox', {name: 'Author', exact: true});
+    if ((await author.count()) && !(await author.first().isChecked())) await author.first().check();
+    const answered = page.waitForResponse((r) => /\/contributors(\?|$)/.test(r.url()) && r.request().method() === 'POST', {timeout: T}).catch(() => null);
+    await modal.getByRole('button', {name: 'Save', exact: true}).last().click();
+    const r = await answered;
+    await sleep(1500);
+    await idle(page);
+    let id = null;
+    try { id = r ? (await r.json()).id : null; } catch (e) { /* not json */ }
+    return {typeChoice: true, save: r ? r.status() : null, id, rows: flat(await page.locator('.listPanel--contributor').innerText().catch(() => ''), 600)};
+}
+
+/** The jobs and failed jobs tables' newest ids and the newest job names since `from` (both from sql()). */
+function jobsState(app, from = {job: 0, failed: 0}) {
+    const job = Number(sql(app, 'select coalesce(max(id),0) from jobs') || 0);
+    const failed = Number(sql(app, 'select coalesce(max(id),0) from failed_jobs') || 0);
+    const queued = sql(app, `select substring(payload from '"displayName":"([^"]+)"') from jobs where id > ${from.job} order by id`).split('\n').filter(Boolean);
+    const failures = sql(app, `select substring(exception from 1 for 220) from failed_jobs where id > ${from.failed} order by id`).split('\n').filter(Boolean);
+    return {job, failed, queued, failures};
+}
+
+/** What the database holds for one author now: the email, the type, the ORCID settings. */
+function storedAuthor(app, id) {
+    const type = sql(app, `select column_name from information_schema.columns where table_name = 'authors' and column_name = 'contributor_type'`) ? ', contributor_type' : '';
+    return {
+        row: sql(app, `select author_id, coalesce(email,'<null>')${type} from authors where author_id = ${id}`),
+        orcid: sql(app, `select setting_name, setting_value from author_settings where author_id = ${id} and setting_name like 'orcid%' order by 1`).split('\n').filter(Boolean),
+    };
+}
+
+module.exports = Object.assign(module.exports, {authorId, openEditFor, setType, orcidField, addOrganization, jobsState, storedAuthor});

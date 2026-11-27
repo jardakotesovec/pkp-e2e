@@ -1,6 +1,10 @@
 --- a/lib/ui-library/src/components/Form/fields/FieldOrcid.vue
 +++ b/lib/ui-library/src/components/Form/fields/FieldOrcid.vue
-@@ -189,7 +189,7 @@
+@@ -185,11 +185,10 @@
+ 
+ 			const {isSuccess, fetch} = useFetch(apiUrl, {
+ 				method: 'POST',
+-				expectValidationError: true,
  			});
  			await fetch();
  
@@ -9,7 +13,12 @@
  				this.verificationRequested = true;
  			}
  		},
-@@ -251,7 +251,7 @@
+@@ -246,12 +245,11 @@
+ 			const {apiUrl} = useUrl(`orcid/deleteForAuthor/${this.authorId}`);
+ 			const {isSuccess, fetch} = useFetch(apiUrl, {
+ 				method: 'POST',
+-				expectValidationError: true,
+ 			});
  
  			await fetch();
  
