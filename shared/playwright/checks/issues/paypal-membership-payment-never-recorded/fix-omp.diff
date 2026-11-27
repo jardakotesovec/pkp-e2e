@@ -1,0 +1,27 @@
+--- a/lib/pkp/classes/payment/Payment.php
++++ b/lib/pkp/classes/payment/Payment.php
+@@ -152,18 +152,19 @@
+     }
+ 
+     /**
+-     * Set the association ID for the payment.
+-     *
++     * Set the association ID for the payment (null for a payment with no associated object,
++     * such as a membership).
+      */
+-    public function setAssocId(int $assocId): int
++    public function setAssocId(?int $assocId): ?int
+     {
+         return $this->assocId = $assocId;
+     }
+ 
+     /**
+-     * Get the association ID for the payment.
++     * Get the association ID for the payment (null for a payment with no associated object,
++     * such as a membership).
+      */
+-    public function getAssocId(): int
++    public function getAssocId(): ?int
+     {
+         return $this->assocId;
+     }

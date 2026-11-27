@@ -845,7 +845,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | The PayPal error page has no heading, and the browser tab shows only the journal's name | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A11](#a11) | Merging a payer's account breaks the journal's list of payments and the paid article's publishing | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A12](#a12) | After a journal switches payments off, the side menu keeps "Institutions" until the page is reloaded | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A13](#a13) | A membership paid through PayPal is never recorded: the journal's server fails when PayPal sends the reader back | 🐞 | user-visible · crash: server | — |
+| [A13](#a13) | A reader who pays the membership fee through PayPal gets a server error and the journal records no payment | 🐞 | medium · crash: server | issues (claude), 2026-11-27 — re-verified |
 | [A5](#a5) | Payments save and ask for fees with no currency, and a saved currency cannot be removed | ❓ | minor | — |
 | [A6](#a6) | An assigned assistant role can record the APC as paid or waived | ❓ | user-visible | — |
 | [A7](#a7) | No page offers the "Association Membership" the tab prices | ❓ | user-visible | — |
@@ -1024,16 +1024,22 @@ never gains either entry.
 Basis: test run; probe, 2026-10-01. <sup>f-a12</sup>
 
 <a id="a13"></a>
-**A13 — A membership paid through PayPal is never recorded: the journal's server fails when PayPal sends the reader back** · 🐞 · user-visible · crash: server.
-On a journal taking payments through "Paypal Fee Payment", the typed
-membership address of Rule 7a, the only way to pay one ([A7](#a7)),
-sends the reader to PayPal for the "Individual Membership Fee".
-When PayPal sends the paying reader back, the journal's server fails
-before it records anything: the reader gets a server error page after
-the money is taken, and nothing in the journal shows the payment. A
-test install, reaching no PayPal account, shows only Rule 9's error
-page; the failure was seen by running the journal's return step on a
-queued membership payment.
+**A13 — A reader who pays the membership fee through PayPal gets a server error and the journal records no payment** · 🐞 · medium · crash: server.
+On a journal that takes payments through "Paypal Fee Payment" and sets
+an "Association Membership" fee, a reader can pay the "Individual
+Membership Fee" at the journal's address followed by
+`user/payMembership`. No page links to that address. When PayPal sends
+the reader back after the payment, the journal's server fails before it
+records anything.
+
+PayPal has taken the money, but the journal's "Payments" list stays
+empty and nobody at the journal is told that the reader paid.
+
+The other fees paid through PayPal come back without the error: an
+article purchase and, on a press, a file sale were recorded, and the
+code records subscription, issue and publication fees the same way. On
+an install with PHP's assertions on, the default of a development
+install, the membership page itself already fails, before PayPal.
 Basis: probe, 2026-11-27. <sup>f-a13</sup>
 
 ### OMP
@@ -1204,6 +1210,7 @@ Issue report: [pkp-e2e#354](https://github.com/jardakotesovec/pkp-e2e/issues/354
 
 <a id="fn-f-a13"></a>
 **f-a13** — PayPal returns to `payment/plugin/PaypalPayment/return` (note l), where `PaypalPaymentPlugin::handle()` calls `OJSPaymentManager::fulfillQueuedPayment()`; its `createCompletedPayment()` reads `Payment::getAssocId()`, typed `int` since pkp/pkp-lib#10834 (9ad8c699ea, 2025-02-12). A membership payment has no assoc id, so the call throws a `TypeError` before the completed payment is written, the queued payment deleted or the end date set (note m). `handle()` catches `\Exception` only, so the `TypeError` escapes and the request ends in a server error. stable-3_5_0 has the same code (read). Live-probed 2026-11-27, OJS main, two runs, on a scratch journal requiring subscriptions, with "Paypal Fee Payment" chosen and "Account Name" typed on screen by the Journal Manager, and "Association Membership" 20: the Reader's typed membership address showed "A transaction error occurred. Please contact the journal manager for details." (Rule 9; A10) and queued a payment, the server logging "PayPal transaction exception: Authentication failed…". `fulfillQueuedPayment()`, the call `handle()` makes once PayPal confirms a payment, run from PHP on that queued payment with the gateway left out, stopped with "TypeError: PKP\payment\Payment::getAssocId(): Return value must be of type int, null returned at lib/pkp/classes/payment/Payment.php:168", thrown in `createCompletedPayment()`; the queued payment stayed, `completed_payments` stayed empty, the Journal Manager's "Payments" tab read "No Items", and `getData('dateEndMembership')` read null after a fresh load. The PayPal round trip itself cannot be made from a test install (note n).
+Issue report: docs/issues/U52-A13-paypal-membership-payment-never-recorded.md
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP `schemas/context.json` `paymentPluginName` default `ManualPayment`, applied when a press is created; OJS gives no default (note b). Live-probed 2026-09-27 (note td1): the press arrived with "Manual Fee Payment" chosen and "Enable" unticked, the journal with none chosen.
