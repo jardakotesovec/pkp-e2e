@@ -151,7 +151,8 @@ parameter lines of the window ("Date Range", one line per filter heading,
 or "Downloads") and "Timeline Interval" ("Day" or "Month")), then an
 empty line, then a line of column names and one line per row. A search
 phrase holding double quotes breaks its "Search Phrase" line ⚠
-[A8](#a8). No file starts with a byte-order mark, the invisible first
+[A8](#a8). A title, or the journal's name, holding a backslash
+followed by a double quote splits its cell ⚠ [A20](#a20). No file starts with a byte-order mark, the invisible first
 character that tells some spreadsheet programs the text is UTF-8 ⚠
 [A9](#a9). <sup>i</sup>
 
@@ -370,7 +371,8 @@ bottom, then "Save": <sup>q</sup>
     and ID") applies on Enter: the chart and the table narrow to the
     published articles whose title, author or ID match. The "×" in the box
     ("Clear search phrase") removes it. Typing without Enter changes
-    nothing. On "Issues" {OJS} the box matches words of an issue's
+    nothing. A phrase holding a backslash finds no article, even one
+    whose title holds it as typed ⚠ [A21](#a21). On "Issues" {OJS} the box matches words of an issue's
     title, a four-digit year, and the volume and number only as written
     on screen ("Vol. 7", "No. 4", "Vol. 7 No. 3"); "7" alone finds
     nothing ⚠ [OJS3](#ojs3). <sup>f</sup> <sup>h</sup> <sup>td15</sup>
@@ -1209,6 +1211,8 @@ Left out of the scenarios above, by reason:
   - the SUSHI "Item Master Report (IR)" asked with the authors shown, for a work whose first author alone has an ORCID iD: only that author carries an iD (Rule 23; the guard for A16, once fixed) {OJS OPS} [incidental 2026-10-13]
   - "Counter R5" of a context whose first publication is dated the 31st of a month followed by a shorter one: "Start Date" offers the first day of the next month (Rule 21; the guard for A19, once fixed) [report 2026-11-02]
   - a reader downloading an article's Word galley and its PDF galley, the day processed: "File Views" and "Total" on "Articles" count both, as the chart's "Files" and "Download Files" do (Rule 1; the guard for A17, once fixed) [incidental 2026-10-23]
+  - a published article's title and the journal's name holding a backslash followed by a double quote: "Download Articles", "Download Files" and "Download Journal" each read with Python's `csv` (RFC 4180): every row under the column names as wide as them, the title and the name whole (Fields "The downloaded spreadsheets"; the guard for A20, once fixed) [incidental 2026-11-27]
+  - on Statistics › "Articles", part of a title holding a backslash typed in the search box and Enter pressed: the article listed (Rule 13; the guard for A21, once fixed) [incidental 2026-11-27]
 - **Nothing new to test**:
   - the site as the COUNTER platform on an installation without a "Site
     Name", whose reports keep the journal's name (Rule 24)
@@ -1252,6 +1256,9 @@ Left out of the scenarios above, by reason:
     an ORCID iD an earlier author's iD; Rule 23)
   - A17 (a Word galley's downloads in no column of "Articles"; Rule 1)
   - A18 (Word downloads in the "Articles" list and its order; Rule 12)
+  - A20 (a title or the journal's name holding a backslash followed by
+    a double quote in the spreadsheets; Fields)
+  - A21 (a search phrase holding a backslash; Rule 13)
   - OJS1 (the Release 4 page beside "Counter R5"; Rule 25; scenario 12
     marks it)
   - OJS2 (one HTML galley view counted once more per missing file it
@@ -1304,6 +1311,8 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | SUSHI "Item Master Report (IR)" gives authors without an ORCID iD the iD of an author listed before them | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A17](#a17) | Statistics › Articles leaves Word file downloads out of "Other", "File Views" and "Total" | 🐞 | medium | issues (claude), 2026-10-27 — re-verified |
 | [A19](#a19) | "Counter R5" skips a journal's first month of figures when its first article is dated the 31st | 🐞 | medium | issues (claude), 2026-11-02 — re-verified |
+| [A20](#a20) | Statistics downloads: a title or the journal's name holding a backslash followed by a double quote splits its cell | 🐞 | minor | — |
+| [A21](#a21) | Statistics › Articles: a search phrase holding a backslash finds no article, even one whose title holds it | 🐞 | minor | — |
 | [OJS2](#ojs2) | One view of an HTML galley counts once more for each picture or style sheet it names that was never uploaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OJS4](#ojs4) | Statistics › Issues: "Download Issues" leaves out every issue after the first 30, without saying so | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS5](#ojs5) | "Counter R5": "Journal Article Requests (IR_A1)" also lists investigation rows, which its "Metric_Types" line leaves out | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1630,6 +1639,48 @@ The same happens for a date on 29, 30 or 31 January (only 30 and 31
 in a leap year), and on 31 March, May, August or October. A press or a
 preprint server meets it the same way.
 Since: 2022-07-23 (pkp/pkp-lib#6782, about four years) · Basis: probe, 2026-11-02. <sup>f-a19</sup>
+
+<a id="a20"></a>
+**A20 — Statistics downloads: a title or the journal's name holding a backslash followed by a double quote splits its cell** · 🐞 · minor.
+On Statistics › "Articles" ("Monographs", "Preprints"), an editor
+presses "Download Report" and then "Download Articles" ("Download
+Monographs", "Download Preprints"). When a published article's title
+holds a backslash followed by a double quote, its line ends the
+"Title" cell at that quote. Read with Python's `csv` (RFC 4180), the
+rest of the title is one more cell and every later cell sits one
+column to the right: a title typed as `Stats I27H\",split title` reads `Stats I27H\`
+under "Title", `split title"` under "Authors", and the authors under
+"Date Published" ("Date Posted" on a preprint server). The line has
+one cell more than the column names: 12 of 11 on a journal, 11 of 10
+on a press and a preprint server. Expected: the title whole, in its
+own cell.
+
+"Download Files" splits the "Article Title" ("Book Title", "Preprint
+Title") the same way, 7 cells of 6. On Statistics › "Journal"
+("Press", "Server"), "Download Journal" ("Download Press", "Download
+Server") splits the journal's own name when it holds the same
+characters, 4 cells of 3. A title with plain double quotes or a comma
+is written whole, and the page shows every title whole. Nothing in the
+file says a line is shifted. The fault is in the rows; the parameter
+lines above them break for another reason, [A8](#a8). The
+users export and the
+report files of [Statistics — editorial activity & reports](U65-editorial-statistics.md)
+split the same way, its
+[A16](U65-editorial-statistics.md#a16).
+Basis: probe, 2026-11-27. <sup>f-a20</sup>
+
+<a id="a21"></a>
+**A21 — Statistics › Articles: a search phrase holding a backslash finds no article, even one whose title holds it** · 🐞 · minor.
+On Statistics › "Articles" ("Monographs", "Preprints"), an editor
+types part of a title that holds a backslash, such as `I27H\",split`
+or `I27H\`, in "Search by title, author and ID" and presses Enter. The
+table reads "No articles were found with usage statistics matching
+these parameters." and "0 of 0 articles" (the press's and the preprint
+server's wording in Fields), although the article's title,
+`Stats I27H\",split title`, holds that text. The same article is found
+by `I27H` or by `",split`. Expected: the article whose title holds the
+phrase, as for any other phrase.
+Basis: probe, 2026-11-27. <sup>f-a21</sup>
 
 ### OJS
 
@@ -2638,8 +2689,14 @@ Timeline" each read `"Search Phrase",""Quoted""`; the server's rows
 escaped a title holding the same quotes as `"K3 ""Quoted"", Rich
 Work"`. The parameter lines are joined as plain strings in the browser
 (`StatsPublicationsPage.vue::downloadReport()`: `searchPhraseRow`,
-`dateRangeRow`, `filtersRow`), so a filter name holding a quote would
-break its line the same way (by the code, not driven).
+`dateRangeRow`, `filtersRow`), so a filter name holding a quote breaks
+its line the same way. Live-probed 2026-11-27, `main`, OJS, OMP and
+OPS, two runs each: a section (series) named `Sec "Q" two` chosen
+under "Filters" showed whole in the window and gave
+`"Sections","Sec "Q" two"` (`"Series",…` on a press) in "Download
+Articles", read by an RFC 4180 reader as `Sec Q" two"`; the phrase
+`I27H\",split` was written `"Search Phrase","I27H\",split"`, three
+cells. The rows below them are the server's, a different writer (A20).
 Issue report: [docs/issues/U64-A8-statistics-download-quotes-break-parameter-lines.md](../issues/U64-A8-statistics-download-quotes-break-parameter-lines.md), filed as [pkp-e2e#615](https://github.com/jardakotesovec/pkp-e2e/issues/615).
 
 <a id="fn-f-a9"></a>
@@ -2798,6 +2855,47 @@ loaded dataset fleets: a new context whose one submission's date is
 2027-01-31 is offered 2027-03-01, and 2027-02-01 at 2027-01-28.
 Issue report: [docs/issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md](../issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md), filed as [pkp-e2e#1079](https://github.com/jardakotesovec/pkp-e2e/issues/1079).
 
+<a id="fn-f-a20"></a>
+**f-a20** — The server's rows of every statistics download are written
+by the `PKPRoutingProvider` `withFile` response macro (lib/pkp
+`classes/core/PKPRoutingProvider.php`), `fputcsv($fp, $row,
+$responseType['separator'])`, called by `PKPStatsPublicationController`,
+`PKPStatsContextController`, OJS `StatsIssueController` and
+`PKPStatsSushiController`. PHP's default escape character `\` leaves a
+double quote after a backslash undoubled, so an RFC 4180 reader ends
+the cell there; `fputcsv($fp, $row, ',', '"', '')` writes it as such
+readers expect. The parameter lines above the rows are the browser's
+(fn-i, A8). The same default as
+[Statistics — editorial activity & reports](U65-editorial-statistics.md#fn-f-a16)'s
+A16. By the code, the macro also writes "Download Issues" {OJS} and
+the "Counter R5" files (not driven). Live-probed 2026-11-27 (Fields
+"The downloaded spreadsheets"; A20), `main`, OJS, OMP and OPS, two
+runs each on scratch contexts as the context's manager, every file
+read with Python's `csv`: the title `Stats I27H\",split title` was
+written `"Stats I27H\",split title"` and read as `Stats I27H\` and
+`split title"`, "Download Articles" 12 cells of 11 (OJS) and 11 of 10
+(OMP, OPS), "Download Files" 7 of 6; the context named
+`I27H I27H\",split Journal` ("Press", "Server") gave "Download
+Journal" 4 of 3; the control `Stats Plain "q", ok title` was written
+`"Stats Plain ""q"", ok title"` and read at width. The same with the
+section filter and the phrase "Stats" applied; the page listed the
+title whole.
+
+<a id="fn-f-a21"></a>
+**f-a21** — `PKP\submission\Collector::searchPhrase()`: each word is
+matched against the titles, abstracts, keywords, subjects,
+disciplines and author names with `LIKE
+CONCAT('%', LOWER(?), '%')`, the word bound as typed. The backslash is
+the default `LIKE` escape character in PostgreSQL and MySQL, so it
+escapes the next character instead of matching itself; `%` and `_` in
+a word act as wildcards the same way (by the code, not driven). The
+same collector backs the other submission searches (not driven
+there). Live-probed 2026-11-27 (Rule 13; A21), `main`, OJS, OMP and
+OPS on PostgreSQL, two runs each as the scratch context's manager:
+`I27H\",split` and `I27H\` gave "0 of 0 articles" ("monographs",
+"preprints"); `I27H` gave "2 of 2", `",split` and `Plain "q", ok` "1
+of 1".
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-p. Live-probed 2026-09-27: td11; the side menu offers
 "Counter R5" at the same time.
@@ -2936,6 +3034,9 @@ HTML galley of a supplementary component was not tried on a journal.
   `<app>/api/v1/stats/{publications/StatsPublicationController,sushi/StatsSushiController}.php`;
   OJS `api/v1/stats/issues/StatsIssueController.php`;
   `lib/pkp/classes/core/PKPBaseController.php` (`_validateStatDates()`).
+- Files and search: `lib/pkp/classes/core/PKPRoutingProvider.php`
+  (the `withFile` CSV response); `lib/pkp/classes/submission/Collector.php`
+  (`searchPhrase()`).
 - Services: `lib/pkp/classes/services/{PKPStatsPublicationService,PKPStatsContextService,PKPStatsSushiService,PKPStatsGeoService,PKPStatsServiceTrait}.php`;
   `<app>/classes/services/StatsPublicationService.php`; OJS
   `classes/services/StatsIssueService.php`;
