@@ -1753,7 +1753,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A51](#a51) | A Funding coordinator's search, filters and "Next" in the Add Reviewer window are refused | 🐞 | medium | issues (claude), 2026-11-16 — re-verified |
 | [A54](#a54) | From the second date window opened on a page, screen readers cannot reach the date calendar | 🐞 | medium | issues (claude), 2026-11-19 — re-verified |
 | [A55](#a55) | On a review with answers saved on a review form, both PDF entries of "Download Review Form" open an "Error" window and no file | 🐞 | medium · crash: server | issues (claude), 2026-11-23 — re-verified |
-| [A57](#a57) | A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports | 🐞 | user-visible | — |
+| [A57](#a57) | A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports | 🐞 | medium | issues (claude), 2026-11-27 — re-verified |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | 🐞 | medium | user request (claude), 2026-11-25 — regression report |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -2416,15 +2416,21 @@ left blank, which is not yet driven.
 Basis: probe, 2026-11-23. <sup>[f-a56](#fn-a56)</sup>
 
 <a id="a57"></a>
-**A57 — A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports** · 🐞 · user-visible.
+**A57 — A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports** · 🐞 · medium.
 A reviewer leaves an optional "Drop-down box" question of the review
 form blank and submits the review. The question's first option is
 recorded as their answer: the editor's Review Details window shows it
 under the question, and so do both XML exports, so the editor reads an
-answer the reviewer never gave. A blank radio-button or checkbox
-question stays blank. The answer is recorded at the reviewer's submit
-([→ the reviewer's step 3](U28-reviewers-review.md#step-3)).
-Basis: probe, 2026-11-23. <sup>[f-a57](#fn-a57)</sup>
+answer the reviewer never gave.
+
+The blank is saved in the database as the first option, not only shown
+that way, so every review already submitted this way holds it. Nobody is told.
+A blank radio-button or checkbox question stays blank.
+
+A new review form question is optional until its "Required" box is
+ticked, so any drop-down question left optional is affected.
+([→ the reviewer's step 3](U28-reviewers-review.md#step-3))
+Basis: probe, 2026-11-27. <sup>[f-a57](#fn-a57)</sup>
 
 ### OMP
 
@@ -4629,6 +4635,7 @@ drop-down answer as `int`, so `""` becomes `0`, the first option;
 `stable-3_5_0` makes the same cast in
 `PKPReviewerReviewStep3Form::execute()` (read in the code, not walked).
 Kept script as f-a55.
+Issue report: docs/issues/U27-A57-review-form-blank-drop-down-reads-first-option.md
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only

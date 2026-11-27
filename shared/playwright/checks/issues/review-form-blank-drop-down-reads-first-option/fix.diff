@@ -1,0 +1,15 @@
+--- a/lib/pkp/classes/submission/reviewAssignment/Repository.php
++++ b/lib/pkp/classes/submission/reviewAssignment/Repository.php
+@@ -440,6 +440,12 @@
+                     break;
+                 case ReviewFormElement::REVIEW_FORM_ELEMENT_TYPE_RADIO_BUTTONS:
+                 case ReviewFormElement::REVIEW_FORM_ELEMENT_TYPE_DROP_DOWN_BOX:
++                    // An empty choice (the drop-down's blank option) is no answer: stored as an int it
++                    // would read as the first option. Clear any earlier answer instead.
++                    if ($reviewFormResponseValue === null || $reviewFormResponseValue === '') {
++                        $reviewFormResponseDao->deleteById($reviewAssignment->getId(), $reviewFormElementId);
++                        return;
++                    }
+                     $reviewFormResponse->setResponseType('int');
+                     $reviewFormResponse->setValue($reviewFormResponseValue);
+                     break;
