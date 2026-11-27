@@ -47,7 +47,10 @@
  * scratch presses as the spec's Givens say (`review` and `components`
  * passthrough keys). Every absence is read settled (an exact list, a class,
  * a count after the window's own answer) and paired with a positive control
- * taken the same way (M4, M6). Downloads are read through Playwright's
+ * taken the same way (M4, M6); S2's and S8's "nothing asks" are read from
+ * every browser dialog the page raises (`recordBrowserDialogs`, none
+ * auto-accepted), S2's step-1 question the recorder's positive control,
+ * and S8 reads "Reviewer Files" before and after a reload. Downloads are read through Playwright's
  * download event (the suggested name), never by fetching a file address.
  * Two reads differ from the letter of a bullet: S6 reads "newest first" on
  * the test's own note, since the seeded note and the upload share one
@@ -919,6 +922,39 @@ test.describe('submission files', () => {
         await openFiles.expectLoaded();
         const named = await openFiles.download('article.pdf');
         expect(named.download.suggestedFilename()).toBe('article.pdf');
+
+        // The Reviewer's own file closed on step 1: on step 3 of the same
+        // review, "Upload File", "notes.md" attached, the header "Close":
+        // nothing asks (every browser dialog of the reviewer's page is
+        // recorded, none answered for it; the window closing bounds the
+        // read, as the question would come with the press; S2's staff
+        // window asks on the same press, the positive control of the
+        // recorder) and the window closes; "Reviewer Files" still reads
+        // "No Files" on the page, and lists "notes.md" after a reload.
+        await reviewerWizard.saveAndContinueButton.click();
+        await reviewerWizard.expectStep(2);
+        await reviewerWizard.continueToStep3();
+        await reviewerWizard.expectStep(3);
+        await reviewerWizard.expectReviewerFilesSettled();
+        await expect(reviewerWizard.noReviewerFiles).toBeVisible();
+        const reviewerAsked = recordBrowserDialogs(reviewerPage, {fallback: 'dismiss'});
+        await reviewerWizard.uploadFileLink.click();
+        const reviewerUpload = new UploadWizard(reviewerPage, 'Upload File');
+        await reviewerUpload.expectOpen();
+        await reviewerUpload.attach(fx('notes.md'), 'notes.md');
+        await expect(reviewerUpload.changeFileButton()).toBeVisible();
+        await reviewerUpload.closeButton().click();
+        await reviewerUpload.expectClosed();
+        expect(reviewerAsked.messages, 'nothing asks on the reviewer\'s step-1 "Close"').toEqual([]);
+        await expect(reviewerWizard.noReviewerFiles).toBeVisible();
+        await expect(reviewerWizard.reviewerFileRow('notes.md')).toHaveCount(0);
+        await reviewerPage.reload();
+        await reviewerWizard.expectStep(3);
+        await reviewerWizard.expectReviewerFilesSettled();
+        await expect(reviewerWizard.reviewerFileRow('notes.md')).toBeVisible({timeout: 30_000});
+        await expect(reviewerWizard.noReviewerFiles).toBeHidden();
+        expect(reviewerAsked.messages, 'nothing asks on the reload either').toEqual([]);
+        reviewerAsked.stop();
 
         // "Summary of Changes (Amendment Notice)" on "Revisions Uploaded".
         const revisions = new FileList(page, frame, REVISIONS_UPLOADED);

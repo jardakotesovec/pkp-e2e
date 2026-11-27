@@ -898,6 +898,13 @@ tooling recipe are in the footnote. <sup>s0</sup>
      Rule 3).
    - **The "Open" review**: the second Reviewer: the same press downloads
      the file as "article.pdf" (Actors row 7; Rule 3).
+   - **The Reviewer's own file closed on step 1**: the first Reviewer:
+     on step 3 of the same review
+     ([→ Reviewer's review](U28-reviewers-review.md#step-3)) press
+     "Upload File", attach "notes.md" in the window that opens and press
+     the window's header "Close": nothing asks and the window closes;
+     "Reviewer Files" does not show "notes.md" yet; reload the page: it
+     lists "notes.md" (Rules 5, 6).
    - **"Summary of Changes (Amendment Notice)"**: Section Editor: press
      "Upload" above "Revisions Uploaded": the window "Upload Review File"
      opens; choose "Article Text" ("Book Manuscript" on a press), attach
@@ -1057,7 +1064,6 @@ Left out of the scenarios above, by reason:
   - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes [report 2026-10-02]
   - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes [incidental 2026-10-05]
   - "Change File" on step 1 of a new file's upload {OJS OMP}, then "Cancel": the list as it was before the window opened ([A14](#a14), Rule 7): the guard, waits for the fix [incidental 2026-11-27]
-  - the reviewer's own "Upload File" on step 3, a file uploaded, closed with its header "Close" on step 1: no question, and "Reviewer Files" lists the file once the page is reloaded (Rule 6) [incidental 2026-11-27]
 - **Nothing new to test**:
   - "Cancel" after revising a file renamed since its last upload: the previous file back, its rename kept, and no line of the cancelled upload in its "History" (Rule 9)
   - the header "Close" after a revision: the new file kept, the earlier version a "Download" in "History" (Rule 9)
@@ -2560,7 +2566,7 @@ their component (`genre`, default the first main-work component), uploader
 and note, `reviewRounds[].files[]` on a round's "Files for Review", given to
 the round's seeded reviewers, and `galleys[]` a galley's file; every other
 file in a scenario is uploaded on screen. Where each scenario runs: 1–7, 9 and 12
-and the first half of 8 on the seeded journal or press `publicknowledge`,
+and all of 8 but its "Open" review on the seeded journal or press `publicknowledge`,
 submissions from `POST scenarios/submission` with submitter `author.alex`
 (on the press `series: 'monographs'`, so the series' editors are assigned
 automatically as on the journal's section ART); 10 and the "Open" review of 8
@@ -2591,7 +2597,9 @@ journal created with `review: {defaultReviewMode: 'open'}` and throwaway
 `author` and `externalReviewer` users, the same seed shape with the throwaway
 author as submitter and the throwaway reviewer on the round; the reviewer's
 download name on the seeded journal starts with the acronym "JPK" ("PKP" on
-the press). 9 — a `submitted: false` draft of `author.alex` with no files,
+the press); the step-1 "Close" of 8's "The Reviewer's own file closed on
+step 1" is pressed as `reviewer.julia` on `publicknowledge`, and that
+nothing asks is read from the run's browser dialogs, none of which fires. 9 — a `submitted: false` draft of `author.alex` with no files,
 which reopens on "Upload Files"; the test continues through the other steps
 to "Review" and ticks what that step asks before "Submit", as the
 submission wizard spec's scenarios do; "Cancel upload" is pressed on a

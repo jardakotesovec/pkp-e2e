@@ -38,8 +38,12 @@
  * scratch journals as the spec's Givens say (`review` and `components`
  * passthrough keys). Every absence is read settled (an exact list, a class,
  * a count after the window's own answer) and paired with a positive control
- * taken the same way (M4, M6). Downloads are read through Playwright's
- * download event (the suggested name), never by fetching a file address.
+ * taken the same way (M4, M6). A browser question is read from a recorder
+ * on the page's `dialog` event that answers "dismiss" (S2, S8), so a
+ * question nobody expects keeps its window open; S8 reads the Reviewer's
+ * "Reviewer Files" before and after a reload. Downloads are read through
+ * Playwright's download event (the suggested name), never by fetching a
+ * file address.
  * Two reads differ from the letter of a bullet: S6 reads "newest first" on
  * the test's own note, since the seeded note and the upload share one
  * second and tie (`.reports/U36/test-ojs-findings.md` T-ojs-1); S9 does not
@@ -94,6 +98,7 @@ const UPLOAD_SUBMISSION_FILE = 'Upload Submission File';
 const UPLOAD_REVIEW_FILE = 'Upload Review File';
 const UPLOAD_PRODUCTION_READY_FILE = 'Upload a Production Ready File';
 const UPLOAD_DEPENDENT_FILE = 'Upload a Dependent File';
+const REVIEWER_UPLOAD_FILE = 'Upload File';
 const SELECT_COMPONENT = 'Select article component';
 
 const MAIN = 'Article Text';
@@ -880,6 +885,38 @@ test.describe('submission files', () => {
         await openFiles.expectLoaded();
         const named = await openFiles.download('article.pdf');
         expect(named.download.suggestedFilename()).toBe('article.pdf');
+
+        // The Reviewer's own file closed on step 1: "Upload File" on step 3,
+        // notes.md attached, the header "Close". No question: the recorder
+        // answers any with "dismiss", which keeps a window open (S2's staff
+        // window on step 1 is the control that the question is raised and
+        // recorded), so the window closing and an empty record are one
+        // settled read. "Reviewer Files" keeps "No Files" until the page is
+        // reloaded (read by text, since a closed legacy window can hide the
+        // page from role reads); after the reload it lists notes.md.
+        await reviewerWizard.saveAndContinueButton.click();
+        await reviewerWizard.expectStep(2);
+        await reviewerWizard.continueToStep3();
+        await reviewerWizard.expectReviewerFilesSettled();
+        await expect(reviewerWizard.noReviewerFiles).toBeVisible();
+        const reviewerAsked = recordBrowserDialogs(reviewerPage, {fallback: 'dismiss'});
+        await reviewerWizard.uploadFileLink.click();
+        const ownUpload = new UploadWizard(reviewerPage, REVIEWER_UPLOAD_FILE);
+        await ownUpload.expectOpen();
+        await ownUpload.attach(fx('notes.md'), 'notes.md');
+        await ownUpload.closeButton().click();
+        await ownUpload.expectClosed();
+        expect(reviewerAsked.messages, 'nothing asks on the reviewer\'s step 1').toEqual([]);
+        await expect(reviewerWizard.noReviewerFiles).toBeVisible();
+        await expect(reviewerWizard.reviewerFilesGrid).not.toContainText('notes.md');
+        await reviewerPage.reload();
+        await reviewerWizard.expectStep(3);
+        await reviewerWizard.expectReviewerFilesSettled();
+        await expect(reviewerWizard.reviewerFilesGrid).toContainText('notes.md');
+        await expect(reviewerWizard.reviewerFileRow('notes.md')).toHaveCount(1);
+        await expect(reviewerWizard.noReviewerFiles).toBeHidden();
+        expect(reviewerAsked.messages, 'nothing asked through the reload').toEqual([]);
+        reviewerAsked.stop();
 
         // "Summary of Changes (Amendment Notice)" on "Revisions Uploaded".
         const revisions = new FileList(page, frame, REVISIONS_UPLOADED);
