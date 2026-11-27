@@ -4635,7 +4635,7 @@ drop-down answer as `int`, so `""` becomes `0`, the first option;
 `stable-3_5_0` makes the same cast in
 `PKPReviewerReviewStep3Form::execute()` (read in the code, not walked).
 Kept script as f-a55.
-Issue report: docs/issues/U27-A57-review-form-blank-drop-down-reads-first-option.md
+Issue report: [pkp-e2e#1113](https://github.com/jardakotesovec/pkp-e2e/issues/1113) ([docs/issues/U27-A57-review-form-blank-drop-down-reads-first-option.md](../issues/U27-A57-review-form-blank-drop-down-reads-first-option.md)).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
