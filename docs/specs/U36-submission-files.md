@@ -208,13 +208,18 @@ record what each role is offered once the list is on screen. <sup>b</sup>
    step 1 the browser first asks "The data on this form has changed. Do
    you wish to continue without saving?": "OK" closes the window with
    the file kept, "Cancel" keeps the window open. Steps 2 and 3 ask
-   nothing. A galley's "Change File" asks nothing either (Rule 9a).
-   <sup>p</sup>
+   nothing. A galley's "Change File" asks nothing either (Rule 9a), and
+   neither does a reviewer's own "Upload File" (Rule 5) on step 1: the
+   file is kept, but the reviewer's "Reviewer Files" list shows it only
+   once the page is reloaded. <sup>p</sup>
 <a id="wizard-cancel"></a>
 7. **"Cancel" undoes the upload.** Pressing the wizard's "Cancel" link
    after a file has been uploaded, before "Complete", removes that file:
    a new file is gone from the list, and a revision gives back the file it
-   replaced (Rule 9). "Cancel" asks nothing at any step. <sup>p</sup> <sup>s</sup>
+   replaced (Rule 9). "Cancel" asks nothing at any step. After a "Change
+   File" swap on a new file (Rule 5a) {OJS OMP}, "Cancel" removes only
+   the second file: the first stays listed, with no message [A14](#a14).
+   <sup>p</sup> <sup>s</sup>
 
    What that means for an author's revision request is [→ Revisions Uploaded](U26-review-stage-and-rounds.md#revisions)'s. <sup>aa</sup>
 <a id="revise"></a>
@@ -1051,6 +1056,8 @@ Left out of the scenarios above, by reason:
   - step 1 of the upload wizard before a component is chosen: the upload box absent from the accessibility snapshot, and each drop-down found by its role and label ([A9](#a9)): the guards the two issue reports propose [report 2026-10-02]
   - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes [report 2026-10-02]
   - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes [incidental 2026-10-05]
+  - "Change File" on step 1 of a new file's upload {OJS OMP}, then "Cancel": the list as it was before the window opened ([A14](#a14), Rule 7): the guard, waits for the fix [incidental 2026-11-27]
+  - the reviewer's own "Upload File" on step 3, a file uploaded, closed with its header "Close" on step 1: no question, and "Reviewer Files" lists the file once the page is reloaded (Rule 6) [incidental 2026-11-27]
 - **Nothing new to test**:
   - "Cancel" after revising a file renamed since its last upload: the previous file back, its rename kept, and no line of the cancelled upload in its "History" (Rule 9)
   - the header "Close" after a revision: the new file kept, the earlier version a "Download" in "History" (Rule 9)
@@ -1077,7 +1084,7 @@ Left out of the scenarios above, by reason:
   - A11 ("Save" in "Edit {file name}" with no component chosen failing; Rule 18; scenario 9 marks it)
   - A12 (the "Download All Files" zip named with two hyphens; Rule 3; scenario 4 marks it)
   - A13 (deleting a file also deleting its copies on other lists; Rule 4)
-  - A14 ("Change File" in step 1 keeping the first upload as a file of its own; Rule 5a)
+  - A14 ("Change File" in step 1 keeping the first upload as a file of its own, and "Cancel" after it removing only the second; Rules 5a, 7)
   - A15 (step 2 reopened from step 3 offering "Complete" and showing "File Added" again; Rule 5b)
   - A16 (a galley's "Change File" closed with "Close" keeping the new file; Rule 9a)
   - A17 (the page's script failing after two "History" downloads and closing the window; Rule 13b)
@@ -1366,21 +1373,28 @@ In step 1 of the upload wizard, a person uploads a new file, then
 presses "Change File" and picks another, expecting the second to replace
 the first. The second is uploaded, but the first stays: after "Complete"
 the list holds both. The first is listed under the file name it was
-uploaded with and the component chosen in step 1. The wizard's own
-attempt to remove the first file fails unseen, whatever the person's
-role.
+uploaded with and the component chosen in step 1 (none on a reviewer's
+file, Rule 5). "Cancel" after the swap closes the window and removes only
+the second file; the first stays listed, with no message. The wizard's
+own attempt to remove the first file fails unseen, whatever the
+person's role.
 
 The person who swapped the file believes the first one is gone. It sits
 on the list as a file of the submission until someone deletes it there.
 On "Submission Files" that is in front of the editors; an author's
 leftover on "Revisions Uploaded" is among the revised files the editors
-read.
+read. A reviewer's leftover on step 3's "Reviewer Files" is listed among
+the reviewer's files in the editor's "Read Review" window; the reviewer
+can delete it until the review is submitted, not after
+([→ Reviewer's review](U28-reviewers-review.md#save-submit), its Rule
+13).
 
 Only a new file is affected. When the upload revises an existing file,
 no second row appears. On a preprint server the wizard uploads a new
 galley's file, and there the first file stays stored but no screen
 shows it.
-Basis: probe, 2026-10-02. <sup>[f-a14](#fn-a14)</sup>
+Basis: probe, 2026-11-27. <sup>[f-a14](#fn-a14)</sup>
+Report: refresh owed — incidental re-probe 2026-11-27 (OJS and OMP `main`): "Cancel" after the swap removes only the second file and leaves the first on the list, which the report's Summary and Steps do not say; the reviewer's attachment, which the report's Reach reads in the code, was seen on screen (the leftover in step 3's "Reviewer Files" and in the editor's "Read Review"), as were the assigned Section Editor (Series Editor on OMP) and Funding coordinator; the Summary's "the component chosen in step 1" holds only on a list with components; each refused delete also logs a PHP warning in `PKPManageFileApiHandler::authorize()`; no code changed, so no class or method the report names is touched; the new readings bear on `wizardCancelRequested()` and `PKPManageFileApiHandler::authorize()` (2026-11-27)
 
 <a id="a15"></a>
 **A15 — Upload wizard: a reopened "2. Review Details" keeps the "Complete" button, which shows "File Added" again instead of closing** · 🐞 · low.
@@ -2137,7 +2151,8 @@ check chose it). The review-stage spec's A11 (test run 2026-09-12) saw the
 header "Close" keep an author's revision and "Cancel" remove it.
 "Change File" posts `deleteFile` for the first upload, which the app refuses
 (A14). The question on "Close" at step 1 is the legacy form's changed-data
-prompt; steps 2 and 3 have none. Live-probed 2026-09-23 (Rules 5a, 6, 7; OJS
+prompt on the workflow lists' windows; steps 2 and 3 have none, and the
+reviewer's "Upload File" raises none at step 1 either. Live-probed 2026-09-23 (Rules 5a, 6, 7; OJS
 and OMP): after "Close" at steps 1, 2 and 3 the file was listed with the
 step-1 component ("Research Instrument" / "Prospectus"); at step 1 the
 browser's question came first, "OK" closing with the file kept, "Cancel"
@@ -2153,7 +2168,17 @@ the file under its uploaded name and the galley served it, "Cancel" removed
 the new file and gave the galley back its previous one. On 3.5 step 2 is
 still the legacy form: after its "Close" the next reload raised the
 browser's leave-page question although the window was gone, as in A18;
-`main` raised none.
+`main` raised none. Live-probed 2026-11-27 (Rules 6, 7; OJS and OMP `main`,
+two runs): the reviewer's "Upload File" on step 3, one file uploaded, closed
+with the header "Close" at step 1 with no browser question; "Reviewer Files"
+showed no new row until a reload, which listed the file; the same after a
+"Change File" swap, both files then listed. On "Submission Files" the same
+"Close" raised "The data on this form has changed. Do you wish to continue
+without saving?" and the list showed the file at once. "Cancel" after a
+"Change File" swap on a new file, as the reviewer and as the Journal Manager,
+posted `cancel-file-upload` (`status:true`) for the second file and closed
+the window; the first file stayed listed, on the same page and after a
+reload (A14).
 
 <a id="fn-q"></a>
 **q** — Cross-feature pointers only; each linked spec states its own
@@ -2719,6 +2744,21 @@ A8 saw it from "Copyedited Files" to "Draft Files".
 `status:false` "The current user is not authorized to access the specified
 submission file." (HTTP 200); after "Complete" the list held "change-first.pdf
 … Research Instrument" beside the renamed second file.
+Live-probed 2026-11-27 (OJS and OMP `main`, two runs): the same refused
+`delete-file` (`status:false`, no `submissionFileId` sent, no notice, no
+dialog) for the Journal Manager, the assigned Section Editor (Series Editor
+on OMP) and the assigned Funding coordinator on "Submission Files", the
+Author on "Revisions Uploaded" with revisions requested, and an external
+Reviewer on step 3's "Upload File"; each refusal logged
+`PHP Warning: Undefined array key "submissionFileId"` in
+`PKPManageFileApiHandler::authorize()`. After "Complete" or the header
+"Close", both files were listed, on the same page and after a reload (the
+reviewer's "Close": after a reload, Rule 6); after "Cancel"
+(`cancel-file-upload` answering `status:true`) the first was listed alone.
+The reviewer's leftovers showed in "Reviewer Files" with an empty
+"Component", the row offering "Edit" and "Delete" before the review was
+submitted, and, once it was, among the files of the editor's "Read Review"
+window under "Reviewer Files" with an empty "Type".
 Issue report: [pkp-e2e#524](https://github.com/jardakotesovec/pkp-e2e/issues/524) ([docs/issues/U36-A14-change-file-keeps-first-upload.md](../issues/U36-A14-change-file-keeps-first-upload.md)).
 
 <a id="fn-a15"></a>
