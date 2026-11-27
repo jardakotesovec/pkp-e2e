@@ -142,7 +142,9 @@ there. The email column holds the account's email address and is
 headed "Email address" on some installs and "Email" on others, with no
 setting behind the difference (the same split as the contributor
 form's email field, [Contributors & affiliations](U41-contributors-and-affiliations.md#a19)).
-<sup>j</sup>
+An account whose name holds a backslash followed by a double quote
+gets a line one cell longer than the column names, every cell after
+the name one column to the right ⚠ [A16](#a16). <sup>j</sup>
 
 **"Reports"** (Statistics › "Reports"; heading "Reports"), top to
 bottom: the line "The system generates reports that track the details
@@ -164,8 +166,10 @@ opens a page instead (Rule 19). The email columns are headed as the
 users export's email column is: where that reads "Email", "Email
 address (Author n)" below reads "Email (Author n)", "Email address
 (Editor n)" reads "Email (Editor n)" and "Email address" reads
-"Email". <sup>l</sup> <sup>m</sup> <sup>n</sup>
-<sup>o</sup>
+"Email". The values [A16](#a16) lists, holding a backslash followed by
+a double quote, shift the rest of their line one column to the right,
+as in the users export. <sup>l</sup> <sup>m</sup>
+<sup>n</sup> <sup>o</sup>
 
 | Report | File name | One line per | Columns, in order |
 |--------|-----------|--------------|-------------------|
@@ -1016,6 +1020,7 @@ Left out of the scenarios above, by reason:
   - "Monograph Report" of a press whose books have fewer authors and decisions than another press's: no author or decision column beyond its own books' (the guard for OMP3, once fixed; Rule 23) [report 2026-10-03]
   - "Monograph Report" after an Internal Review "Decline Submission" and its "Revert Decline": the revert named "Revert Decline" (the guard for OMP4, once fixed; Rule 23) [report 2026-10-03]
   - "Monograph Report" after a book is published: its "Move to Done" named (the guard for OMP6, once fixed; Rule 23b) [incidental 2026-10-05]
+  - the users export and each report file with the values A16 lists holding a backslash followed by a double quote: every line as wide as its column names, the value whole in its cell (the guard for A16, once fixed; Fields "The exported file", "The report files") [incidental 2026-11-27]
 - **Nothing new to test**:
   - a published item whose newer version moves it to another section,
     counted under its old section in "Filters" and "Articles Report"
@@ -1057,6 +1062,8 @@ Left out of the scenarios above, by reason:
     email was off; Settings bullet 1; scenario 4 marks it)
   - A15 ("Year to date" chosen on 1 January; Rule 3; scenario 5 marks
     it)
+  - A16 (a value holding a backslash followed by a double quote in
+    the users export and the report files; Fields)
   - OJS1 and OJS2 ("Supporting Agencies" and "&amp;" in "Articles
     Report"; Rule 20d)
   - OJS3 (the decisions "Articles Report" has no name for; Rule 20b)
@@ -1094,6 +1101,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | A press's monthly statistics email reads "Login to the the press" ("the the preprint server" on a preprint server) | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A14](#a14) | Saving Profile › "Notifications" while it hides the statistics row stops that editor's monthly statistics email | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A15](#a15) | On 1 January, choosing "Year to date" on "Editorial Activity" opens an "Error" window instead of figures | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A16](#a16) | A name, title or comment holding a backslash followed by a double quote splits its cell in the users export and the report files | 🐞 | minor | — |
 | [OJS1](#ojs1) | "Articles Report" leaves "Supporting Agencies" empty for every submission, though the agencies are filled in | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS2](#ojs2) | "Articles Report" writes article titles holding "&", an apostrophe or italics with web codes ("&amp;") | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | "Articles Report" leaves "Editor Decision" empty for skipped reviews, new rounds, reverted declines and stage moves | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -1320,6 +1328,30 @@ read in the code, since the test installs could not be put on that date.
 In a browser, on 21 October, "Year to date" loaded its figures with no
 window. Nothing is lost: "Last year" gives the figures that day.
 Basis: probe, 2026-10-21. <sup>f-a15</sup>
+
+<a id="a16"></a>
+**A16 — A name, title or comment holding a backslash followed by a double quote splits its cell in the users export and the report files** · 🐞 · minor.
+In the users export and the report files, each value below holding a
+backslash followed by a double quote has its cell cut after the
+backslash. A spreadsheet program reads the rest of the value as one
+more cell, so every later cell sits one column to the right, under the
+wrong column name, and the line has more cells than the column-name
+line. A given name typed as `I27D\",split` reads `I27D\` under "Given
+Name", `split"` under "Family Name" and the family name under the
+email column. Values with a plain double quote or a comma and no
+backslash are written whole.
+
+It splits the accounts' given names in the users export, the
+reviewer's in "Review Report", the subscriber's "Name" in
+"Subscriptions Report", a contributor's "Given Name (Author n)" in
+"Articles Report" and "Monograph Report", the reviewer's "Comments On
+Submission" and a book's "Title" in "Monograph Report". An article's
+"Title" in "Articles Report" does not split only because the file
+writes its quote as a web code [OJS2](#ojs2); fixing that alone would
+let it split too. No other value was tried. Nothing in the file says a
+line is shifted.
+Expected: the value whole, in its own cell.
+Basis: probe, 2026-11-27. <sup>f-a16</sup>
 
 ### OJS
 
@@ -2271,6 +2303,37 @@ raw key is *Statistics — usage*'s A14, whose issue report
 ([docs/issues/U64-A14-stats-refusal-raw-code.md](../issues/U64-A14-stats-refusal-raw-code.md))
 already names this case.
 Issue report: [pkp-e2e#1053](https://github.com/jardakotesovec/pkp-e2e/issues/1053) ([docs/issues/U65-A15-year-to-date-error-on-1-january.md](../issues/U65-A15-year-to-date-error-on-1-january.md)).
+
+<a id="fn-f-a16"></a>
+**f-a16** — Every writer calls `fputcsv()` with PHP's default escape
+character `\`, which leaves a double quote after a backslash undoubled,
+so an RFC 4180 reader ends the cell there: `PKP\user\Report::serialize()`
+(note j), OJS `ArticleReportPlugin`, `ReviewReportPlugin` (OJS and
+OMP) and `SubscriptionReportPlugin` (notes l, m, n), and OMP
+`MonographReportPlugin` through `SplFileObject::fputcsv` (note o).
+`fputcsv($fp, $row, ',', '"', '')` (PHP 7.4 and later; PHP 8.4
+deprecates relying on the default escape) doubles the quote. Desk check
+on PHP 8.3 CLI: the default wrote `"I27D\",split",next`, which Python's
+`csv` read as three cells; the empty escape wrote
+`"I27D\"",split",next`, read as two, the value intact. The monthly
+email's attachment (`StatisticsReportMail::createCsvAttachment()`,
+Rule 26) carries only labels, role-level names and numbers, so no
+value an account enters reaches it (read in code).
+Live-probed 2026-11-27 (Fields "The exported file", "The report files";
+A16), `main`, two runs per app on scratch contexts as the context's
+manager, every file read with Python's `csv`: with the given name
+`I27D\",split` on author, reviewer and subscriber accounts and a
+contributor, a reviewer's comments and a title, the users export read
+28 cells of 27 on OJS, 29 of 28 on OMP and 15 of 14 on OPS on each
+such account; "Articles Report" 36 or 37 of 35, one per such name, its
+"Title" `Stats I27D\&quot;,split title` unsplit; "Monograph Report" 42
+of 40, "Title" split into `Stats I27D\` and `split title"`; "Review
+Report" 29 of 27 on OJS and OMP, the reviewer's given name and
+"Comments On Submission" (`<p>Comment I27D\` | `split</p>"`) each
+adding one; "Subscriptions Report" 15 of 14 in the individual block,
+"Name" ending at `I27D\`. The control value `Plain "q", ok` read at
+the header's width in every file, and every file kept one physical
+line per item.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn l (`$agencies`). Live-probed 2026-09-28: td10, with the item switched off and on.
