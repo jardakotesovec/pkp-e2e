@@ -174,6 +174,24 @@ itself enforces before submission is Rule 13.
    submitter the submission's only participant, in that role, with no
    Author entry, and leaves the Contributors list empty (Rule 12b). The
    button shows a spinner while the wizard loads. <sup>e</sup>
+5a. **A refused "Begin Submission".** In two cases "Begin Submission"
+    makes no draft and the start form stays as filled:
+    - The browser has signed in afresh in another tab since the form
+      opened (signed out and back in there). The notice "The form could
+      not be submitted. You may have been logged out. Please reload the
+      page and try again." shows for a few seconds. A reload empties the
+      form.
+    - {OJS OPS} The section picked was deactivated while the form was
+      open.
+      "This section is no longer receiving submissions." shows under
+      "Section", the foot of the form reads "Please correct one error."
+      with "Go to Section: This section is no longer receiving
+      submissions.", and the notice "The form was not saved because 1
+      error(s) were encountered. Please correct these errors and try
+      again." shows. A reload no longer offers the section. On a
+      preprint server both places read
+      "##api.submission.400.inactiveSection##" instead ⚠ [OPS12](#ops12).
+    <sup>e</sup>
 6. **A draft persists until submitted or cancelled.** The draft appears on
    the author's My Submissions list as an incomplete submission, with
    "Complete submission" in its row (see *My Submissions*). On a preprint
@@ -231,10 +249,13 @@ itself enforces before submission is Rule 13.
    - *Contributors*: the contributors panel (see *Contributors &
      affiliations*). A submitter who chose "Author" is already listed
      (Rule 5).
-   - *For the Editors*: the descriptive metadata the journal asks for
-     (subjects, disciplines, supporting agencies, coverage, rights, source,
-     type, each only when enabled), categories when the journal lets
-     authors pick them, and a comments box, which is always present:
+   - *For the Editors*: the descriptive metadata the journal asks
+     authors for (subjects, disciplines, supporting agencies, coverage,
+     rights, source, type). An item switched on with "Do not request…"
+     chosen ("Do not request subjects from the author during
+     submission.") is not shown. The step also carries categories when
+     the journal lets authors pick them, and a comments box, which is
+     always present:
      "Comments for the Editor" on a journal, "Cover Note to Editor" on a
      press, "Comments for the Moderator" on a preprint server. A press adds
      an optional Series choice here [OMP1](#omp1).
@@ -244,8 +265,9 @@ itself enforces before submission is Rule 13.
      *Reviewer suggestions*). Present only when enabled.
    - *Review*: Rules 12 to 12b.
    Above the rail the wizard names the submission (number, contributors,
-   title, as they are filled in). On a journal or preprint server it also
-   states what is being submitted, for example "Submitting to the Articles
+   title, as they are filled in). On a journal or preprint server with
+   more than one open section or more than one submission language it
+   also states what is being submitted, for example "Submitting to the Articles
    section in English.", with a "Change" control (Rule 11). A press states
    the work type instead ("Submitting a Monograph."). <sup>g</sup>
 8. **Moving between steps.** "Continue" advances one step. "Back" returns
@@ -310,7 +332,9 @@ itself enforces before submission is Rule 13.
     and "Submit" stays enabled while the network is down. Reopening a
     wizard for which the browser still holds unsaved changes opens an
     "Unsaved Changes" dialog. It offers to restore them ("Yes") or discard
-    them ("No, discard unsaved changes"). <sup>i</sup>
+    them ("No, discard unsaved changes"). Whether a reload that lands
+    while a retry is being sent keeps the change is not settled
+    ⚠ [A28](#a28). <sup>i</sup>
 9b. **A save the server refuses.** The server refuses a step's save,
     whether sent by the timer or by "Continue", in these cases:
     - a plain language summary longer than the section's word limit
@@ -338,6 +362,22 @@ itself enforces before submission is Rule 13.
       in one save [A16](#a16)). "Unsaved Changes" offers only changes
       made after the refusal, and "Yes" sends them.
     <sup>[fn-a19](#fn-a19)</sup>
+9d. **After signing in afresh in another tab.** Once the browser has
+    signed in afresh in another tab (signed out and back in there), the
+    server refuses every save from a wizard page opened before. The
+    wizard does not hang, but the save never goes through ⚠ [A27](#a27):
+    - "Continue" still moves on one step, and the "Error" dialog "An
+      unexpected error has occurred. Please reload the page and try
+      again." opens.
+    - The footer reads "Reconnecting". Over the 90 seconds watched, the
+      wizard resends the save four times, about 4, 8, 16 and 32 seconds
+      apart; each is refused, and the dialog, once closed with "OK",
+      opens again.
+    - Both "Save for Later" buttons and "Submit" stay disabled; "Back"
+      and "Cancel" stay enabled.
+    - A reload opens "Unsaved Changes", and "Yes" sends the kept change,
+      ticked categories included.
+    <sup>[fn-a27](#fn-a27)</sup>
 10. **Save for Later.** "Save for Later" is offered in the header and the
     footer. It finishes any saves in flight, records the furthest step the
     draft has reached (Rule 6a), and lands on the **Saved for Later**
@@ -568,10 +608,12 @@ them live are the subject of *Submission intake configuration*.
   control (Rule 11). It also makes the Review step show one Details panel
   and one For the Editors panel per language (Rule 12).
 - **Sections** {OJS OPS}: each section's *deactivated* and *restricted to
-  editors* flags gate intake (Rules 3, 17). Its *abstract not required* and
-  *abstract word limit* settings shape the Details step's demands (Rule
-  13); the word limit also caps a plain language summary, whose save it
-  refuses (Rule 9b). See *Sections*.
+  editors* flags gate intake (Rules 3, 5a, 17). Its *abstract not
+  required* and *abstract word limit* settings shape the Details step's
+  demands (Rule 13); the word limit also caps a plain language summary,
+  whose save it refuses (Rule 9b). More than one open section adds the
+  "Section" choice to the start form (Rule 4) and the "Submitting to…"
+  line with its "Change" control (Rule 11). See *Sections*.
 - **Metadata asked of authors**: each metadata item the journal's setup
   sets to "ask" or "require" during submission adds its field to the
   Details or For the Editors step (Rule 7). Setting it to "require" makes
@@ -1135,6 +1177,10 @@ Left out of the scenarios above, by reason:
   - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names) [report 2026-10-01]
   - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names) [report 2026-10-01]
   - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names) [report 2026-10-01]
+  - the category picker on "For the Editors" with "let authors pick categories" on and a category, and none with the setting off or no category (Settings, "Categories"; Rule 7) [incidental 2026-11-27]
+  - "Begin Submission" pressed after signing in afresh in another tab: the notice, the form kept, no draft (Rule 5a) [incidental 2026-11-27]
+  - "Begin Submission" pressed with the picked section closed meanwhile: the reason under "Section", no draft, the section gone after a reload {OJS} (Rule 5a; OPS12 on a preprint server) [incidental 2026-11-27]
+  - a metadata item enabled with "Do not request…" chosen, absent from "For the Editors" (Rule 7) [incidental 2026-11-27]
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold
@@ -1167,6 +1213,8 @@ Left out of the scenarios above, by reason:
   - A24 (a reload, or a bookmark taken from the address bar, opening a saved draft on "Upload Files", and "Save for Later" pressed there)
   - A25 (a Journal Manager with no other role opening "Make a Submission" with self-registration off on every author-role group, and a start form they loaded earlier)
   - A26 (a draft's submission date, read in the statistics reports before and after "Submit")
+  - A27 (a step's save after signing in afresh in another tab, its retries and the reload's "Unsaved Changes")
+  - A28 (a reload while the wizard is resending a save)
   - OMP2 (a second copy address on a press)
   - OMP4 (a submission made as "Chapter Author" on a press, its refused saves and the hang)
   - OPS2 (a Moderator with no other role opening the start screen on a preprint server)
@@ -1175,12 +1223,12 @@ Left out of the scenarios above, by reason:
   - OPS9 (the Review step's "Files" panel after a reload)
   - OPS10 (a Moderator already on a preprint at its submission)
   - OPS11 (the Review step's "Files" panel after "Order" on "Upload Files")
+  - OPS12 (the start form's reason for a section closed while it was open, on a preprint server)
 - **No seed**:
   - a journal with a task template for the first workflow stage (Side effects, "Editorial task templates run")
   - a preprint server configured to register DOIs {OPS} (Side effects, "DOIs are assigned")
   - the site-wide substitution of the site's privacy statement (Settings, "Start-of-submission guidance, checklist, privacy statement")
   - the "Before you begin" guidance, and the start form with no checklist or privacy statement configured (Settings, "Start-of-submission guidance, checklist, privacy statement"); no scenario key sets or clears them
-  - the category picker (Settings, "Categories"); no scenario key turns on "let authors pick categories"
   - the reader-site "Make a Submission" block once enabled {OJS OMP} (Actors row 6, Rule 1); no scenario key enables a plugin or places a sidebar block
   - a press whose setup requires an abstract (Rule 13); no scenario key sets it
   - a Journal Manager unsubscribed from the "needs an editor" email (Side effects); no scenario key sets a user's email opt-outs
@@ -1204,7 +1252,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-25; additions
-2026-08-26, 2026-09-07, 2026-09-28, 2026-09-30, 2026-10-01, 2026-10-05, 2026-10-19, 2026-10-21, 2026-11-13 and 2026-11-23), unreviewed unless an entry notes otherwise; the team settles
+2026-08-26, 2026-09-07, 2026-09-28, 2026-09-30, 2026-10-01, 2026-10-05, 2026-10-19, 2026-10-21, 2026-11-13, 2026-11-23 and 2026-11-27), unreviewed unless an entry notes otherwise; the team settles
 them on spec review. The summary is sorted 🐞 → ❓ → ✅ and the entries below
 are the source; badges, Impact and Basis:
 [Reading a spec](GLOSSARY.md#reading-a-spec).
@@ -1227,6 +1275,7 @@ are the source; badges, Impact and Basis:
 | [A23](#a23) | Once a manager edits the Author role, a user with no role who starts a submission is made "Translator" on a journal, "Chapter Author" on a press | 🐞 | minor | — |
 | [A24](#a24) | Submission wizard: a reload opens a draft on its first step with the later steps locked, and "Save for Later" there forgets the step reached | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A25](#a25) | A journal or press manager is turned away from "Make a Submission" once no author role allows self-registration | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
+| [A27](#a27) | After signing in afresh in another tab, the submission wizard resends a refused save that cannot succeed and shows only "An unexpected error" | 🐞 | minor | — |
 | [OMP2](#omp2) | A press refuses the comma-separated "Notify Anyone" list its own help text asks for | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP4](#omp4) | On a press, a submission made as "Chapter Author" cannot be saved: the title is lost, every save is refused and the wizard hangs | 🐞 | user-visible · crash: script | — |
 | [OPS3](#ops3) | A preprint author cannot delete their own draft: the wizard's "Cancel" does nothing and My Submissions refuses it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -1235,6 +1284,7 @@ are the source; badges, Impact and Basis:
 | [OPS8](#ops8) | A further galley on a reloaded draft gets stuck in its upload window and shows no file until a reload | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [OPS9](#ops9) | The Review step's "Files" panel says "No files have been uploaded" for galleys the draft already had when the page loaded | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [OPS11](#ops11) | After "Order" on a preprint's "Upload Files", the Review step's "Files" panel lists the galleys in their old order | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [OPS12](#ops12) | "Begin Submission" with a section closed meanwhile reads "##api.submission.400.inactiveSection##" on a preprint server | 🐞 | minor | — |
 | [A1](#a1) | Closing submissions does not stop drafts already started; they can still be filled and submitted | ❓ | latent | — |
 | [A2](#a2) | The save-for-later confirmation email goes to whoever pressed the button, not to the submitting author | ❓ | latent | — |
 | [A3](#a3) | The submissions-closed notice shown to would-be authors ends with an instruction meant for managers | ❓ | minor | — |
@@ -1242,6 +1292,7 @@ are the source; badges, Impact and Basis:
 | [A15](#a15) | Leaving the wizard within a minute of the last save drops the change without a question | ❓ | minor | — |
 | [A17](#a17) | "Needs an editor" goes out for a submission that already has an editor on it | ❓ | minor | — |
 | [A26](#a26) | A draft carries a submission date from the moment it was started, and the statistics reports list it under "Date submitted" | ❓ | minor | — |
+| [A28](#a28) | A reload that lands while the wizard is resending a save may lose that change, with no "Unsaved Changes" | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server enrolls a visitor with no role, or a Moderator, as Author on merely opening the start screen | ❓ | latent | — |
 | [OPS4](#ops4) | The preprint completion screen thanks the viewer, not the submitter | ❓ | latent | — |
 | [OPS6](#ops6) | The "needs an editor" email keeps its journal wording on a preprint server | ❓ | minor | — |
@@ -1671,6 +1722,32 @@ editor" leaves out undated submissions, so an undated draft would not be
 listed there.
 Basis: probe + code inspection, 2026-11-23. <sup>[fn-a26](#fn-a26)</sup>
 
+<a id="a27"></a>
+**A27 — After signing in afresh in another tab, the submission wizard resends a refused save that cannot succeed and shows only "An unexpected error"** · 🐞 · minor.
+An author whose browser has signed out and back in in another tab
+presses "Continue" in a wizard opened before. The save is refused, and
+the wizard opens "An unexpected error has occurred. Please reload the
+page and try again." It then shows "Reconnecting" and resends the same
+save, each time refused, reopening the dialog, with both "Save for
+Later" buttons and "Submit" disabled (Rule 9d). The wizard should say
+the author may have been logged out, as the server's answer does, and
+stop resending it. Nothing is lost: a reload offers the change in
+"Unsaved Changes", and "Yes" saves it. Unlike a refused field ([A19](#a19)), the wizard does not hang.
+Basis: probe, 2026-11-27. <sup>[fn-a27](#fn-a27)</sup>
+
+<a id="a28"></a>
+**A28 — A reload that lands while the wizard is resending a save may lose that change** · ❓ · minor.
+While the wizard is resending a save that failed or was refused (Rules
+9a, 9d), a reload should open "Unsaved Changes" with the kept change.
+Once, on a press, a reload made when the next resend was due opened no
+dialog, and after a second reload the comment typed on "For the Editors"
+was gone. Every other reload, on all three apps, kept the change.
+Question: does a reload that lands while a resend is on its way lose the
+change? Lean: yes, a defect. The wizard takes the change out of the
+browser's store while it resends it and puts it back only when that
+resend fails, which a reload cuts short.
+Basis: probe, 2026-11-27 (seen once); code. <sup>[fn-a28](#fn-a28)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1872,6 +1949,19 @@ order that is not the one saved; only that summary is wrong. A press's
 chapters go stale on "Review" the same way
 ([→ Chapters & work type A13](U72-chapters-work-type.md#a13)).
 Basis: probe, 2026-10-21. <sup>[fn-ops11](#fn-ops11)</sup>
+
+<a id="ops12"></a>
+**OPS12 — "Begin Submission" with a section closed meanwhile reads "##api.submission.400.inactiveSection##"** · 🐞 · minor.
+On a preprint server, an author whose picked section was closed while
+the start form was open presses "Begin Submission" and reads
+"##api.submission.400.inactiveSection##" under "Section" and in the
+form's foot ("Go to Section: ##api.submission.400.inactiveSection##"),
+where a journal reads "This section is no longer receiving
+submissions." (Rule 5a). No draft is made, and a reload no longer
+offers the section, so the author can go on; only the reason is
+missing. The preprint server lacks this text, which the journal has;
+the same gap as [OPS7](#ops7).
+Basis: probe, 2026-11-27. <sup>[fn-ops12](#fn-ops12)</sup>
 
 ### Retired
 
@@ -2096,6 +2186,27 @@ submitted with the Participants list, read by the submitter and by a
 Journal Manager, holding only themself in that role, and the
 Contributors step empty; the same users choosing "Author" were listed as
 "Author".
+Refusals (Rule 5a). `PKPSubmissionController::add()` refuses a section
+that is gone, inactive or editor-restricted with a 400 on `sectionId`
+(`api.submission.400.inactiveSection`; OPS: fn-ops12), which the start
+form shows as a field error; the API's form-token check answers 403
+`{"error":"The form could not be submitted. You may have been logged
+out. Please reload the page and try again."}`, which the form shows as
+a passing notice. Live-probed 2026-11-27, two runs per app on OJS, OMP
+and OPS `main`, scratch contexts, kept script
+`shared/playwright/checks/U21/I27F/i27f.js`, as the Author: with the
+start form filled, a second page of the same browser signed out and in
+again (the page's token changed), and "Begin Submission" answered 403
+on all three, with no navigation, no field error and no dialog, the
+notice above, and no draft in the database; a reload showed the form
+empty. On OJS and OPS, a section ("Alpha") picked on the filled form
+and then marked inactive (`sections.is_inactive = 1`, as the section
+window's "Mark this section as inactive…" stores it): 400, the reason
+under "Section" and as "Go to Section: …" at the foot after "Please
+correct one error.", the notice "The form was not saved because 1
+error(s) were encountered. …", no draft, and after a reload no "Section"
+choice at all (one section left open). No server error and no page
+error in any run.
 
 <a id="fn-f"></a>
 **f** — Draft state and access. `submissionProgress` (submission schema,
@@ -2196,6 +2307,19 @@ context's Settings → Workflow → Submission › Metadata screen reads
 seeded context's Details step showed "Keywords" (help "Keywords are
 typically one- to three-word phrases…", no "Required" mark) between
 "Title" and "Abstract * Required" on all three.
+Live-probed 2026-11-27, two runs per app on OJS, OMP and OPS `main`,
+scratch contexts (kept script `shared/playwright/checks/U21/I27F/i27f.js`):
+with `subjects` at `enable` ("Do not request subjects from the author
+during submission.") and the other six items at `request`, "For the
+Editors" ("For Readers") listed Disciplines, Supporting Agencies,
+Coverage, Rights, Source and Type and no Subjects; with all seven at
+the install default, none of them. "Categories" ("Select only the categories that are appropriate
+for your submission. Selected: None", "Select Categories") showed with
+`submitWithCategories` on and two categories, and not with it off and
+a category, nor on with no category. Header line: two open sections and
+one language read "Submitting to the Alpha section." / "Submitting to
+the Articles section." with "Change" (OJS, OPS); with one section left
+open and one language, no such line.
 
 <a id="fn-h"></a>
 **h** — Navigation. Footer buttons `common.continue` / `common.back` /
@@ -2252,7 +2376,9 @@ buttons disable on `isDisconnected` (AFFW-078, 096); submit enablement
 requires `!isAutosaving && !isDisconnected` (note m). Restore dialog on
 load when stored autosaves exist: `common.unsavedChanges` title,
 `common.unsavedChangesMessage`, `common.yes` / `common.discardChanges`
-(AFFW-108). A 403 on autosave asks for a re-login (session/CSRF expiry).
+(AFFW-108). A save answered 403 (a stale form token) is kept in
+localStorage like a lost connection's and resent with the same token,
+under the generic "Error" dialog (Rule 9d, note fn-a27).
 Live-probed 2026-08-25: the save fired ≈55 s after typing stopped, with no
 per-keystroke request; the footer flashed "Saving" for ~300 ms, then
 "Last saved 0 seconds ago", the relative time ticking every ~3 s
@@ -3074,6 +3200,49 @@ OJS r1), and after the submit the submit time ("2026-11-23 04:20:48").
 stage "Incomplete". My Submissions, the dashboards' "Days" column and
 the workflow screen showed no submitted date.
 
+<a id="fn-a27"></a>
+**fn-a27** — Rule 9d, A27. ui-library `SubmissionWizardPage.vue`
+`autosaveErrored()` keeps a save answered 0, 500 or 403 in localStorage
+(note fn-a19) and calls `ajaxErrorCallback({})`, so the generic "Error"
+dialog opens and the server's 403 text never shows; the autosave
+mixin's `_runReconnect()` resends with the page's
+`pkp.currentUser.csrfToken`, which signing in afresh in another page of
+the browser has replaced, so every resend answers 403 again.
+Live-probed 2026-11-27, two runs per app on OJS, OMP and OPS `main`,
+scratch contexts with "let authors pick categories" on and two
+categories, kept script `shared/playwright/checks/U21/I27F/i27f.js`, as
+the submitting Author: on "For the Editors" ("For Readers" on OPS) a
+comment typed, once with no category ticked and once with "Category A"
+ticked; a second page of the same browser signed out and in again (the
+page's token changed); "Continue". The step's save
+(`PUT …/submissions/{id}` for the comment, `PUT …/publications/{id}`
+for a category and OPS's relation status) answered 403 `{"error":"The
+form could not be submitted. You may have been logged out. Please reload
+the page and try again."}`, then four resends about 4, 12, 28 and 60 s
+after the first, each 403, and none more before the reload about 91 s
+after it. The step moved to "5 Review" with "Error An
+unexpected error has occurred. Please reload the page and try again."
+open; the footer read "Reconnecting" at 6, 15 and 36 s, "Save for
+Later" and "Submit" disabled, "Back" and "Cancel" enabled; the dialog,
+closed with "OK" at about 3 s, was open again at 36 s. A reload opened
+"Unsaved Changes" ("We found unsaved changes from 1 minute ago…"),
+"Yes" sent the save, 200, and a second reload showed the comment and
+"Category A" kept (but one OMP run: A28). No server error and no page
+error in any run.
+
+<a id="fn-a28"></a>
+**fn-a28** — A28. The autosave mixin's `_getNextAutosave()` removes the
+payload from localStorage before a resend and `autosaveErrored()` puts
+it back only in the request's error callback, which a page unload
+cancels. Live-probed 2026-11-27 (the runs of note fn-a27): on OMP, run
+r1 without a category, the reload went out about 32 s after the fourth
+resend, when the next was due; it opened no "Unsaved Changes" and no
+save was sent, and the second reload showed "Comments for the Editor"
+empty. OMP's r2 and an OMP-only r3, and every OJS and OPS run, restored
+the change. What would settle it: a reload timed while one resend is
+held pending (a Playwright route holding that one PUT), then the
+Unsaved Changes read.
+
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
 `workType`; `SubmissionHandler::getSubmittingTo()` returns the work-type
@@ -3256,6 +3425,22 @@ been uploaded for this submission." (OPS9), 3.5 "Poster Preprint
 Text", "PDF Preprint Text". "Order", "Cancel ordering" with no drag left
 "Poster", "PDF". No page error and no server error in any run.
 Issue report: [pkp-e2e#1019](https://github.com/jardakotesovec/pkp-e2e/issues/1019) ([docs/issues/U72-A13-wizard-review-chapters-old-order.md](../issues/U72-A13-wizard-review-chapters-old-order.md)), joined 2026-10-21.
+
+<a id="fn-ops12"></a>
+**fn-ops12** — OPS12. lib/pkp's `PKPSubmissionController::add()`
+answers an inactive section with `__('api.submission.400.inactiveSection')`,
+a key OJS and OMP define in their own `locale/en/api.po` and OPS does
+not; the same cause as OPS7 (note c). Two issue reports elsewhere list
+the key from a code search without a screen:
+[docs/issues/U59-OPS1-preprint-server-path-zero-raw-code.md](../issues/U59-OPS1-preprint-server-path-zero-raw-code.md)
+and
+[docs/issues/U17-A9-sections-interface-refusals-raw-codes.md](../issues/U17-A9-sections-interface-refusals-raw-codes.md).
+Live-probed 2026-11-27, two runs on OPS `main` (note e's refusal
+drive): the 400 body read
+`{"sectionId":["##api.submission.400.inactiveSection##"]}`, and the
+start form showed the raw key under "Section" and as "Go to Section:
+##api.submission.400.inactiveSection##" at its foot; OJS's runs read
+"This section is no longer receiving submissions." in both places.
 
 <a id="fn-s"></a>
 **s** — Scenario seeding. Use the seeded context (`publicknowledge`) and
