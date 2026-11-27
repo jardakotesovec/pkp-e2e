@@ -12,7 +12,8 @@
  *   live count badges (the badge count is the entry's leading text);
  * - the list heading ("Active submissions (2)");
  * - the table search box (commits on Enter; on My Submissions the search
- *   narrows the CURRENT view — no cross-status search view for authors);
+ *   narrows the CURRENT view — no cross-status search view for authors),
+ *   and the absence read bounded by the search's own answer;
  * - row affordances ("View", "Complete submission", "Submit revisions");
  * - the workflow panel a row's "View" opens over the list;
  * - the "More Actions" → "Delete Incomplete Submissions" selection mode and
@@ -354,6 +355,24 @@ exports.MySubmissionsPage = class MySubmissionsPage extends BasePage {
         const row = this.row(tag);
         await expect(row).toBeVisible({timeout: 30_000});
         return row;
+    }
+
+    /**
+     * Search the current view for a single-token phrase (a seed tag) and
+     * assert no row carries it: the absence is read after the list's own
+     * filtered answer (`…/_submissions?…searchPhrase={phrase}`), never on
+     * silence (PRINCIPLES M4). Pair it with a `findRowByTag` of a row that
+     * is there, taken the same way.
+     */
+    async expectNoRowFor(phrase) {
+        const filtered = this.page.waitForResponse(
+            (r) => r.url().includes('_submissions') && r.url().includes(encodeURIComponent(phrase)),
+            {timeout: 30_000}
+        );
+        await this.searchFor(phrase);
+        const response = await filtered;
+        expect(response.ok()).toBeTruthy();
+        await expect(this.row(phrase)).toHaveCount(0);
     }
 
     /** A row's "View" action (absent on drafts). */

@@ -38,14 +38,17 @@
  * read-only `publicknowledge` press for author-only flows; scratch presses
  * (with throwaway users carrying unique mail.test addresses) wherever a
  * setting differs from the install default (seeded through the context
- * passthrough keys: `copyrightNotice`, `metadata`,
- * `submissionAcknowledgement` and its copies, `supportedSubmissionLocales`)
+ * passthrough keys: `copyrightNotice`, `metadata`, `submitWithCategories`
+ * with `categories[]`, `submissionAcknowledgement` and its copies,
+ * `supportedSubmissionLocales`)
  * or Mailpit is read (PRINCIPLES A8 — every mail assertion is scoped by a
  * unique throwaway recipient). S5 runs on two scratch presses (two
  * submission languages; the builder's defaults) as its given says, its
  * draft started through the start form by an Author whose profile carries
  * a typed affiliation (the `users[]` `affiliation` key), so the copy is the
- * start form's own; S17's second draft is started there too. S3 runs on
+ * start form's own; S17's second draft is started there too. S1's
+ * "signed in afresh in another tab" is a second tab of the Author's own
+ * browser context signing out through the user menu and back in. S3 runs on
  * the page's own clock, moved instead of waited out. The
  * settings scenarios 7, 8, 9 and 13 switch their setting through the
  * manager's own screen, as the spec's bullets say. All tests run in the
@@ -70,6 +73,12 @@ const {
     expectWizardOpen,
     fillStartForm,
     beginSubmission,
+    startTitleBody,
+    startChecklistBox,
+    startPrivacyBox,
+    pressBeginSubmissionRefused,
+    pageNotice,
+    categoriesField,
     continueTo,
     uploadWizardFile,
     openReview,
@@ -109,6 +118,7 @@ const {
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
+const {closeTab} = require('../../../../shared/playwright/support/tabs.js');
 
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
@@ -214,6 +224,26 @@ async function activityLogRows(page) {
 }
 
 /**
+ * In a second tab of the given browser context, sign out through the user
+ * menu's "Logout" and sign back in on the Login page (scenario 1's other
+ * tab): the session, and with it the form token, is renewed, while the
+ * first tab keeps the page it had. The tab is closed afterwards.
+ */
+async function signOutAndBackIn(context, username) {
+    const tab = await context.newPage();
+    await tab.goto(`/index.php/${PK}${PK_PREFIX}/dashboard/mySubmissions`);
+    const userNav = tab.locator('[data-cy="app-user-nav"]').last();
+    await userNav.locator('> button').click();
+    await userNav.locator('nav').getByRole('link', {name: 'Logout', exact: true}).click();
+    await tab.waitForURL(/\/login/, {waitUntil: 'commit', timeout: 30_000});
+    const login = new LoginPage(tab);
+    await login.expectForm();
+    await login.signIn(username, getPassword(username));
+    await expect(tab).not.toHaveURL(/\/login/);
+    await closeTab(tab);
+}
+
+/**
  * Walk a draft to Review with one uploaded file and a second contributor
  * added on the Contributors step, then submit (scenario 10's drafts).
  */
@@ -235,7 +265,8 @@ test.describe('Submission wizard (U21)', () => {
 
     test('S1: start a submission from the dashboard sidebar', async ({ompApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s1');
-        const page = await (await asUser('author.alex')).newPage();
+        const alexContext = await asUser('author.alex');
+        const page = await alexContext.newPage();
 
         // The sidebar offers "Start A New Submission" (Rule 1)…
         await page.goto(`/index.php/${PK}${PK_PREFIX}/dashboard/mySubmissions`);
@@ -278,6 +309,55 @@ test.describe('Submission wizard (U21)', () => {
             page.locator('.submissionWizard__submissionDetails')
         ).toContainText(String(id));
         await expect(page).toHaveTitle(/Make a Submission/);
+
+        // Signed in afresh in another tab: "Start A New Submission" again,
+        // the form filled the same way with Signed in elsewhere in "Title";
+        // a second tab of the same browser signs out (the user menu's
+        // "Logout") and back in, which renews the session and its form
+        // token; back on the first tab "Begin Submission" is refused
+        // (Rule 5a): the start form's POST answers 403, the notice shows,
+        // and the form stays as filled, no navigation.
+        const elsewhere = `Signed in elsewhere ${tag}`;
+        // From the open wizard the sidebar entry stays on the wizard
+        // (T-omp-1, .reports/U21/test-omp-findings.md), so the press goes
+        // through My Submissions first.
+        await mySub.openView('Active submissions');
+        await mySub.startNewSubmissionLink().click();
+        await page.waitForURL((url) => /\/submission$/.test(url.pathname) && !url.searchParams.has('id'), {
+            waitUntil: 'commit',
+            timeout: 30_000,
+        });
+        await fillStartForm(page, {title: elsewhere});
+        await signOutAndBackIn(alexContext, 'author.alex');
+        const refused = await pressBeginSubmissionRefused(page);
+        expect(refused.status(), 'Begin Submission refused with the old form token').toBe(403);
+        await expect(
+            pageNotice(
+                page,
+                'The form could not be submitted. You may have been logged out. Please reload the page and try again.'
+            )
+        ).toBeVisible();
+        await expect(page).not.toHaveURL(/[?&]id=\d+/);
+        await expect(page.getByRole('heading', {name: /Make a Submission/}).first()).toBeVisible();
+        await expect(await startTitleBody(page)).toHaveText(elsewhere);
+        await expect(startChecklistBox(page)).toBeChecked();
+        await expect(startPrivacyBox(page)).toBeChecked();
+        // Reload: the form is empty (the box is read once its editor is
+        // ready; the unticked boxes are read the same way as the ticked
+        // ones above).
+        await page.reload();
+        await expect(page.getByRole('heading', {name: /Make a Submission/}).first()).toBeVisible({timeout: 20_000});
+        await expect(await startTitleBody(page)).toHaveText('');
+        await expect(startChecklistBox(page)).not.toBeChecked();
+        await expect(startPrivacyBox(page)).not.toBeChecked();
+        // My Submissions lists no draft titled Signed in elsewhere: the
+        // search for the tag lists this test's first draft (Wizard start,
+        // the positive control from the same answer) and nothing else.
+        await mySub.openView('Active submissions');
+        const started = await mySub.findRowByTag(tag);
+        await expect(started).toContainText(`Wizard start ${tag}`);
+        await expect(mySub.row(tag)).toHaveCount(1);
+        await expect(mySub.row(elsewhere)).toHaveCount(0);
 
         // No affiliation: a throwaway Author (the seeder creates the account
         // with no affiliation) starts a draft the same way — the wizard
@@ -1527,11 +1607,13 @@ test.describe('Submission wizard (U21)', () => {
 
         // A press whose setup requires keywords and the plain language
         // summary during submission, asks for subjects and a data
-        // availability statement without requiring them, and keeps
-        // references at the install default (seeded through `metadata:
-        // {keywords: 'require', subjects: 'request', dataAvailability:
-        // 'request', plainLanguageSummary: 'require'}`, `citations` left at
-        // the fresh context's `request`), a complete draft (scenario 17).
+        // availability statement without requiring them, keeps references
+        // at the install default, and lets authors pick categories and has
+        // a category (seeded through `metadata: {keywords: 'require',
+        // subjects: 'request', dataAvailability: 'request',
+        // plainLanguageSummary: 'require'}`, `citations` left at the fresh
+        // context's `request`, `submitWithCategories: true` and one
+        // `categories[]` entry), a complete draft (scenario 17).
         const press = await seedPress(ompApi, tag, ['author'], {
             settings: {
                 metadata: {
@@ -1540,6 +1622,8 @@ test.describe('Submission wizard (U21)', () => {
                     dataAvailability: 'request',
                     plainLanguageSummary: 'require',
                 },
+                submitWithCategories: true,
+                categories: [{path: 'cata', title: 'Category A'}],
             },
         });
         const author = press.users.author;
@@ -1600,6 +1684,10 @@ test.describe('Submission wizard (U21)', () => {
         await continueTo(page, STEPS.editors);
         await expect(wizardField(page, /^Subjects/)).toBeVisible();
         await expect(wizardFieldLabel(page, /^Subjects/)).not.toContainText('Required');
+        // The category picker: on the same draft, "For the Editors" also
+        // shows the category picker (Rule 7).
+        await expect(categoriesField(page)).toBeVisible();
+        await expect(categoriesField(page).getByRole('button', {name: 'Select Categories'})).toBeVisible();
         await openReview(page);
         await expect(problemsBanner(page)).toContainText(
             'There are one or more problems that need to be fixed before you can submit.'
@@ -1668,21 +1756,30 @@ test.describe('Submission wizard (U21)', () => {
         await expect(wizardFieldLabel(alex, /^Keywords/)).not.toContainText('Required');
         await continueTo(alex, STEPS.contributors);
         await continueTo(alex, STEPS.editors);
+        // Categories not offered to authors: the seeded press has
+        // categories but does not let authors pick them, so "For the
+        // Editors" shows no category picker (the step's own "Cover Note to
+        // Editor" field, and the picker on the first press, read the same
+        // way, are the positive controls).
+        await expect(wizardField(alex, new RegExp(`^${EDITOR_NOTE}`))).toBeVisible();
+        await expect(categoriesField(alex)).toHaveCount(0);
+        await expect(alex.getByRole('button', {name: 'Select Categories'})).toHaveCount(0);
         await openReview(alex);
         await expect(problemsBanner(alex)).toHaveCount(0);
         await expect(reviewItem(reviewPanel(alex, 'Details'), 'Keywords')).toContainText('None provided');
         await expect(submitButton(alex)).toBeEnabled();
 
-        // Control: on a press whose setup does not ask for keywords,
-        // "Details" shows no "Keywords" field (positive control: the Title
-        // field, read the same way) and Review passes without one. The
-        // spec places this control on the seeded press, but the seeded
-        // press asks for keywords (optional, the install default) — finding
-        // T-omp-2 in .reports/U21/test-omp-findings.md — so the control
-        // runs on a scratch press seeded with `metadata: {keywords: 'off'}`.
+        // A second scratch press: subjects switched on with "Do not request
+        // subjects from the author during submission." chosen (`subjects:
+        // 'enable'`), authors let to pick categories but no category
+        // (`submitWithCategories: true`, no `categories[]`), and keywords
+        // not asked (`keywords: 'off'`).
         const offTag = `${tag}c`;
         const off = await seedPress(ompApi, offTag, ['author'], {
-            settings: {metadata: {keywords: 'off'}},
+            settings: {
+                metadata: {keywords: 'off', subjects: 'enable'},
+                submitWithCategories: true,
+            },
         });
         const control = await seedDraft(ompApi, offTag, {
             context: off.path,
@@ -1693,10 +1790,20 @@ test.describe('Submission wizard (U21)', () => {
         await expectWizardOpen(offPage);
         await uploadWizardFile(offPage, `ms-${offTag}.txt`);
         await continueTo(offPage, STEPS.details);
+        // Control: "Details" shows no "Keywords" field (positive control:
+        // the Title field, read the same way) and Review passes without one.
         await expect(wizardField(offPage, /^Title/)).toBeVisible();
         await expect(wizardField(offPage, /^Keywords/)).toHaveCount(0);
         await continueTo(offPage, STEPS.contributors);
         await continueTo(offPage, STEPS.editors);
+        // Switched on, not requested; no category: "For the Editors" shows
+        // neither a field for subjects nor the category picker (the step's
+        // "Cover Note to Editor" field, and the first press's "Subjects"
+        // field and picker, read the same way, are the positive controls).
+        await expect(wizardField(offPage, new RegExp(`^${EDITOR_NOTE}`))).toBeVisible();
+        await expect(wizardField(offPage, /^Subjects/)).toHaveCount(0);
+        await expect(categoriesField(offPage)).toHaveCount(0);
+        await expect(offPage.getByRole('button', {name: 'Select Categories'})).toHaveCount(0);
         await openReview(offPage);
         await expect(problemsBanner(offPage)).toHaveCount(0);
         await expect(submitButton(offPage)).toBeEnabled();

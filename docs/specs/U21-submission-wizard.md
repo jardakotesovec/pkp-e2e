@@ -68,9 +68,11 @@ itself enforces before submission is Rule 13.
 
 1. <a id="ways-in"></a>**Ways in.** Signed in, the dashboard sidebar offers
    "Start A New Submission", which opens the **Make a Submission** start
-   screen. On the reader site of a journal or press, the "Make a Submission"
-   sidebar block links to the journal's submissions information page, whose
-   own controls lead to the same screen. That block is installed with the
+   screen, except from inside the wizard, where pressing it leaves the
+   open step on screen ⚠ [A29](#a29). On the reader site of a journal or
+   press, the "Make a Submission" sidebar block links to the journal's
+   submissions information page, whose own controls lead to the same
+   screen. That block is installed with the
    app but switched off until a Journal Manager enables the plugin and
    places the block in the sidebar. A preprint server does not install this
    block. Old bookmarked wizard addresses from earlier versions forward to
@@ -691,7 +693,7 @@ them live are the subject of *Submission intake configuration*.
 
 Scenarios 1 to 4, 6, 14 and 15 run on the seeded journal with ready
 accounts, as do the assigned-editor half of scenario 11 and the
-install-default bullet of scenario 17; the drafts and submissions are
+two install-default bullets of scenario 17; the drafts and submissions are
 scratch, and so is the section that waives abstracts in scenario 6 on a
 preprint server. The others change a journal setting, a section or a
 language, so they run on a scratch journal with throwaway accounts, and
@@ -714,6 +716,15 @@ recipe are in the footnote. <sup>s</sup>
      form the same way, Wizard start in "Title".
    - **"Begin Submission"**: press it: the wizard opens on the "Upload
      Files" step, with the new submission's number shown above the heading.
+   - **Signed in afresh in another tab**: open My Submissions from the
+     sidebar, then choose "Start A New Submission" in the sidebar
+     ([A29](#a29)), and fill the start form the same way, with Signed in
+     elsewhere in "Title". In a second browser tab, sign out and sign back in; then,
+     back on the first tab, press "Begin Submission": the notice "The form
+     could not be submitted. You may have been logged out. Please reload
+     the page and try again." shows for a few seconds, and the form stays
+     as filled. Reload the page: the form is empty. Open My Submissions:
+     it lists no draft titled Signed in elsewhere.
    - **No affiliation**: an Author whose profile carries no affiliation
      starts a draft the same way: the wizard opens on "Upload Files", and
      its "Contributors" step already lists them, as primary contact.
@@ -1025,6 +1036,21 @@ App-specific:
     - **A section's policy**: Author: on "Make a Submission", pick the
       section that has a policy: the policy shows under the "Section"
       list.
+    - **The picked section closed while the form is open**: Author: on
+      that start form, type Closed meanwhile in "Title", with the
+      section that has a policy still picked, and tick any confirmation
+      box offered. Journal Manager, in a separate browser session
+      (Rule 5a): deactivate that section. Author: press
+      "Begin Submission": "This section is no longer receiving
+      submissions." shows under "Section", the foot of the form reads
+      "Please correct one error." with "Go to Section: This section is no
+      longer receiving submissions.", and the notice "The form was not
+      saved because 1 error(s) were encountered. Please correct these
+      errors and try again." shows; the form stays as filled. On a
+      preprint server both places read a raw locale code
+      [OPS12](#ops12); the rest holds. Reload the
+      page: the start form no longer offers that section. Open My
+      Submissions: it lists no draft titled Closed meanwhile.
     - **Word limit**: Author: on a draft in the section with the word
       limit, on "Details", type "This abstract has more words than the
       section allows, fourteen of them in all." as the abstract and reach
@@ -1047,7 +1073,8 @@ App-specific:
       been deactivated or restricted…"; on a preprint server the
       explanation is a raw locale code [OPS7](#ops7).
     - **Control**: Journal Manager: reactivate a deactivated section: the
-      author's start form offers it again. A press has no section at
+      author's start form opens again, that section applied unshown
+      (Rule 4). A press has no section at
       intake, so this scenario has no press analogue [OMP1](#omp1)
       (scenario 14). <sup>p</sup>
 
@@ -1129,7 +1156,8 @@ App-specific:
     Given: Author, on a complete draft in a journal whose setup requires
     keywords and the plain language summary during submission, asks for
     subjects and a data availability statement without requiring them,
-    and keeps references at the install default.
+    keeps references at the install default, and lets authors pick
+    categories and has a category.
 
     - **Saves before the summary is typed**: on the same journal, open
       "Make a Submission", type Summary required in "Title", tick any
@@ -1156,13 +1184,23 @@ App-specific:
       statement, and "For the Editors" a field for subjects; with both left
       empty, "Review" raises no complaint about either and "Submit" stays
       enabled.
+    - **The category picker**: on the same draft, "For the Editors" also
+      shows the category picker.
     - **Keywords at the install default**: on a journal at the install
       default, which asks for keywords without requiring them, "Details"
       shows a "Keywords" field not marked required, and "Review" passes
       with it empty.
-    - **Control**: on a journal whose setup does not ask for keywords (a
-      scratch journal with the keywords item switched off, since the seeded
-      journal asks for them by install default), "Details" shows no
+    - **Categories not offered to authors**: on that same journal, which
+      has categories but does not let authors pick them, "For the
+      Editors" shows no category picker.
+    - **Switched on, not requested; no category**: on a second scratch
+      journal, whose setup switches subjects on with "Do not request
+      subjects from the author during submission." chosen, and lets
+      authors pick categories but has no category, "For the Editors"
+      shows neither a field for subjects nor the category picker.
+    - **Control**: on that second scratch journal, whose setup also does
+      not ask for keywords (its keywords item is switched off, since the
+      seeded journal asks for them by install default), "Details" shows no
       "Keywords" field and "Review" passes without one. <sup>s</sup>
 
 ## Coverage
@@ -1177,10 +1215,6 @@ Left out of the scenarios above, by reason:
   - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names) [report 2026-10-01]
   - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names) [report 2026-10-01]
   - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names) [report 2026-10-01]
-  - the category picker on "For the Editors" with "let authors pick categories" on and a category, and none with the setting off or no category (Settings, "Categories"; Rule 7) [incidental 2026-11-27]
-  - "Begin Submission" pressed after signing in afresh in another tab: the notice, the form kept, no draft (Rule 5a) [incidental 2026-11-27]
-  - "Begin Submission" pressed with the picked section closed meanwhile: the reason under "Section", no draft, the section gone after a reload {OJS} (Rule 5a; OPS12 on a preprint server) [incidental 2026-11-27]
-  - a metadata item enabled with "Do not request…" chosen, absent from "For the Editors" (Rule 7) [incidental 2026-11-27]
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold
@@ -1215,6 +1249,7 @@ Left out of the scenarios above, by reason:
   - A26 (a draft's submission date, read in the statistics reports before and after "Submit")
   - A27 (a step's save after signing in afresh in another tab, its retries and the reload's "Unsaved Changes")
   - A28 (a reload while the wizard is resending a save)
+  - A29 (the sidebar's "Start A New Submission" pressed on the open wizard)
   - OMP2 (a second copy address on a press)
   - OMP4 (a submission made as "Chapter Author" on a press, its refused saves and the hang)
   - OPS2 (a Moderator with no other role opening the start screen on a preprint server)
@@ -1276,6 +1311,7 @@ are the source; badges, Impact and Basis:
 | [A24](#a24) | Submission wizard: a reload opens a draft on its first step with the later steps locked, and "Save for Later" there forgets the step reached | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A25](#a25) | A journal or press manager is turned away from "Make a Submission" once no author role allows self-registration | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
 | [A27](#a27) | After signing in afresh in another tab, the submission wizard resends a refused save that cannot succeed and shows only "An unexpected error" | 🐞 | minor | — |
+| [A29](#a29) | On the open submission wizard, the sidebar's "Start A New Submission" does nothing | 🐞 | minor | — |
 | [OMP2](#omp2) | A press refuses the comma-separated "Notify Anyone" list its own help text asks for | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP4](#omp4) | On a press, a submission made as "Chapter Author" cannot be saved: the title is lost, every save is refused and the wizard hangs | 🐞 | user-visible · crash: script | — |
 | [OPS3](#ops3) | A preprint author cannot delete their own draft: the wizard's "Cancel" does nothing and My Submissions refuses it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -1747,6 +1783,17 @@ change? Lean: yes, a defect. The wizard takes the change out of the
 browser's store while it resends it and puts it back only when that
 resend fails, which a reload cuts short.
 Basis: probe, 2026-11-27 (seen once); code. <sup>[fn-a28](#fn-a28)</sup>
+
+<a id="a29"></a>
+**A29 — On the open submission wizard, the sidebar's "Start A New Submission" does nothing** · 🐞 · minor.
+An Author on any step of the wizard ("Make a Submission: Upload Files",
+for example) who presses the sidebar's "Start A New Submission" stays
+where they are: the address, the heading and the step rail do not
+change, nothing is asked and the start form does not open. Expected: the
+"Make a Submission" start form, as the entry opens from any other
+screen (Rule 1). The draft is untouched. Opening My Submissions first and
+pressing the entry there opens the start form.
+Basis: test run, 2026-11-27 (OJS, OMP); code (OPS). <sup>[fn-a29](#fn-a29)</sup>
 
 ### OMP
 
@@ -3243,6 +3290,25 @@ the change. What would settle it: a reload timed while one resend is
 held pending (a Playwright route holding that one PUT), then the
 Unsaved Changes read.
 
+<a id="fn-a29"></a>
+**fn-a29** — Rule 1, A29. ui-library `src/composables/useSideMenu.js`
+`mapItems()` gives a linked side-menu item a command that calls
+`compareUrlPaths(window.location.href, item.link)` (host and path only);
+when they match it copies the link's query into the page's query
+params and never sets `window.location`. The wizard's address
+`…/{context}/en/submission?id={id}#{step}` and the entry's link
+`…/{context}/en/submission` share the path, so the press stays on the
+page. The file is identical in OJS, OMP and OPS `main`. Test run
+2026-11-27, the U21 suites' scenario 1, as the submitting Author right
+after "Begin Submission": OJS, two runs: after the press the heading
+"Make a Submission: Upload Files" was still up and no navigation came
+within 30 s; the sidebar link's address was `…/publicknowledge/en/submission`.
+OMP, three runs: the address read `…/en/submission?id=114#files` before
+and 3 s after the press, no dialog and no browser dialog, the step rail
+still shown; a wait of 30 s for the start form timed out. OPS not driven;
+its suite, like the other two, reaches the start form through My
+Submissions. The run logs record no server error and no page error.
+
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
 `workType`; `SubmissionHandler::getSubmittingTo()` returns the work-type
@@ -3454,7 +3520,9 @@ assigned-editor half of 11: `author.alex` (or the app's author roster
 account). 1's no-affiliation bullet: a throwaway Author whose profile
 `affiliation` is empty; 1's plugin bullets: `manager.maya` reads Settings →
 Website → Plugins (a journal or press lists the "Make a Submission" block
-disabled; OPS lists none). 2's comments bullet needs a section with no
+disabled; OPS lists none); 1's signed-in-afresh bullet: a second page
+in the same browser context signs out and back in as the same account
+before the first page's "Begin Submission". 2's comments bullet needs a section with no
 assigned editor (a scratch journal's section) and reads the discussion on
 the workflow screen at `/dashboard/editorial?workflowSubmissionId={id}` and
 the copy in the mail catcher; 2's log bullet reads the activity log there.
@@ -3505,7 +3573,8 @@ flips `disableSubmissions`, section flags (`editorRestricted`,
 `isInactive`, the section form's word count for 12's word-limit bullet)
 and "Reviewer Suggestion at Submission" (Settings → Workflow → Review) on a
 scratch journal; 12's policy bullet: one of the open scratch sections
-seeded with a `policy`. 9: a scratch journal with a throwaway Journal
+seeded with a `policy`, which 12's closed-meanwhile bullet then flips
+`isInactive` on while the author's start form is open. 9: a scratch journal with a throwaway Journal
 Manager, two scratch users with no role in it, and for the roles bullet
 one throwaway account each in its `users[]` with the role key `editor`,
 `sectionEditor` or `author`, no other (OPS: `author` and `manager`). 10 sets
@@ -3517,13 +3586,18 @@ same visit as the first (OPS8 breaks one added after a reload). 16: a
 scratch journal with a copyright notice (the context's
 `copyrightNotice`); 17: a scratch journal seeded
 `metadata: {keywords: 'require', subjects: 'request', dataAvailability: 'request', plainLanguageSummary: 'require'}`
-(`citations` left at the fresh context's `request`), its
+(`citations` left at the fresh context's `request`), with
+`submitWithCategories: true` and one `categories[]` entry, its
 saves-before-the-summary bullet on a second draft started there through
-the start form, and for the control a second one with `keywords` `off` (the seeded
+the start form, and for the not-requested bullet and the control a second one with
+`metadata: {keywords: 'off', subjects: 'enable'}`,
+`submitWithCategories: true` and no `categories[]` (the seeded
 context asks for keywords by install default, so its Details step shows
 the field; run 2026-09-07 on all three apps), with a throwaway Author on
-each; 17's install-default bullet: the seeded context as `author.alex`
-(or a scratch one with no `metadata` key). Never mutate the
+each; 17's install-default bullets: the seeded context as `author.alex`,
+which has categories and `submitWithCategories` at the fresh context's
+"No" (the keywords bullet may also run on a scratch one with no
+`metadata` key, which has no category). Never mutate the
 shared roster or seeded sections — scratch sections/users for every
 closure test.
 

@@ -9,13 +9,14 @@
  *
  * Deliberately NOT covered (register IDs; OMP* and OPS* are the press's
  * and the server's): A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A12, A14,
- * A15, A16, A17, A18, A19, A21, A22, A23, A24, A25, A26.
+ * A15, A16, A17, A18, A19, A21, A22, A23, A24, A25, A26, A27, A28.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (journal-level state runs on scratch journals with throwaway
  * users, configured through the context passthrough keys: `sections[]`
  * with `wordCount` and `policy`, `supportedSubmissionLocales`,
- * `copyrightNotice`, `metadata`, `submissionAcknowledgement` and its two
+ * `copyrightNotice`, `metadata`, `submitWithCategories` with
+ * `categories[]`, `submissionAcknowledgement` and its two
  * copy keys, and the users' `affiliation`; a second scratch journal at the
  * builder's defaults is the
  * one-section, one-language journal of scenario 5). Mailpit
@@ -37,6 +38,7 @@ const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmi
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const {waitForJQueryIdle} = require('../support/legacy.js');
+const {closeTab} = require('../../../../shared/playwright/support/tabs.js');
 
 const JOURNAL = 'publicknowledge';
 const COMMENT_FOR_EDITOR = 'Please note the data set is under embargo.';
@@ -290,9 +292,12 @@ test.describe('submission wizard', () => {
 
         // The "Make a Submission" start form (Rule 4).
         const start = new StartSubmissionPage(page, JOURNAL);
+        // The title carries a token of the tag, so My Submissions can be
+        // searched for it below (patterns.md parallel lesson 3).
+        const startToken = `${tag}w`;
         const fillStartForm = async () => {
             await expect(start.heading()).toBeVisible({timeout: 30_000});
-            await start.fillTitle('Wizard start');
+            await start.fillTitle(`Wizard start ${startToken}`);
             await start.sectionRadio('Articles').check();
             await start.checklistBox().check();
             await start.privacyBox().check();
@@ -330,6 +335,67 @@ test.describe('submission wizard', () => {
         const submissionId = new URL(page.url()).searchParams.get('id');
         expect(Number(submissionId)).toBeGreaterThan(0);
         await expect(wizard.submissionDetailsLine()).toContainText(String(submissionId));
+
+        // Signed in afresh in another tab (Rule 5a): the start form filled
+        // again, with the tag's own token in the title so the list can be
+        // searched for it (patterns.md parallel lesson 3); a second tab of
+        // the same browser signs out and back in ("Keep me logged in"
+        // unticked, so the shared account gets no remember token), which
+        // renews the session and its form token. Back on the first tab,
+        // "Begin Submission" is refused: the form's POST answers 403, no
+        // wizard opens, the notice shows and the form stays as filled.
+        // On the wizard the sidebar's "Start A New Submission" is the
+        // current entry and a press there opens nothing (findings T-ojs-1),
+        // so the start form is reached again the way scenario 1 first left
+        // it: My Submissions, then "Start A New Submission".
+        const elsewhereToken = `${tag}e`;
+        await mySubmissions.openView('Active submissions');
+        await mySubmissions.startNewSubmissionLink().click();
+        await page.waitForURL((url) => url.pathname.endsWith('/submission') && !url.searchParams.has('id'), {
+            waitUntil: 'commit',
+            timeout: 30_000,
+        });
+        await expect(start.heading()).toBeVisible({timeout: 30_000});
+        await start.fillTitle(`Signed in elsewhere ${elsewhereToken}`);
+        await start.sectionRadio('Articles').check();
+        await start.checklistBox().check();
+        await start.privacyBox().check();
+        const otherTab = await page.context().newPage();
+        await otherTab.goto(`/index.php/${JOURNAL}/login/signOut`);
+        const otherLogin = new LoginPage(otherTab);
+        await otherLogin.gotoContext(JOURNAL);
+        await otherLogin.signInRemembered('author.alex', getPassword('author.alex'), false);
+        await closeTab(otherTab);
+        const refused = await start.beginRefused();
+        expect(refused.status()).toBe(403);
+        await expect(
+            start.pageNotice(
+                'The form could not be submitted. You may have been logged out. Please reload the page and try again.'
+            )
+        ).toBeVisible();
+        expect(new URL(page.url()).searchParams.get('id')).toBeNull();
+        await expect(start.heading()).toBeVisible();
+        await expect(start.titleEditorBody()).toContainText(`Signed in elsewhere ${elsewhereToken}`);
+        await expect(start.sectionRadio('Articles')).toBeChecked();
+        await expect(start.checklistBox()).toBeChecked();
+        await expect(start.privacyBox()).toBeChecked();
+
+        // A reload empties the form (the heading and the initialized Title
+        // editor are the controls that it is the form, read settled).
+        await page.reload();
+        await expect(start.heading()).toBeVisible({timeout: 30_000});
+        await start.titleReady();
+        await expect(start.titleEditorBody()).toHaveText('');
+        await expect(start.sectionRadio('Articles')).not.toBeChecked();
+        await expect(start.checklistBox()).not.toBeChecked();
+        await expect(start.privacyBox()).not.toBeChecked();
+
+        // My Submissions lists no draft titled Signed in elsewhere: its
+        // search for the title's token answers with no row, where the same
+        // search for the draft begun above finds its row (the control).
+        await mySubmissions.openView('Active submissions');
+        await mySubmissions.findRowByTag(startToken);
+        await mySubmissions.expectNoRowFor(elsewhereToken);
 
         // No affiliation: a throwaway Author whose profile carries none (the
         // seeder creates it so) starts a draft the same way, and the
@@ -1363,6 +1429,55 @@ test.describe('submission wizard', () => {
         await expect(managerStart.sectionRadio('Rho')).toBeVisible({timeout: 30_000});
         await expect(managerStart.sectionRadio('Delta')).toHaveCount(0);
 
+        // The picked section closed while the form is open (Rule 5a): the
+        // author's start form filled with Beta, the section with a policy,
+        // picked again; the manager, in a separate browser session,
+        // deactivates Beta; "Begin Submission" is refused with a 400: the
+        // reason under "Section", the foot's one error with its "Go to
+        // Section" entry, the notice, no wizard, the form as filled.
+        const closedToken = `${tag}c`;
+        await start.sectionRadio('Beta').check();
+        await expect(start.sectionPolicy(policy)).toBeVisible();
+        await start.fillTitle(`Closed meanwhile ${closedToken}`);
+        await start.checklistBox().check();
+        await start.privacyBox().check();
+        await openSectionsGrid(managerPage, journal.path);
+        await setSectionFlag(managerPage, 'Beta', 'isInactive', true);
+        const closedMeanwhile = 'This section is no longer receiving submissions.';
+        const refused = await start.beginRefused();
+        expect(refused.status()).toBe(400);
+        await expect(start.sectionGroup().getByText(closedMeanwhile, {exact: true})).toBeVisible();
+        await expect(start.errorSummary()).toBeVisible();
+        await expect(start.goToErrorButton('Section', closedMeanwhile)).toBeVisible();
+        await expect(
+            start.pageNotice(
+                'The form was not saved because 1 error(s) were encountered. Please correct these errors and try again.'
+            )
+        ).toBeVisible();
+        expect(new URL(authorPage.url()).searchParams.get('id')).toBeNull();
+        await expect(start.titleEditorBody()).toContainText(`Closed meanwhile ${closedToken}`);
+        await expect(start.sectionRadio('Beta')).toBeChecked();
+        await expect(start.checklistBox()).toBeChecked();
+        await expect(start.privacyBox()).toBeChecked();
+
+        // A reload no longer offers Beta: with Alpha the one section left
+        // open to the author, the form shows no "Section" choice at all
+        // (Rule 4; the heading and the initialized Title editor are the
+        // controls that the form is read settled). My Submissions lists no
+        // draft titled Closed meanwhile: the search for its token answers
+        // with no row, where the same search finds the word-limit draft
+        // (the control).
+        await authorPage.reload();
+        await expect(start.heading()).toBeVisible({timeout: 30_000});
+        await start.titleReady();
+        await expect(start.titleEditorBody()).toHaveText('');
+        await expect(start.fieldLegend('Section')).toHaveCount(0);
+        await expect(start.sectionRadio('Beta')).toHaveCount(0);
+        const authorSubmissions = new MySubmissionsPage(authorPage, journal.path);
+        await authorSubmissions.openView('Active submissions');
+        await authorSubmissions.findRowByTag(`${tag}w`);
+        await authorSubmissions.expectNoRowFor(closedToken);
+
         // Word limit: on the Alpha draft, a 14-word abstract makes Review's
         // Details panel report the abstract as too long; Submit is disabled
         // (Rule 13).
@@ -1529,8 +1644,9 @@ test.describe('submission wizard', () => {
         // A journal whose setup requires keywords during submission and asks
         // for subjects and a data availability statement without requiring
         // them (the `metadata` passthrough).
-        // The journal also requires the plain language summary, and keeps
-        // references at the fresh context's "ask".
+        // The journal also requires the plain language summary, keeps
+        // references at the fresh context's "ask", and lets authors pick
+        // categories and has one (`submitWithCategories`, `categories[]`).
         const journal = await seedScratchJournal(ojsApi, tag, {
             settings: {
                 metadata: {
@@ -1539,6 +1655,8 @@ test.describe('submission wizard', () => {
                     dataAvailability: 'request',
                     plainLanguageSummary: 'require',
                 },
+                submitWithCategories: true,
+                categories: [{path: 'cata', title: 'Category A'}],
             },
         });
         const {submissionId} = await seedDraft(ojsApi, tag, journal.path, journal.author);
@@ -1599,6 +1717,9 @@ test.describe('submission wizard', () => {
         await wizard.continueTo('For the Editors');
         await expect(wizard.subjectsInput()).toBeVisible();
         await expect(wizard.requiredMark('forTheEditors-subjects-control-en')).toHaveCount(0);
+        // The category picker: For the Editors also shows it (Rule 7).
+        await expect(wizard.categoriesField()).toBeVisible();
+        await expect(wizard.categoriesField()).toContainText('Categories');
         await wizard.continueToReview(submissionId);
         await expect(wizard.errorBanner()).toBeVisible();
         await expect(wizard.reviewItem('Details', 'Keywords')).toContainText('This field is required.');
@@ -1666,17 +1787,26 @@ test.describe('submission wizard', () => {
         await expect(alexWizard.requiredMark('titleAbstract-keywords-control-en')).toHaveCount(0);
         await alexWizard.continueTo('Contributors');
         await alexWizard.continueTo('For the Editors');
+        // Categories not offered to authors: the seeded journal has
+        // categories but leaves "let authors pick categories" at its "No",
+        // and For the Editors shows no category picker (the comments box,
+        // read on the same step, is the control that it rendered).
+        await expect(alexWizard.commentsForEditorEditor()).toBeVisible({timeout: 30_000});
+        await expect(alexWizard.categoriesField()).toHaveCount(0);
+        await expect(alexPage.getByRole('button', {name: 'Select Categories'})).toHaveCount(0);
         await alexWizard.continueToReview(seeded.submissionId);
         await expect(alexWizard.reviewPanel('Files')).toContainText(FIXTURE_PDF_NAME);
         await expect(alexWizard.errorBanner()).toHaveCount(0);
         await expect(alexWizard.submitButton()).toBeEnabled();
 
-        // Control: a journal whose setup does not ask for keywords (the
-        // keywords item switched off) shows no "Keywords" field on Details
-        // (the Title editor is the control that the step rendered), and
-        // Review passes without one.
+        // Switched on, not requested; no category: a second scratch journal
+        // switches subjects on with "Do not request…" chosen (`enable`) and
+        // lets authors pick categories but has none. Control: its keywords
+        // item is switched off, so Details shows no "Keywords" field (the
+        // Title editor is the control that the step rendered), and Review
+        // passes without one.
         const off = await seedScratchJournal(ojsApi, `${tag}o`, {
-            settings: {metadata: {keywords: 'off'}},
+            settings: {metadata: {keywords: 'off', subjects: 'enable'}, submitWithCategories: true},
         });
         const offDraft = await seedDraft(ojsApi, `${tag}o`, off.path, off.author);
         const offPage = await (await asUser(off.author)).newPage();
@@ -1690,6 +1820,14 @@ test.describe('submission wizard', () => {
         await expect(offPage.getByText('Keywords', {exact: true})).toHaveCount(0);
         await offWizard.continueTo('Contributors');
         await offWizard.continueTo('For the Editors');
+        // For the Editors shows neither a field for subjects nor the
+        // category picker (the comments box is the control; the first
+        // journal's step above showed both).
+        await expect(offWizard.commentsForEditorEditor()).toBeVisible({timeout: 30_000});
+        await expect(offWizard.subjectsInput()).toHaveCount(0);
+        await expect(offPage.getByText('Subjects', {exact: true})).toHaveCount(0);
+        await expect(offWizard.categoriesField()).toHaveCount(0);
+        await expect(offPage.getByRole('button', {name: 'Select Categories'})).toHaveCount(0);
         await offWizard.continueToReview(offDraft.submissionId);
         await expect(offWizard.reviewPanel('Files')).toContainText(FIXTURE_PDF_NAME);
         await expect(offWizard.errorBanner()).toHaveCount(0);

@@ -21,7 +21,10 @@
  * mark, Review items and the bare 404 page. Added for U22's 2026-09-13
  * revision: `saveForLaterAt` (a draft saved on a named step). Added on the
  * 2026-11-12 revision: `fillStartForm` (the start form filled, not sent)
- * with its "Submit As" choice, and the galley grid's "Order" mode.
+ * with its "Submit As" choice, and the galley grid's "Order" mode. Added
+ * on the 2026-11-27 revision: the refused "Begin Submission" (Rule 5a:
+ * `pressBeginSubmission`, its notice, field error and foot summary, the
+ * Title box and confirmation boxes read back) and the "Categories" picker.
  */
 const path = require('path');
 const {expect} = require('../support/fixtures.js');
@@ -237,6 +240,74 @@ async function beginSubmission(page, {title, section = null, language = null, su
     await page.waitForURL(/[?&]id=\d+/, {waitUntil: 'commit', timeout: 30_000});
     await expectWizardOpen(page);
     await expectStep(page, STEPS.files);
+}
+
+/**
+ * The start form's Title box (its one-line rich-text editor), returned once
+ * the editor is initialized, so a read of an emptied box after a reload is
+ * not taken before the editor could have restored anything.
+ */
+async function startTitleBody(page) {
+    const iframe = page.locator('iframe.tox-edit-area__iframe').first();
+    await waitForEditorReady(page, await editorIdOf(iframe));
+    return iframe.contentFrame().locator('body');
+}
+
+/**
+ * The start form's confirmation boxes (Submission Checklist, Privacy
+ * Consent); each is offered only when the server's setup has it.
+ */
+function startFormConfirmations(page) {
+    return page.getByRole('checkbox', {name: /meets all of these requirements|agree to have my data collected/});
+}
+
+/**
+ * Press "Begin Submission" when the press is expected to be refused (Rule
+ * 5a): no navigation follows, so the press resolves on the start form's
+ * `POST submissions` answer, which it returns.
+ */
+async function pressBeginSubmission(page) {
+    const answered = page.waitForResponse(
+        (r) => /\/api\/v1\/submissions(\?|$)/.test(r.url()) && r.request().method() === 'POST',
+        {timeout: 30_000}
+    );
+    await page.getByRole('button', {name: 'Begin Submission'}).click();
+    return answered;
+}
+
+/** A page notice at the top right (`.app__notifications`), by its text; it shows for a few seconds. */
+function pageNotice(page, text) {
+    return page.locator('.app__notifications .pkpNotification').filter({hasText: text});
+}
+
+/** A start-form option group ("Section") with its field error under the options. */
+function startFormFieldError(page, legend) {
+    return page
+        .locator('fieldset.pkpFormField--options')
+        .filter({has: startFormLegend(page, legend)})
+        .locator('.pkpFieldError');
+}
+
+/**
+ * The form's foot error summary ("Please correct one error."), with its
+ * "Go to {field}: {message}" buttons (`formErrorGoTo`).
+ */
+function formErrors(page) {
+    return page.locator('.pkpFormErrors');
+}
+
+/** The foot summary's "Go to {field}: …" button for one field. */
+function formErrorGoTo(page, fieldLabel) {
+    return formErrors(page).getByRole('button', {name: new RegExp(`^Go to ${fieldLabel}: `)});
+}
+
+/**
+ * The "Categories" picker of "For Readers" (its "Select Categories"
+ * button), offered while the server lets authors pick categories and has one
+ * (Rule 7).
+ */
+function categoriesField(page) {
+    return page.locator('.pkpFormField').filter({has: page.getByRole('button', {name: 'Select Categories'})});
 }
 
 /**
@@ -784,6 +855,14 @@ module.exports = {
     fillStartForm,
     submitAsGroup,
     beginSubmission,
+    startTitleBody,
+    startFormConfirmations,
+    pressBeginSubmission,
+    pageNotice,
+    startFormFieldError,
+    formErrors,
+    formErrorGoTo,
+    categoriesField,
     continueTo,
     addGalleyFile,
     galleyGrid,

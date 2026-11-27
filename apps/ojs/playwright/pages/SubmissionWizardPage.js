@@ -26,7 +26,11 @@
  * entries, the required mark, the Data Availability Statement and Subjects
  * fields and the bare 404 page on 2026-09-12; the References box, the
  * Plain Language Summary editor, the Review panels' per-field items, the
- * step-save wait and the save "Error" dialog on the 2026-11-12 revision.
+ * step-save wait and the save "Error" dialog on the 2026-11-12 revision;
+ * the start form's refused press (its POST's answer, the Section field
+ * error, the foot's error list, the page notice, the Title read back) and
+ * For the Editors' category picker and comments editor on the 2026-11-27
+ * revision.
  */
 const path = require('path');
 const {expect} = require('@playwright/test');
@@ -144,6 +148,70 @@ exports.StartSubmissionPage = class StartSubmissionPage extends BasePage {
     async begin() {
         await this.beginButton().click();
         await this.page.waitForURL(/[?&]id=\d+/, {waitUntil: 'commit', timeout: 45_000});
+    }
+
+    /**
+     * Press "Begin Submission" on a form the app is expected to refuse
+     * (Rule 5a): a refusal does not navigate, so the wait is the start
+     * form's own POST to `…/api/v1/submissions`, whose answer is returned
+     * for the caller to read (403 for an expired form token, 400 for a
+     * section closed meanwhile).
+     *
+     * @returns {Promise<import('@playwright/test').Response>}
+     */
+    async beginRefused() {
+        const answered = this.page.waitForResponse(
+            (r) => /\/api\/v1\/submissions(\?|$)/.test(r.url()) && r.request().method() === 'POST',
+            {timeout: 45_000}
+        );
+        await this.beginButton().click();
+        return await answered;
+    }
+
+    /**
+     * The start form's Title editor body (TinyMCE iframe), for reading what
+     * it holds; read it after `titleReady()` on a freshly loaded form.
+     */
+    titleEditorBody() {
+        return this.page.frameLocator('#startSubmission-title-control_ifr').locator('body');
+    }
+
+    /**
+     * Wait until the Title editor is initialized, so a read of its body
+     * (an empty one after a reload) is the form's value, not the bare
+     * iframe before TinyMCE fills it.
+     */
+    async titleReady() {
+        await waitForEditorReady(this.page, 'startSubmission-title-control');
+    }
+
+    /** The "Section" option group of the start form (its radios and its field error). */
+    sectionGroup() {
+        return this.page.getByRole('group', {name: /^Section/});
+    }
+
+    /**
+     * The form's foot after a refused press: "Please correct one error."
+     * with a "Go to {field}: {message}" button per error (Rule 5a).
+     */
+    errorSummary(text = 'Please correct one error.') {
+        // The sentence shares its element with the error list and "Jump to
+        // next error", so it is matched as a part of that text.
+        return this.page.getByText(text);
+    }
+
+    /** One "Go to {field}: {message}" button in the form's foot. */
+    goToErrorButton(field, message) {
+        return this.page.getByRole('button', {name: `Go to ${field}: ${message}`, exact: true});
+    }
+
+    /**
+     * A floating page notice (`.app__notifications`), by its text. The
+     * start form's are the page's own (a refused press), shown for a few
+     * seconds.
+     */
+    pageNotice(text) {
+        return this.page.locator('.app__notifications .pkpNotification').filter({hasText: text});
     }
 };
 
@@ -475,6 +543,27 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
     /** The For the Editors step's Subjects chip input (shown when asked for). */
     subjectsInput(locale = 'en') {
         return this.page.locator(`#forTheEditors-subjects-control-${locale}`);
+    }
+
+    /**
+     * The category picker on For the Editors ("Categories", "Select only
+     * the categories that are appropriate for your submission.", its
+     * "Select Categories" button): offered when the journal lets authors
+     * pick categories and has one (Rule 7).
+     */
+    categoriesField() {
+        return this.page
+            .locator('.pkpFormField')
+            .filter({has: this.page.getByRole('button', {name: 'Select Categories'})});
+    }
+
+    /**
+     * The For the Editors step's "Comments for the Editor" editor (TinyMCE
+     * iframe), always on the step: the positive control of an absence read
+     * there.
+     */
+    commentsForEditorEditor() {
+        return this.page.locator('#commentsForTheEditors-commentsForTheEditors-control_ifr');
     }
 
     /** Type one keyword into the chips box (Enter commits the chip). */

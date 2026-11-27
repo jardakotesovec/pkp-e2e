@@ -187,6 +187,62 @@ async function beginSubmission(page, {title, workType = null, language = null}) 
 }
 
 /**
+ * The start form's Title box, settled: its editor initialized (a read
+ * before that sees the empty iframe of any page load), for a read of what
+ * the form holds.
+ */
+async function startTitleBody(page) {
+    const iframe = page.locator('iframe.tox-edit-area__iframe').first();
+    await waitForEditorReady(page, await editorIdOf(iframe));
+    return iframe.contentFrame().locator('body');
+}
+
+/** The start form's Submission Checklist box ("…meets all of these requirements"). */
+function startChecklistBox(page) {
+    return page.getByRole('checkbox', {name: /meets all of these requirements/});
+}
+
+/** The start form's Privacy Consent box ("…agree to have my data collected…"). */
+function startPrivacyBox(page) {
+    return page.getByRole('checkbox', {name: /agree to have my data collected/});
+}
+
+/**
+ * Press "Begin Submission" on a start form that is expected to be
+ * refused: no navigation follows a refusal, so the press waits for the
+ * start form's POST submissions answer and returns it (the caller reads
+ * its status and what the screen shows).
+ */
+async function pressBeginSubmissionRefused(page) {
+    const answer = page.waitForResponse(
+        (r) => /\/api\/v1\/submissions(\?|$)/.test(r.url()) && r.request().method() === 'POST',
+        {timeout: 30_000}
+    );
+    await page.getByRole('button', {name: 'Begin Submission'}).click();
+    return answer;
+}
+
+/**
+ * A top-right page notice holding `text` (`.app__notifications
+ * .pkpNotification`); it shows for about five seconds, so a read waits on
+ * it right after the answer that raised it.
+ */
+function pageNotice(page, text) {
+    return page.locator('.app__notifications .pkpNotification').filter({hasText: text});
+}
+
+/**
+ * The For the Editors step's category picker: the form field holding the
+ * "Select Categories" button (shown when the press lets authors pick
+ * categories and has one).
+ */
+function categoriesField(page) {
+    return page
+        .locator('.pkpFormField')
+        .filter({has: page.getByRole('button', {name: 'Select Categories'})});
+}
+
+/**
  * Press a footer button until its outcome shows (ci-triage flake watch,
  * "a wizard press swallowed the instant a step becomes current"): the
  * press issued right as a step mounts occasionally fires nothing, so the
@@ -581,6 +637,12 @@ module.exports = {
     fillStartTitle,
     fillStartForm,
     beginSubmission,
+    startTitleBody,
+    startChecklistBox,
+    startPrivacyBox,
+    pressBeginSubmissionRefused,
+    pageNotice,
+    categoriesField,
     continueTo,
     uploadWizardFile,
     openReview,

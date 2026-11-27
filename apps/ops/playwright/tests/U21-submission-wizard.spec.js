@@ -15,14 +15,15 @@
  * site). What the scenarios leave out is the spec's Coverage section.
  *
  * Not covered (register IDs; PRINCIPLES M3): OPS2, OPS3, OPS4, OPS5, OPS6,
- * OPS7, OPS8, OPS9, OPS11, A1, A2, A4, A5, A6, A7, A8, A18, A24.
+ * OPS7, OPS8, OPS9, OPS11, OPS12, A1, A2, A4, A5, A6, A7, A8, A18, A24.
  *
  * Seeding: scenario endpoints only. Drafts (`submitted: false`) on the
  * read-only `publicknowledge` server for author-only flows; scratch servers
  * (with throwaway users carrying unique mail.test addresses) wherever a
  * setting differs from the install default (seeded through the context
  * passthrough keys: `copyrightNotice`, `metadata`,
- * `submissionAcknowledgement` and its copies, `sections[]` with
+ * `submissionAcknowledgement` and its copies, `submitWithCategories`
+ * with `categories[]`, `sections[]` with
  * `wordCount`, `policy` and `abstractsNotRequired`,
  * `supportedSubmissionLocales`, a throwaway's profile `affiliation`; a
  * second scratch server at the builder's
@@ -60,6 +61,14 @@ const {
     fillStartForm,
     submitAsGroup,
     beginSubmission,
+    startTitleBody,
+    startFormConfirmations,
+    pressBeginSubmission,
+    pageNotice,
+    startFormFieldError,
+    formErrors,
+    formErrorGoTo,
+    categoriesField,
     continueTo,
     addGalleyFile,
     galleyRows,
@@ -104,6 +113,7 @@ const {
 const {MySubmissionsPage} = require('../pages/MySubmissionsPage.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
+const {closeTab} = require('../../../../shared/playwright/support/tabs.js');
 
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
@@ -375,6 +385,59 @@ test.describe('Submission wizard (U21)', () => {
             page.locator('.submissionWizard__submissionDetails')
         ).toContainText(String(id));
         await expect(page).toHaveTitle(/Make a Submission/);
+
+        // Signed in afresh in another tab (Rule 5a): "Start A New
+        // Submission" again, the form filled the same way with Signed in
+        // elsewhere in "Title" (the seed tag appended, so the absence below
+        // is this run's: PRINCIPLES M5). A second tab of the same browser
+        // signs out and back in; back on the first tab "Begin Submission"
+        // is refused: the notice shows and the form stays as filled.
+        const elsewhere = `Signed in elsewhere ${tag}`;
+        await mySub.goto();
+        await mySub.startNewSubmissionLink().click();
+        await fillStartForm(page, {title: elsewhere});
+        const tab = await page.context().newPage();
+        await tab.goto('/index.php/index/login/signOut');
+        const login = new LoginPage(tab);
+        await login.expectForm();
+        await login.gotoContext(PK);
+        await login.signInRemembered('author.alex', getPassword('author.alex'), false);
+        await closeTab(tab);
+        const refused = await pressBeginSubmission(page);
+        expect(refused.status()).toBe(403);
+        await expect(
+            pageNotice(
+                page,
+                'The form could not be submitted. You may have been logged out. Please reload the page and try again.'
+            )
+        ).toBeVisible();
+        expect(new URL(page.url()).searchParams.get('id')).toBeNull();
+        await expect(page.getByRole('button', {name: 'Begin Submission'})).toBeVisible();
+        await expect(await startTitleBody(page)).toContainText(elsewhere);
+        const confirmations = startFormConfirmations(page);
+        const offered = await confirmations.count();
+        for (let i = 0; i < offered; i++) {
+            await expect(confirmations.nth(i)).toBeChecked();
+        }
+        // Reload the page: the form is empty (the Title box read once its
+        // editor is up, the boxes unticked).
+        await page.reload();
+        await expect(page.getByRole('button', {name: 'Begin Submission'})).toBeVisible({timeout: 20_000});
+        await expect(await startTitleBody(page)).toHaveText('');
+        await expect(startFormConfirmations(page)).toHaveCount(offered);
+        for (let i = 0; i < offered; i++) {
+            await expect(startFormConfirmations(page).nth(i)).not.toBeChecked();
+        }
+        // Open My Submissions: no draft titled Signed in elsewhere (the
+        // search by the seed tag finds nothing; the first draft, found by
+        // its number the same way, is the positive control).
+        await mySub.goto();
+        await mySub.searchFor(tag);
+        await expect(mySub.emptyState()).toBeVisible({timeout: 30_000});
+        await expect(mySub.row(elsewhere)).toHaveCount(0);
+        await mySub.searchFor(String(id));
+        await expect(mySub.row('Wizard start').filter({hasText: String(id)})).toBeVisible({timeout: 30_000});
+        await expect(mySub.emptyState()).toHaveCount(0);
 
         // No affiliation: a throwaway Author (the seeder creates the account
         // with no affiliation) starts a draft the same way — the wizard
@@ -1565,6 +1628,54 @@ test.describe('Submission wizard (U21)', () => {
         await expect(authorPage.getByRole('radio', {name: 'Alpha', exact: true})).toBeChecked();
         await expect(sectionPolicy(authorPage, policy)).toHaveCount(0);
 
+        // The picked section closed while the form is open (Rule 5a): with
+        // Open Extra (the section with a policy) picked again and Closed
+        // meanwhile in "Title", the manager, in a session of their own,
+        // deactivates it; "Begin Submission" is refused under "Section" and
+        // in the foot, with the notice, and the form stays as filled. On a
+        // preprint server the reason reads a raw locale code (register
+        // OPS12, not asserted: the reason's presence is, its words are not).
+        const closedTitle = 'Closed meanwhile';
+        await fillStartForm(authorPage, {title: closedTitle, section: 'Open Extra'});
+        await expect(sectionPolicy(authorPage, policy)).toBeVisible();
+        await deactivateSection(managerPage, 'Open Extra');
+        const closedPress = await pressBeginSubmission(authorPage);
+        expect(closedPress.status()).toBe(400);
+        await expect(startFormFieldError(authorPage, 'Section')).toBeVisible({timeout: 20_000});
+        await expect(startFormFieldError(authorPage, 'Section')).toHaveText(/\S/);
+        await expect(formErrors(authorPage)).toContainText('Please correct one error.');
+        await expect(formErrorGoTo(authorPage, 'Section')).toHaveCount(1);
+        await expect(
+            pageNotice(
+                authorPage,
+                'The form was not saved because 1 error(s) were encountered. Please correct these errors and try again.'
+            )
+        ).toBeVisible();
+        expect(new URL(authorPage.url()).searchParams.get('id')).toBeNull();
+        await expect(await startTitleBody(authorPage)).toContainText(closedTitle);
+        await expect(authorPage.getByRole('radio', {name: 'Open Extra', exact: true})).toBeChecked();
+        const confirmations = startFormConfirmations(authorPage);
+        const offered = await confirmations.count();
+        for (let i = 0; i < offered; i++) {
+            await expect(confirmations.nth(i)).toBeChecked();
+        }
+        // Reload: the start form no longer offers that section (Alpha, the
+        // one open section left to an author, is applied unshown — Rule 4;
+        // the form itself is the positive control).
+        await authorPage.reload();
+        await expect(authorPage.getByRole('button', {name: 'Begin Submission'})).toBeVisible({timeout: 20_000});
+        await startTitleBody(authorPage);
+        await expect(authorPage.getByRole('radio', {name: 'Open Extra', exact: true})).toHaveCount(0);
+        await expect(authorPage.getByRole('radio', {name: 'Alpha', exact: true})).toHaveCount(0);
+        await expect(sectionPolicy(authorPage, policy)).toHaveCount(0);
+        // Open My Submissions: no draft titled Closed meanwhile (the
+        // author's seeded Alpha draft, read on the same list, is the
+        // positive control).
+        const authorList = new MySubmissionsPage(authorPage, server.path);
+        await authorList.goto();
+        await expect(authorList.row(`Submission ${tag}w`)).toBeVisible({timeout: 30_000});
+        await expect(authorList.row(closedTitle)).toHaveCount(0);
+
         // The manager is additionally offered the restricted section — but
         // not the deactivated one (Rule 3).
         await managerPage.goto(startUrl(server.path));
@@ -1643,9 +1754,9 @@ test.describe('Submission wizard (U21)', () => {
         // Allowed" page (Rule 3; the explanation is a raw locale code on a
         // preprint server — register OPS7, not asserted; the withheld start
         // form is the control).
+        // (Open Extra was closed above, while the author's form was open.)
         await gotoSections(managerPage, server.path);
         await deactivateSection(managerPage, 'Alpha');
-        await deactivateSection(managerPage, 'Open Extra');
         await authorPage.goto(startUrl(server.path));
         await expect(
             authorPage.getByRole('heading', {name: 'Not Allowed'})
@@ -1913,11 +2024,12 @@ test.describe('Submission wizard (U21)', () => {
 
         // A server whose setup requires keywords and the plain language
         // summary during submission, asks for subjects and a data
-        // availability statement without requiring them, and keeps
-        // references at the fresh context's `request` (seeded through
-        // `metadata: {keywords: 'require', subjects: 'request',
-        // dataAvailability: 'request', plainLanguageSummary: 'require'}`),
-        // a complete draft (scenario 17).
+        // availability statement without requiring them, keeps references
+        // at the fresh context's `request`, and lets authors pick categories
+        // and has one (seeded through `metadata: {keywords: 'require',
+        // subjects: 'request', dataAvailability: 'request',
+        // plainLanguageSummary: 'require'}`, `submitWithCategories: true`
+        // and one `categories[]` entry), a complete draft (scenario 17).
         const server = await seedServer(opsApi, tag, ['author'], {
             settings: {
                 metadata: {
@@ -1926,6 +2038,8 @@ test.describe('Submission wizard (U21)', () => {
                     dataAvailability: 'request',
                     plainLanguageSummary: 'require',
                 },
+                submitWithCategories: true,
+                categories: [{path: `cat${tag}`, title: 'Category A'}],
             },
         });
         const author = server.users.author;
@@ -1986,6 +2100,9 @@ test.describe('Submission wizard (U21)', () => {
         await continueTo(page, STEPS.readers);
         await expect(wizardField(page, /^Subjects/)).toBeVisible();
         await expect(wizardFieldLabel(page, /^Subjects/)).not.toContainText('Required');
+        // The category picker: "For Readers" (OPS's "For the Editors") also
+        // shows the "Categories" picker (Rule 7).
+        await expect(categoriesField(page)).toBeVisible();
         await setRelationStatus(page);
         await openReview(page);
         await expect(problemsBanner(page)).toContainText(PROBLEMS_BANNER);
@@ -2055,6 +2172,13 @@ test.describe('Submission wizard (U21)', () => {
         await expect(wizardFieldLabel(alex, /^Keywords/)).not.toContainText('Required');
         await continueTo(alex, STEPS.contributors);
         await continueTo(alex, STEPS.readers);
+        // Categories not offered to authors: the seeded server has categories
+        // but keeps "let authors pick categories" at its "No", so "For
+        // Readers" shows no category picker (positive controls: the step's
+        // "Comments for the Moderator" box on this page, and the picker on
+        // the first scratch server above, read the same way).
+        await expect(wizardField(alex, new RegExp(`^${MODERATOR_NOTE}`))).toBeVisible();
+        await expect(categoriesField(alex)).toHaveCount(0);
         await setRelationStatus(alex);
         await openReview(alex);
         await expect(reviewPanel(alex, 'Files')).toContainText('Preprint Text');
@@ -2062,14 +2186,17 @@ test.describe('Submission wizard (U21)', () => {
         await expect(reviewItem(reviewPanel(alex, 'Details'), 'Keywords')).toContainText('None provided');
         await expect(submitButton(alex)).toBeEnabled();
 
-        // Control: on a server whose setup does not ask for keywords (a
-        // scratch server seeded `metadata: {keywords: 'off'}`, since the
-        // seeded server asks for them by install default), "Details" shows
+        // Control: on a second scratch server, whose setup does not ask for
+        // keywords (seeded `metadata: {keywords: 'off', subjects:
+        // 'enable'}`, since the seeded server asks for them by install
+        // default), switches subjects on with "Do not request…" chosen, and
+        // lets authors pick categories but has no category
+        // (`submitWithCategories: true`, no `categories[]`), "Details" shows
         // no "Keywords" field (positive control: the Title field, read the
         // same way) and Review passes without one.
         const offTag = `${tag}c`;
         const off = await seedServer(opsApi, offTag, ['author'], {
-            settings: {metadata: {keywords: 'off'}},
+            settings: {metadata: {keywords: 'off', subjects: 'enable'}, submitWithCategories: true},
         });
         const control = await seedDraft(opsApi, offTag, {
             context: off.path,
@@ -2084,6 +2211,13 @@ test.describe('Submission wizard (U21)', () => {
         await expect(wizardField(offPage, /^Keywords/)).toHaveCount(0);
         await continueTo(offPage, STEPS.contributors);
         await continueTo(offPage, STEPS.readers);
+        // Switched on, not requested; no category: "For Readers" shows
+        // neither a field for subjects nor the category picker (positive
+        // controls: the step's "Comments for the Moderator" box here, and
+        // both on the first scratch server above, read the same way).
+        await expect(wizardField(offPage, new RegExp(`^${MODERATOR_NOTE}`))).toBeVisible();
+        await expect(wizardField(offPage, /^Subjects/)).toHaveCount(0);
+        await expect(categoriesField(offPage)).toHaveCount(0);
         await setRelationStatus(offPage);
         await openReview(offPage);
         await expect(problemsBanner(offPage)).toHaveCount(0);
