@@ -480,7 +480,7 @@ under the prompt "Record the response on behalf of the reviewer". Submit
       is saved: after "Cancel", which then asks nothing, the view window
       lists it (Side effects).
     - {OJS} A required "Recommendation" select, preset to the submitted
-      recommendation.
+      recommendation (below for one the journal has since switched off).
     - The competing-interests answer, where the journal has a
       competing-interests policy or the review already carries an answer:
       a "Competing Interests" group, "Declaration" with the radios "I do
@@ -491,13 +491,40 @@ under the prompt "Record the response on behalf of the reviewer". Submit
       unticked records no answer. A saved change shows in the view window
       at once and adds or removes the row's badge (Rule 2).
 
+    {OJS} The "Recommendation" select lists the journal's active
+    recommendations as they stood when the workflow page loaded (the
+    "Activate" tick on Settings › Workflow › Review › "Reviewer
+    Recommendations",
+    [→ reviewer recommendations](U29-review-setup-and-review-forms.md#recommendations)).
+    One other than the review's own switched off after that stays listed;
+    a save with it chosen is refused. The page notice reads "The form was
+    not saved because 1 error(s) were encountered. Please correct these
+    errors and try again.", "The submitted reviewer recommendation ID is
+    not a valid for this Context." shows under "Recommendation", and the
+    window's summary reads "Please correct one error. Go to Recommendation: …". The window
+    stays open, nothing is saved, and "Save Changes" stays disabled until
+    a field changes; a listed choice then saves and closes the window.
+    <sup>i</sup>
+
+    {OJS} When the review's own recommendation was switched off before the
+    workflow page loaded, the window still reads "Submitted
+    recommendation: {label}", but the select opens with nothing chosen and
+    does not list it; a save with only the comment changed goes through
+    and keeps it ⚠ [A59](#a59). <sup>[f-a59](#fn-a59)</sup> {OJS} The old
+    "Read Review" request `…/reviewer-grid/review-read`, which no screen
+    sends, fails on the server with a value that is not one of the
+    journal's recommendations, or not a number ⚠ [A60](#a60); the
+    footnote gives it, sent by hand. <sup>[f-a60](#fn-a60)</sup>
+
     The editor-only comment is editable nowhere. It stays display-only in
     both windows, in both apps. "Cancel" returns to the view window. With
-    anything typed, a dialog titled "Warning" first asks "The data on this
-    form has changed. Do you wish to continue without saving?" with "Yes"
-    and "No"; "Yes" drops the change, and the window opened again shows the
-    comment as it was. "Save Changes" saves and closes the edit window with no
-    notice, and the view window refreshes showing "Last modified by {user
+    anything changed (a comment typed, the competing-interests answer
+    changed or {OJS} another "Recommendation" chosen), a dialog titled
+    "Warning" first asks "The data on this form has changed. Do you wish
+    to continue without saving?" with "Yes" and "No". "Yes" drops the
+    change, and the window opened again shows the comment as it was; "No"
+    leaves the edit window open with the change kept. "Save Changes" saves
+    and closes the edit window with no notice, and the view window refreshes showing "Last modified by {user
     full name}" under its title along with the edited values. There is no
     further confirmation, with one exception: a review already marked
     complete whose assignment has "Publicly Show Reviewer Comments" ticked
@@ -614,7 +641,8 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     ([→ form items](U29-review-setup-and-review-forms.md#items)). A
     free-form review's four files download through the browser, and so
     do the XML files of a review made with a review form, except on a
-    fresh install (below). <sup>i</sup>
+    form with a choice question saved without options and on a fresh
+    install (both below). <sup>i</sup>
 
     On a review the reviewer submitted through their own wizard on a
     form with a text or drop-down question, answered or left blank, both
@@ -624,11 +652,22 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     install (read in the code). On a form whose every question has
     "Included in message to author" unticked, only "Editor Form Shows All
     Review Sections (PDF)" fails; the author-only PDF downloads, with no
-    question in it. A review seeded as completed on a form, with no answer
-    saved, downloads both PDFs laid out as a free-form review's, "None"
-    under each comment block; a blank wizard submit of only checkboxes and
-    radio buttons may too ⚠ [A56](#a56).
+    question in it. A review with no answer saved on its form downloads
+    both PDFs laid out as a free-form review's, "None" under each comment
+    block: one seeded as completed, and one the reviewer submitted with
+    the form's only question, a "Radio buttons" one, left blank
+    ⚠ [A56](#a56).
     <sup>[f-a55](#fn-a55)</sup> <sup>[f-a56](#fn-a56)</sup>
+
+    A form can hold a "Drop-down box" or "Radio buttons" question saved
+    with no "Response Options"
+    ([→ form items](U29-review-setup-and-review-forms.md#items)). On a
+    review made with such a form, both XML entries fail every time: an
+    "Error" window opens over Review Details with a programming error
+    message and "OK", and no file arrives ⚠ [A58](#a58). "OK" returns to
+    Review Details. The PDFs fail as above when the question is a
+    drop-down; when it is a radio question and the form's only one, they
+    download as a free-form review's. <sup>[f-a58](#fn-a58)</sup>
 
     On an install where nobody has yet downloaded a review PDF or
     uploaded a library file, an email attachment, a plugin or import file, or an
@@ -1625,6 +1664,15 @@ Left out of the scenarios above, by reason:
   - the guard for A57: a "Drop-down box" question left blank on the
     reviewer's submit reads unanswered in the Review Details window and in
     the XML exports (Rules 14a, 15): waits for the fix [incidental 2026-11-23]
+  - the guard for A58: on a review whose form has a "Drop-down box" or
+    "Radio buttons" question saved with no "Response Options", "Editor
+    Form Shows All Review Sections (XML)" and "Author-Only Sections
+    Displayed (XML)" each download a file (Rule 15): waits for the fix [incidental 2026-11-27]
+  - {OJS} a recommendation other than the review's own switched off
+    while "Modify Review" is open: still listed, its save refused with
+    "The submitted reviewer recommendation ID is not a valid for this
+    Context." under "Recommendation" and nothing saved, and a listed
+    choice then saving (Rule 14b) [incidental 2026-11-27]
 - **Rarely met**:
   - submitting a review for the reviewer on a "Request Resent" row, on an accepted row holding no draft, or with a comment entered, and the row's menu, the reviewer's side and the missing acceptance email after any such save (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a reminded, an accepted or a declined request with no review: "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", and the empty blocks (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -1642,7 +1690,7 @@ Left out of the scenarios above, by reason:
   - the blank list sections omitted (Rule 5): seen only in an expanded entry
   - "Modify Review" on a review with a review form: the questions editable, an empty required one refused (Rule 14b): the comment's path is the one scenario 16 walks
   - a file added through "Upload" in "Modify Review", kept and logged without a save (Rule 14b, Side effects): an editor attaches a file for a reviewer in a rare week
-  - the unsaved-changes "Warning" on leaving "Modify Review" with something typed (Rule 14b): a close control
+  - the unsaved-changes "Warning" on leaving "Modify Review" with something changed, a comment typed or {OJS} another recommendation chosen, and "No" keeping the change (Rule 14b): a close control
   - "View changes" opened to its "View Review" window (Side effects): scenario 16 reads the action, not the window behind it
   - "Cancel" in the Add Reviewer window with a reviewer chosen and its "Review Due Date" changed, and in the "Edit Review" window with a due date changed, closing without a question (Fields): a close control
   - the second ends of covered controls: an edit changing only the review type (Rule 12), the XML exports of a review made without a review form (Rule 15), a logged decline (Rule 20)
@@ -1690,8 +1738,11 @@ Left out of the scenarios above, by reason:
   - A53 (a review submitted for the reviewer with nothing changed leaving no activity-log row; Side effects)
   - A54 (the due-date calendar hidden from screen readers from the second date window opened on one page; Fields)
   - A55 (both PDF entries failing with an "Error" window on a review made with a review form; Rule 15)
-  - A56 (a review on a form with no answer saved exporting its PDFs as a free-form review's; Rule 15)
+  - A56 (a review on a form with no answer saved, a blank submit of a radio-only form included, exporting its PDFs as a free-form review's; Rule 15)
   - A57 (a drop-down question left blank reading as its first option; Rule 14a)
+  - A58 (both XML entries failing with an "Error" window on a form with a choice question saved without options; Rule 15)
+  - A59 ({OJS} the required "Recommendation" opening empty when the review's own recommendation is switched off, and the save keeping it; Rule 14b)
+  - A60 ({OJS} the older recommendation request no screen sends failing on a recommendation the journal does not have, after logging it as set; Rule 14b)
 - **No seed**:
   - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reviewer Reminded" and log stamps (Rule 13, Side effects, Settings)
   - a section's default "Review Form" preselected in the Add Reviewer window (Rule 10, Settings): the seed sets no default review form on a section
@@ -1754,6 +1805,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A54](#a54) | From the second date window opened on a page, screen readers cannot reach the date calendar | 🐞 | medium | issues (claude), 2026-11-19 — re-verified |
 | [A55](#a55) | On a review with answers saved on a review form, both PDF entries of "Download Review Form" open an "Error" window and no file | 🐞 | medium · crash: server | issues (claude), 2026-11-23 — re-verified |
 | [A57](#a57) | A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports | 🐞 | medium | issues (claude), 2026-11-27 — re-verified |
+| [A58](#a58) | On a review form with a choice question saved without options, both XML entries of "Download Review Form" open an "Error" window and no file | 🐞 | medium · crash: server | — |
+| [A60](#a60) | {OJS} An older request no screen sends fails on a recommendation the journal does not have, after logging it as set | 🐞 | low · crash: server | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | 🐞 | medium | user request (claude), 2026-11-25 — regression report |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -1766,6 +1819,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A52](#a52) | {OMP} On a press, recording only a reviewer's competing-interests answer in "Modify Review" submits an empty review in their name | ❓ | user-visible | — |
 | [A53](#a53) | A review submitted for the reviewer with nothing changed leaves no row in the activity log | ❓ | user-visible | — |
 | [A56](#a56) | A review on a form with no answer saved exports its PDFs as a free-form review's, reading "None" for both comment blocks | ❓ | minor | — |
+| [A59](#a59) | {OJS} "Modify Review" opens with the required "Recommendation" empty when the review's own recommendation has been switched off, yet the save keeps it | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
 
 ### All apps
@@ -2394,26 +2448,30 @@ question of the form has "Included in message to author" unticked does
 the author-only PDF download. A free-form review's PDFs download.
 
 "OK" returns to Review Details, where the two XML entries still
-download and the answers can be read on screen. No released version
-has the fault yet.
+download, except on a form with a choice question saved without
+options ([A58](#a58)), and the answers can be read on screen. No
+released version has the fault yet.
 Since: 2025-07-07 (`main`; 3.5 walked: not affected) · Basis: probe + walk, 2026-11-23. <sup>[f-a55](#fn-a55)</sup>
+Report: refresh owed — probed 2026-11-27: the way round fails on a form with a "Drop-down box" or "Radio buttons" question saved with no "Response Options", whose two XML entries fail too (A58); the report's "Way round" bullet, its "OK returns to Review Details, where the two XML entries still download" and its cause note that the XML entries are not affected need that exception, which sits in `PKPReviewController::generateXML()` (2026-11-27)
 
 <a id="a56"></a>
 **A56 — A review on a form with no answer saved exports its PDFs as a free-form review's** · ❓ · minor.
-A review seeded as completed on a review form, with no answer saved,
-downloads both PDF entries, but they read as a free-form review's:
-"Reviewer Comments", "For author and editor" "None" and, in the full
-PDF, "For editor" {OJS} / "For editor only" {OMP} "None". Its XML files
-and its Review Details window list the form's questions, unanswered. A
-reader of the PDF cannot tell that a form was used. A reviewer's own
-submit on a form with a text or drop-down question saves answers even
-when they are left blank, and meets [A55](#a55) instead.
+A review on a review form with no answer saved downloads both PDF
+entries, but they read as a free-form review's: "Reviewer Comments",
+"For author and editor" "None" and, in the full PDF, "For editor"
+{OJS} / "For editor only" {OMP} "None". Its XML files and its Review
+Details window list the form's questions, unanswered. A reader of the
+PDF cannot tell that a form was used. A reviewer's own submit reaches
+the state: on a form whose only question is a "Radio buttons" one,
+submitted with it left blank, nothing is saved. So does a review
+seeded as completed on a form. A reviewer's own submit on a form with
+a text or drop-down question saves answers even when they are left
+blank, and meets [A55](#a55) instead.
 Question: should the PDF of a review on a form with nothing answered
 list the form's questions unanswered, as the XML files and the window
-do? Lean: yes, at low weight: a reviewer's own submit looks able to
-reach the state, on a form of only checkboxes and radio buttons all
-left blank, which is not yet driven.
-Basis: probe, 2026-11-23. <sup>[f-a56](#fn-a56)</sup>
+do? Lean: yes, now that a reviewer's own blank submit reaches the
+state.
+Basis: probe, 2026-11-27. <sup>[f-a56](#fn-a56)</sup>
 
 <a id="a57"></a>
 **A57 — A drop-down question the reviewer left blank reads as its first option in Review Details and the XML exports** · 🐞 · medium.
@@ -2431,6 +2489,62 @@ A new review form question is optional until its "Required" box is
 ticked, so any drop-down question left optional is affected.
 ([→ the reviewer's step 3](U28-reviewers-review.md#step-3))
 Basis: probe, 2026-11-27. <sup>[f-a57](#fn-a57)</sup>
+
+<a id="a58"></a>
+**A58 — On a review form with a choice question saved without options, both XML entries of "Download Review Form" open an "Error" window and no file** · 🐞 · medium · crash: server.
+The app fails on the server when anyone downloads, as XML, a review
+made on a form that has a "Drop-down box" or "Radio buttons" question
+saved with no "Response Options". The form editor saves such a
+question with no warning
+([→ form items](U29-review-setup-and-review-forms.md#items)), the
+reviewer meets it on step 3 with an empty drop-down or with no radio
+button at all, and the review submits. In the review's "Review
+Details" window, "Download Review Form" › "Editor Form Shows All Review
+Sections (XML)" and "Author-Only Sections Displayed (XML)" each open an
+"Error" window holding a programming error message, with "OK", and no
+file arrives, every time. "OK" returns to Review Details.
+
+The PDFs are no way round when the question is a drop-down, which
+fails them as [A55](#a55); with a radio question as the form's only
+one, they download laid out as a free-form review's ([A56](#a56)). A
+choice question that has options, left blank, does not stop the XML
+download.
+Basis: probe, 2026-11-27. <sup>[f-a58](#fn-a58)</sup>
+
+<a id="a59"></a>
+**A59 — {OJS} "Modify Review" opens with the required "Recommendation" empty when the review's own recommendation has been switched off, yet the save keeps it** · ❓ · minor.
+A reviewer recommended "Accept Submission", and the journal then
+switched that recommendation off. In "Modify Review" the window reads
+"Submitted recommendation: Accept Submission", but the required
+"Recommendation" select shows nothing chosen and lists only the active
+recommendations. "Save Changes" with only the comment changed goes
+through with no message, and the review keeps "Accept Submission": the
+row and the Review Details window still read it. The editor sees a
+required field left empty that the save does not need, and once
+another recommendation is chosen, the review's own cannot be chosen
+back.
+Question: should the select list the review's own recommendation while
+it is switched off? Lean: yes; the reviewer's own list on step 3 keeps a
+switched-off recommendation the review already carries
+([→ reviewer recommendations](U29-review-setup-and-review-forms.md#recommendations)),
+and the save keeps it already, so only the window disagrees.
+Basis: probe, 2026-11-27. <sup>[f-a59](#fn-a59)</sup>
+
+<a id="a60"></a>
+**A60 — {OJS} An older request no screen sends fails on a recommendation the journal does not have, after logging it as set** · 🐞 · low · crash: server.
+The app still answers `…/reviewer-grid/review-read`, which the
+Reviewers table sent from its old "Read Review" window to record a
+review's recommendation on the reviewer's behalf. No window sends it
+since the Review Details windows replaced that one; the footnote gives
+it, sent by hand, with its values. Sent by a Journal Manager on a
+submitted review with a recommendation number the journal does not
+have, it fails on the server and nothing is stored: the row and Review
+Details read as before. The submission's activity log still gains a
+row saying the editor set the recommendation on the reviewer's behalf.
+Sent with something other than a number, it fails the same way, with
+no row. A press's version ignores the value and marks the review
+complete.
+Basis: probe, 2026-11-27. <sup>[f-a60](#fn-a60)</sup>
 
 ### OMP
 
@@ -2577,7 +2691,8 @@ and `ReadReviewHandler.js`, so that entry is inert — code-read at lib/pkp
 pkp/pkp-lib#13156) when the review method is anonymous/double-anonymous.
 App chains: OJS `ReviewerGridHandler` still overrides `reviewRead`
 (recommendation-by-proxy on the legacy op — the Vue windows no longer post
-to it, note i; GRID-086); OMP's subclass is EMPTY (GRID-098) —
+to it, note i; GRID-086; sent directly 2026-11-27 it fails on an unknown
+or non-numeric recommendation, finding A60, note f-a60); OMP's subclass is EMPTY (GRID-098) —
 shared-behavior evidence. Row-menu roster and order (Rule 3):
 `useReviewerManagerConfig.js::getItemActions`, code-read 2026-08-29 at the
 same rework and probed live the same day on both apps — the primary
@@ -3061,7 +3176,8 @@ f-a23); editable only in the modify window's required select
 override (AFFW-665) no longer render in an editor window — the per-app
 gate is `hasCustomizableReviewerRecommendation()` (note f-omp1) — and
 the legacy `reviewRead` grid op (GRID-086) remains in code with no window
-posting to it (note a). Downloads (Rule 15): "Download Review Form" menu
+posting to it (note a; no run of 2026-11-27 sent it, and sent directly it
+is finding A60, note f-a60). Downloads (Rule 15): "Download Review Form" menu
 labels `editor.review.download`, `editor.review.authorOnly` (PDF/XML),
 `editor.review.allSections` (PDF/XML) → reviews API `export-pdf`/
 `export-xml` with `authorFriendly`, then the temporary-file download op
@@ -3100,7 +3216,11 @@ writes PHP warnings to the server log ("Undefined array key …",
 `PKPReviewController::generateXML()` at the checkbox and
 radio/drop-down branches): 3 per press on a wizard submit left blank, 7
 on a review with nothing saved; the file still downloads, and nothing
-answered 500 or more. The form review PDFs are A55 and A56. Kept script
+answered 500 or more. That holds for choice items that have options
+(driven again 2026-11-27: the "Undefined array key …" warning for a
+blank radio item, the file downloaded); a "Drop-down box" or "Radio
+buttons" item saved with no options makes both XML exports answer 500
+instead (finding A58, note f-a58). The form review PDFs are A55 and A56. Kept script
 `shared/playwright/checks/U27/I27/i27.js`. Live
 probe 2026-08-29 (OJS
 scratch journal + OMP publicknowledge press, manager role; apps ojs
@@ -3275,6 +3395,36 @@ submitted for the reviewer (Rule 14d), read on screen the same day:
 "Request Accepted: {save time}" on an unanswered and a re-sent request
 and on one carrying a required review form, the seeded acceptance time on
 two accepted ones.
+Driven 2026-11-27 (Rule 14b; OJS and OMP `main`, ojs `d37c63cc7c` / omp
+`39fc76c2b`, lib/pkp `44b36bf802`, ui-library `0549a357`; a scratch
+journal and a scratch press, two runs each, the Journal Manager or Press
+Manager and the assigned Section Editor or Series Editor). Every OJS
+"Modify Review" read "Submitted recommendation: Accept Submission", also
+with that recommendation switched off; the OMP window held no
+recommendation word. With the recommendation active the select was
+preset to it and listed the journal's six active ones. At each level one
+recommendation ("See Comments", "Resubmit Elsewhere") was unticked under
+"Activate" on Settings › Workflow › Review › "Reviewer Recommendations",
+with no page notice, while the edit window stayed open on the workflow
+page: the select still listed it, and "Save Changes" with it chosen sent
+the PUT `…/review`, answered 422 with `{"reviewerRecommendationId":["The
+submitted reviewer recommendation ID is not a valid for this
+Context."]}` (`api.submissions.reviews.422.invalidRecommendation`); the
+notice, the field message and the summary showed as quoted in Rule 14b,
+the window stayed open, the stored recommendation was unchanged and
+"Save Changes" was disabled until the select changed. Another listed
+choice then saved (200) and closed the window, and after a reload the
+view window read it under "Last modified by {name}". Mechanism: the
+window lists the `recommendations` the workflow page was given, filtered
+to active ones (`useReviewDetailsForm.js`, `recommendationOptions`), and
+the server's `EditReview` form request accepts an active recommendation
+or the assignment's own (`Rule::exists` on `reviewer_recommendations`),
+which is finding A59 (note f-a59). After another recommendation was
+chosen, "Cancel" asked the "Warning" with "Yes" / "No", and "No" left
+the window open with the choice kept; on OMP the same after typing.
+Every control save closed the window with no notice on both apps (on OMP
+the save sends `reviewerRecommendationId: null`, 200). Kept script
+`shared/playwright/checks/U27/I27I/i27i.js` (`PARTS=modify`).
 
 <a id="fn-j"></a>
 **j** — `ThankReviewerForm` (template `thankReviewerForm.tpl`, AFFW-645):
@@ -4616,9 +4766,16 @@ item left blank stored a row for each of the three text items and the
 drop-down (f-a57) and failed as A55. Mechanism: `reviewDownload.tpl`
 takes its free-form branch (`editor.review.reviewerComments`,
 `common.none`) whenever `$reviewFormResponses` is empty, whatever form
-the assignment carries. Would settle it: a reviewer's wizard submit on a
-form whose only items are checkboxes and radio buttons, all left blank
-(they post nothing), then the PDF read. Kept script as f-a55.
+the assignment carries. Kept script as f-a55. Driven 2026-11-27 (the
+runs of f-a58, two per app): a reviewer's wizard submit on a form whose
+only item is a "Radio buttons" item with options, left blank, posted
+nothing for it and stored no response; both PDFs downloaded reading
+"Reviewer Comments For author and editor None For editor None" ({OMP}
+"… For editor only None"), the author-only one "Reviewer: {letter}" and
+no editor block, while both XML files listed the question with an empty
+value and Review Details showed nothing under it. The same for a radio
+item with no options (its XML fails, f-a58). Not driven: a form of only
+checkboxes, which also post nothing when left blank (read in the code).
 
 <a id="fn-a57"></a>
 **f-a57** — Live-probed 2026-11-23 (Rule 14a; the runs of f-a55, two
@@ -4636,6 +4793,79 @@ drop-down answer as `int`, so `""` becomes `0`, the first option;
 `PKPReviewerReviewStep3Form::execute()` (read in the code, not walked).
 Kept script as f-a55.
 Issue report: [pkp-e2e#1113](https://github.com/jardakotesovec/pkp-e2e/issues/1113) ([docs/issues/U27-A57-review-form-blank-drop-down-reads-first-option.md](../issues/U27-A57-review-form-blank-drop-down-reads-first-option.md)).
+
+<a id="fn-a58"></a>
+**f-a58** — Live-probed 2026-11-27 (Rule 15; OJS and OMP `main`, ojs
+`d37c63cc7c` / omp `39fc76c2b`, lib/pkp `44b36bf802`; a scratch journal
+and a scratch press, two runs each; the Journal Manager or Press Manager
+and the assigned Section Editor or Series Editor). Forms made on screen:
+"I27I Drop none" with one optional "Drop-down box" item and "I27I Radio
+none" with one optional "Radio buttons" item, each saved with no
+response options ("Your changes have been saved.", no warning, the item
+reopening with "No Items" under "Response Options"; no
+`possibleResponses` setting stored); controls "I27I With opts" (a
+drop-down and a radio item with options) and "I27I Radio opts". The
+reviewer's step 3 showed an empty select and no radio button, and the
+submit with everything blank went through. Each XML entry on the two
+no-options reviews, at both levels, sent `GET
+…/api/v1/reviews/{submission}/{review}/export-xml?authorFriendly=0|1`,
+answered 500 with `{"error":"array_key_exists(): Argument #2 ($array)
+must be of type array, null given"}` twice per press (the client retries
+a failed GET once); the "Error" window read "array_key_exists():
+Argument #2 ($array) must be of type array, null given" over "OK", no
+file arrived within 4 s and no page notice showed, and after "OK"
+Review Details was open again. The drop-down form's PDFs failed as A55;
+the radio form's PDFs downloaded laid out as a free-form review's
+(f-a56). Both controls' XML entries downloaded. Mechanism:
+`PKPReviewController::generateXML()` reads the element's localized
+possible responses, null when none were saved, and passes them to
+`array_key_exists()` in its radio/drop-down branch, an uncaught
+TypeError. Kept script `shared/playwright/checks/U27/I27I/i27i.js`
+(`PARTS=forms`).
+
+<a id="fn-a59"></a>
+**f-a59** — Live-probed 2026-11-27 (Rule 14b; the runs of f-a58, OJS,
+the Journal Manager): a review seeded with "Accept Submission", then
+"Accept Submission" unticked under "Activate" on Settings › Workflow ›
+Review › "Reviewer Recommendations" before the workflow page was
+loaded. "Modify Review" read "Submitted recommendation: Accept
+Submission"; the select had value "" and no option chosen, its options
+"Revisions Required", "Resubmit for Review" and "Decline Submission"
+(the active ones). "Save Changes" after an edit to the comment sent
+the PUT `…/review` with `reviewerRecommendationId` of "Accept
+Submission", answered 200, and closed the window with no notice; after
+a reload the row read "Accept Submission" and the view window
+"Recommendation: Accept Submission", and the stored value was
+unchanged. Mechanism: the select's value is the assignment's
+`reviewerRecommendationId` while its options are the active
+recommendations only (`useReviewDetailsForm.js`), and the server's
+`EditReview` accepts the assignment's own recommendation whatever its
+status. Kept script as f-a58 (`PARTS=modify`).
+
+<a id="fn-a60"></a>
+**f-a60** — Live-probed 2026-11-27 (note a; OJS and OMP `main` as in
+f-a58, a scratch journal and press, two runs per app, the Journal
+Manager or Press Manager, on a completed review with "Decline
+Submission"): no run's record lists a request to `review-read`. Sent
+directly, `POST
+…/$$$call$$$/grid/users/reviewer/reviewer-grid/review-read` with
+`reviewerRecommendationId` 99999 and "abc". On OJS both answered 500:
+99999 with an uncaught PDOException, SQLSTATE 23503, the foreign key
+`review_assignments_reviewer_recommendation_id_foreign`; "abc" with an
+uncaught TypeError, `ReviewAssignment::setReviewerRecommendationId()`
+takes an int. Nothing was stored, and the row and Review Details read
+"Review Submitted" and "Decline Submission" as before. For 99999 one
+`log.review.reviewRecommendationSetByProxy` event was stored ("The
+recommendation for the round {$round} review of submission
+{$submissionId} has been set by the editor, {$editorName}, on behalf of
+the reviewer, {$reviewerName}."; read from the stored events, not on
+screen); for "abc", none. Mechanism: OJS `ReviewerGridHandler::reviewRead()`
+writes the event before `PKPReviewerGridHandler::reviewRead()` stores
+the value. On OMP, whose subclass is empty, both answered 200, the value
+was ignored, and the op marked the review considered: the row read
+"Complete" with "Thank Reviewer" and "Revert Decision", Review Details
+"Review Completed: …", one `log.review.reviewConfirmed` event. Kept
+script as f-a58 (`PARTS=legacy`).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
